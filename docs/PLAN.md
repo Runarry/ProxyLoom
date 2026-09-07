@@ -512,7 +512,15 @@ G2 演示在其上增加两个不同订阅方案、依赖确认、最终配置�
 
 本轮授权仅 WP-01 的 T-001、T-002、T-003。三项实现及本地自动检查已完成，状态为 `in_review`，其余 T-004～T-060 为 `not_started`；机器状态见 `docs/PLAN.tasks.json`。`in_review` 表示代码、契约及证据可供评审，不代替人工基线评审、任务 done 或 G0 通过。原 60 项 ID、范围、直接依赖、里程碑和估算保持不变。
 
-T-001 基线、候选范围与 ADR 位于 `docs/baseline/`、`docs/adr/`；三项证据分别位于 `docs/evidence/T-001/`、`T-002/`、`T-003/`。已通过前端构建、Go 单测与静态分析、Linux race、真实开发 Compose 烟测及锁／任务清单一致性检查。开发工具具体锁定值由 `deploy/tools.lock.json` 维护并受 CI 漂移检查；正式内核锁留 T-023。外部测试许可、实际角色分派与人工评审仍待确认，默认后续仅使用 T-053 自建隔离夹具；全部内核能力为 `unverified`。
+T-001 基线、候选范围与 ADR 位于 `docs/baseline/`、`docs/adr/`；三项证据分别位于 `docs/evidence/T-001/`、`T-002/`、`T-003/`。已通过前端构建、Go 单测与静态分析、Linux race、真实开发 Compose 烟测及锁／任务清单一致性检查。开发工具具体锁定值由 `deploy/tools.lock.json` 维护并受 CI 漂移检查。外部测试许可、实际角色分派与人工评审仍待确认。
+
+## 12.4 第二窗口实施状态（2026-09-07）
+
+本轮实施 PLAN §12.1 第 3 步：T-023 与 T-053。两项实现及本地自动检查已完成，状态为 `in_review`；T-001～T-003 保持 `in_review`，其余仍为 `not_started`。`in_review` 不代替人工评审、任务 done 或 G0 通过。
+
+T-023 锁定官方非预发布 linux 候选：Xray `v26.3.27`、sing-box `v1.14.0`、mihomo `v1.19.30`，各含 amd64／arm64 归档与二进制 SHA-256，见 `compat/cores.lock.yaml` 与 `docs/adr/0002-core-candidates.md`。能力模型在 `internal/capability`；P0 组合见 `compat/p0-combinations.yaml`，全部 `unverified`。amd64 在锁定 Debian 镜像中执行了 version 命令；arm64 只哈希。二进制不入库。
+
+T-053 提供 `internal/isolation` Trojan TLS 代理与 HTTP 目标、`deploy/compose.isolation.yaml`（test-only，不纳入开发 Compose）及绕行阻断测试。证据位于 `docs/evidence/T-023/`、`T-053/`。T-024、T-040 及三目标原型仍未开始。
 
 # 13. M4 增强队列与进入条件
 
@@ -553,6 +561,8 @@ M4 不计入 60 项 P0 任务和 198–324 人日基础估算。以下按功能�
 初始记录：2026-09-07，v1.0，依据两份 v1.0 文档建立 ProxyLoom 实施计划；新增执行顺序、60 项 WBS、关卡、责任角色、条件投入估算和逐项验收追踪。当前无开发完成、上线或测试通过声明。
 
 实施记录：2026-09-07，补齐 60 项机器清单、T-001 基线和 ADR，首轮 T-001～T-003 实施中，其他任务维持初始基线；仅同步现有工程目录映射与状态说明，不改变原任务范围、依赖和估算。最终评审与代码提交待完成，G0 尚未验收。
+
+实施记录：2026-09-07，第二窗口完成 T-023 内核候选锁与 T-053 隔离夹具，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。G0 仍未验收。
 
 ## 14.3 参考文档与引用方式
 

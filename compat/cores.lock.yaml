@@ -1,0 +1,111 @@
+# Official non-prerelease linux candidates. Digests were hashed from downloaded
+# GitHub release assets on 2026-09-07. Nothing in this file is verified.
+schema_version: 1
+adapter_version: 0.0.0-unverified
+fixture_set: isolation-v1
+id_namespace: 8c3f0e2a-4b91-41d6-a2c1-9f0e6b7d4a10
+pinned_at: 2026-09-07T00:00:00Z
+client_validation:
+  state: unverified
+builds:
+  - id: 42f06ab1-ac85-524b-87e5-6bc1e9a82409
+    family: xray
+    version: 26.3.27
+    git_tag: v26.3.27
+    git_commit: d2758a023cd7f4174a5a5fa4ff66e487d4342ba0
+    os: linux
+    arch: amd64
+    asset_name: Xray-linux-64.zip
+    asset_url: https://github.com/XTLS/Xray-core/releases/download/v26.3.27/Xray-linux-64.zip
+    asset_sha256: 23cd9af937744d97776ee35ecad4972cf4b2109d1e0fe6be9930467608f7c8ae
+    binary_name: xray
+    binary_sha256: 8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed
+    cgo: false
+    feature_notes: official GitHub release zip; amd64 version smoke printed 26.3.27 d2758a0 go1.26.1 linux/amd64; feature inventory unverified
+    license: MPL-2.0
+    source: https://github.com/XTLS/Xray-core
+  - id: ff431867-11af-51b5-8f60-6d076121ad1f
+    family: xray
+    version: 26.3.27
+    git_tag: v26.3.27
+    git_commit: d2758a023cd7f4174a5a5fa4ff66e487d4342ba0
+    os: linux
+    arch: arm64
+    asset_name: Xray-linux-arm64-v8a.zip
+    asset_url: https://github.com/XTLS/Xray-core/releases/download/v26.3.27/Xray-linux-arm64-v8a.zip
+    asset_sha256: 4d30283ae614e3057f730f67cd088a42be6fdf91f8639d82cb69e48cde80413c
+    binary_name: xray
+    binary_sha256: c2d20a7045250497083afea0d79db0672f6c89a25aaaf37c92de034d6b764b04
+    cgo: false
+    feature_notes: official GitHub release zip; arm64 hash pinned, execution smoke not run; feature inventory unverified
+    license: MPL-2.0
+    source: https://github.com/XTLS/Xray-core
+  - id: ebdd7efd-a425-5eb7-a63b-88667909c4b0
+    family: sing-box
+    version: 1.14.0
+    git_tag: v1.14.0
+    git_commit: 0b8995879f29a9b98ee027bc17b75e101445b238
+    os: linux
+    arch: amd64
+    asset_name: sing-box-1.14.0-linux-amd64.tar.gz
+    asset_url: https://github.com/SagerNet/sing-box/releases/download/v1.14.0/sing-box-1.14.0-linux-amd64.tar.gz
+    asset_sha256: 2375de6999f4f56ab46b4fc5ddf26a6aba1d3e61a0f4e7ddec2f4690457d5f63
+    binary_name: sing-box
+    binary_sha256: 57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04
+    cgo: false
+    feature_notes: official GitHub release tarball without glibc/musl suffix; amd64 version smoke printed 1.14.0 revision 0b8995879f29a9b98ee027bc17b75e101445b238 CGO disabled tags with_gvisor,with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_tailscale,with_ccm,with_ocm,with_cloudflared,with_naive_outbound,with_usbip,with_openvpn,with_openconnect,badlinkname,tfogo_checklinkname0,with_purego; feature inventory unverified
+    license: GPL-3.0-or-later
+    source: https://github.com/SagerNet/sing-box
+  - id: 46605aa0-5670-557e-9d98-f0cab347516f
+    family: sing-box
+    version: 1.14.0
+    git_tag: v1.14.0
+    git_commit: 0b8995879f29a9b98ee027bc17b75e101445b238
+    os: linux
+    arch: arm64
+    asset_name: sing-box-1.14.0-linux-arm64.tar.gz
+    asset_url: https://github.com/SagerNet/sing-box/releases/download/v1.14.0/sing-box-1.14.0-linux-arm64.tar.gz
+    asset_sha256: 04d9b40bc98dc55b6f509ce3292145c65478f65866bea64826ebb2f382385088
+    binary_name: sing-box
+    binary_sha256: 4393306b90bb05502fce3b8f1754280f531c0f3ff47df9b1997b7831e3e543d0
+    cgo: false
+    feature_notes: official GitHub release tarball without glibc/musl suffix; arm64 hash pinned, execution smoke not run; feature inventory unverified
+    license: GPL-3.0-or-later
+    source: https://github.com/SagerNet/sing-box
+  - id: 81407b9e-61c5-5473-b359-29fa2730567e
+    family: mihomo
+    version: 1.19.30
+    git_tag: v1.19.30
+    git_commit: ac017cdd246ce8bd547653d927e7bf77d7ee73d5
+    os: linux
+    arch: amd64
+    asset_name: mihomo-linux-amd64-v1.19.30.gz
+    asset_url: https://github.com/MetaCubeX/mihomo/releases/download/v1.19.30/mihomo-linux-amd64-v1.19.30.gz
+    asset_sha256: cf06ce2c7d1421bdbda14ee4a5b6046672dc35ebf8eecd8e77504ec3c0ed9a84
+    binary_name: mihomo
+    binary_sha256: 3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae
+    cgo: false
+    feature_notes: official GitHub gzip binary without goamd64 v1/v2/v3 suffix; amd64 version smoke printed Mihomo Meta v1.19.30 linux amd64 go1.26.6 tags with_gvisor; feature inventory unverified
+    license: GPL-3.0
+    source: https://github.com/MetaCubeX/mihomo
+  - id: 4d9381af-9850-5de0-a049-c716ae3c81c4
+    family: mihomo
+    version: 1.19.30
+    git_tag: v1.19.30
+    git_commit: ac017cdd246ce8bd547653d927e7bf77d7ee73d5
+    os: linux
+    arch: arm64
+    asset_name: mihomo-linux-arm64-v1.19.30.gz
+    asset_url: https://github.com/MetaCubeX/mihomo/releases/download/v1.19.30/mihomo-linux-arm64-v1.19.30.gz
+    asset_sha256: 58896873736d28628f66de3677c8654fa0f180662523148e136cff4f6e890069
+    binary_name: mihomo
+    binary_sha256: b9456718a8955364b9a77c80f74dca49ded10f071c1c6b4513a0ea68a3d87a50
+    cgo: false
+    feature_notes: official GitHub gzip binary; arm64 hash pinned, execution smoke not run; feature inventory unverified
+    license: GPL-3.0
+    source: https://github.com/MetaCubeX/mihomo
+unsupported:
+  - family: sing-box
+    key: policy.round_robin
+    state: unsupported
+    reason: no_native_adapter_in_this_baseline

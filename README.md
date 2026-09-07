@@ -1,6 +1,6 @@
 # ProxyLoom · 织流
 
-自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。当前实现 **WP-01 首轮 M0（T-001～003）工程与 IR 基座**：可以运行空 API、中文工程页、空 Runner 和 PostgreSQL 迁移入口；还没有登录、节点 CRUD、订阅发布或内核执行功能。
+自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。当前实现 **M0 第二窗口（T-001～003 基座，T-023 内核锁，T-053 隔离夹具）**：可以运行空 API、中文工程页、空 Runner 和 PostgreSQL 迁移入口；已锁定三内核官方 linux 候选并提供 test-only Trojan／HTTP 夹具。还没有登录、节点 CRUD、订阅发布、配置编译或 Runner 内核执行。全部内核能力为 `unverified`。
 
 ## 启动开发环境
 
@@ -49,6 +49,8 @@ Windows 未安装 CGO 编译器时，使用 `docker build -f deploy/Dockerfile.c
 - API：`serve`、`healthcheck`、`migrate up`、`migrate status`。健康检查不读取秘密；`/healthz` 只表示进程存活，`/readyz` 检查数据库、迁移与必要配置。
 - 迁移：独立 `PROXYLOOM_MIGRATION_DSN_FILE`；运行账号使用 `PROXYLOOM_DATABASE_DSN_FILE`，只有连接、schema 使用及迁移元数据读取权限。已执行迁移按内容摘要校验，仅追加新文件。
 - IR：本地嵌入 JSON Schema v1、Go 类型与语义校验；两跳具体节点、严格字段、稳定引用、冻结快照。接口与例子见 `docs/ir-contract.md`。
+- 内核锁：`compat/cores.lock.yaml` 固定 Xray／sing-box／Mihomo 的 linux amd64 与 arm64 摘要；`internal/capability` 在版本、摘要或架构不符时拒绝。能力保持 unverified。
+- 隔离夹具：`internal/isolation` 与 `deploy/compose.isolation.yaml` 仅用于测试，不随开发 Compose 启动。
 - 管理 API、Runner mTLS/队列、真实编译和网络执行分别由后续任务提供；未知 `/api`、`/internal`、`/s` 路径不会返回前端成功页面。
 
 需求依据、范围与 ADR 见 `docs/baseline/README.md`。机器任务清单为 `docs/PLAN.tasks.json`，执行主入口为 `docs/PLAN.md`。逐任务证据在 `docs/evidence/`，首轮完成不代表 G0 或三内核兼容验证通过。

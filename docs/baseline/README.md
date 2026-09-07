@@ -7,7 +7,7 @@
 | `docs/requirements_v1.0.md` | `51f77d604b462a88d83e3e45d2de07930e61eed404a641d2be0f708c448d77c7` |
 | `docs/project_design_v1.0.md` | `5846b27b60d6a8d664125200730a83fc40eb74f3f306c1fd0bd50d4658c6f701` |
 
-已执行 `Get-FileHash` 核对，与 PLAN §14.3 一致。需求范围仍为全部 60 项 P0；本轮授权切片仅 WP-01 的 T-001、T-002、T-003，不能解释为 M0 整体完成。正式内核候选、构建来源、摘要与架构锁由 T-023 交付；开发工具和依赖的具体值集中在 `deploy/tools.lock.json`，本文件不复制或猜测版本。
+已执行 `Get-FileHash` 核对，与 PLAN §14.3 一致。需求范围仍为全部 60 项 P0；本轮授权切片仅 WP-01 的 T-001、T-002、T-003，不能解释为 M0 整体完成。正式内核候选锁见 `compat/cores.lock.yaml` 与 ADR-0002（T-023，`in_review`）；开发工具和依赖的具体值集中在 `deploy/tools.lock.json`，本文件不复制或猜测版本。
 
 实施选择见 [ADR](../adr/0001-initial-foundation.md)，候选组合和未决事项见 [范围清单](scope.md)。当前能力全部 `unverified`，内核配置检查、网络行为、客户端导入、G0 均未执行／未通过验收。
 

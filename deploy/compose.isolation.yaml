@@ -1,0 +1,89 @@
+# TEST ONLY. Not included by compose.dev.yaml. Do not use as a production default.
+# A/B listen on 8443 because UID 10003 cannot bind TCP ports below 1024.
+name: proxyloom-isolation
+
+x-test-only: &test-only
+  labels:
+    proxyloom.test-only: "true"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  restart: "no"
+
+services:
+  target:
+    <<: *test-only
+    image: proxyloom-isolation:m0-dev
+    build: {context: .., dockerfile: deploy/Dockerfile.isolation}
+    command: [target]
+    environment:
+      PROXYLOOM_ISOLATION_ROLE: target
+      PROXYLOOM_ISOLATION_BIND: 0.0.0.0:8080
+    networks:
+      isolation:
+        ipv4_address: 172.30.253.30
+  proxy-b:
+    <<: *test-only
+    image: proxyloom-isolation:m0-dev
+    build: {context: .., dockerfile: deploy/Dockerfile.isolation}
+    command: [b]
+    environment:
+      PROXYLOOM_ISOLATION_ROLE: b
+      PROXYLOOM_ISOLATION_BIND: 0.0.0.0:8443
+      PROXYLOOM_ISOLATION_HOST: b.proxyloom.test
+      PROXYLOOM_ISOLATION_PASSWORD: EXAMPLE_ONLY_B
+      PROXYLOOM_ISOLATION_ALLOW_FROM: 172.30.253.10
+      PROXYLOOM_ISOLATION_CERT_FILE: /certs/b.pem
+      PROXYLOOM_ISOLATION_KEY_FILE: /certs/b-key.pem
+    volumes:
+      - type: bind
+        source: ../.cache/isolation/certs/b.pem
+        target: /certs/b.pem
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ../.cache/isolation/certs/b-key.pem
+        target: /certs/b-key.pem
+        read_only: true
+        bind: {create_host_path: false}
+    networks:
+      isolation:
+        ipv4_address: 172.30.253.20
+        aliases: [b.proxyloom.test]
+  proxy-a:
+    <<: *test-only
+    image: proxyloom-isolation:m0-dev
+    build: {context: .., dockerfile: deploy/Dockerfile.isolation}
+    command: [a]
+    environment:
+      PROXYLOOM_ISOLATION_ROLE: a
+      PROXYLOOM_ISOLATION_BIND: 0.0.0.0:8443
+      PROXYLOOM_ISOLATION_HOST: a.proxyloom.test
+      PROXYLOOM_ISOLATION_PASSWORD: EXAMPLE_ONLY_A
+      PROXYLOOM_ISOLATION_CERT_FILE: /certs/a.pem
+      PROXYLOOM_ISOLATION_KEY_FILE: /certs/a-key.pem
+    volumes:
+      - type: bind
+        source: ../.cache/isolation/certs/a.pem
+        target: /certs/a.pem
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ../.cache/isolation/certs/a-key.pem
+        target: /certs/a-key.pem
+        read_only: true
+        bind: {create_host_path: false}
+    networks:
+      isolation:
+        ipv4_address: 172.30.253.10
+        aliases: [a.proxyloom.test]
+    depends_on: [proxy-b]
+
+networks:
+  isolation:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.253.0/24
+    labels:
+      proxyloom.test-only: "true"

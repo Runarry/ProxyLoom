@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "首轮 T-001～T-003 实现与本地自动检查已完成，进入 in_review；人工基线评审待定，不代表 done 或 G0 通过。其他任务保留 not_started。",
+  "status_note": "T-001～T-003 保持 in_review。第二窗口 T-023、T-053 实现与本地检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。其余任务保留 not_started。",
   "tasks": [
     {
       "id": "T-001",
@@ -419,7 +419,7 @@
         "T-003"
       ],
       "acceptance": "候选值来自实际构建；未验证保持 unverified；版本、摘要、架构不符拒绝执行；P0 组合有待测列表。\n构建烟测；NFR-13 的前置",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-024",
@@ -997,7 +997,7 @@
         "T-003"
       ],
       "acceptance": "夹具可重建、不依赖个人节点；可阻断绕行；测试白名单不打包为生产默认；证据能追溯提交。\nAC-09、AC-10 的前置",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-054",

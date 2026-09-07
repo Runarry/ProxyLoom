@@ -15,6 +15,7 @@ function run(command, args, capture = false) {
 run(process.execPath, ['scripts/check-locks.mjs']);
 run(process.execPath, ['scripts/check-plan.mjs']);
 run(process.execPath, ['scripts/check-boundaries.mjs']);
+run(process.execPath, ['scripts/verify-cores.mjs']);
 function goFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     if (entry.name.startsWith('.') || ['node_modules', 'vendor', 'dist'].includes(entry.name)) return [];

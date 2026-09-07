@@ -1,0 +1,74 @@
+# P0 candidate combinations from docs/baseline/scope.md.
+# Every entry stays unverified until a later task attaches real kernel evidence.
+schema_version: 1
+state: unverified
+combinations:
+  - id: P0-SS-TCP
+    capability_key: protocol.shadowsocks.native_tcp.none
+    protocol: shadowsocks
+    transport: native_tcp
+    security: none
+    state: unverified
+  - id: P0-VMESS-TCP
+    capability_key: protocol.vmess.native_tcp.tls_or_none
+    protocol: vmess
+    transport: native_tcp
+    security: tls_or_none
+    state: unverified
+  - id: P0-VMESS-WS
+    capability_key: protocol.vmess.websocket.tls_or_none
+    protocol: vmess
+    transport: websocket
+    security: tls_or_none
+    state: unverified
+  - id: P0-VLESS-TCP
+    capability_key: protocol.vless.native_tcp.tls_or_none
+    protocol: vless
+    transport: native_tcp
+    security: tls_or_none
+    state: unverified
+  - id: P0-VLESS-WS
+    capability_key: protocol.vless.websocket.tls_or_none
+    protocol: vless
+    transport: websocket
+    security: tls_or_none
+    state: unverified
+  - id: P0-VLESS-REALITY
+    capability_key: protocol.vless.native_tcp.reality
+    protocol: vless
+    transport: native_tcp
+    security: reality
+    state: unverified
+  - id: P0-TROJAN-TCP
+    capability_key: protocol.trojan.native_tcp.tls
+    protocol: trojan
+    transport: native_tcp
+    security: tls
+    state: unverified
+  - id: P0-TROJAN-WS
+    capability_key: protocol.trojan.websocket.tls
+    protocol: trojan
+    transport: websocket
+    security: tls
+    state: unverified
+  - id: P0-SOCKS5-TCP
+    capability_key: protocol.socks5.native_tcp.none
+    protocol: socks5
+    transport: native_tcp
+    security: none
+    state: unverified
+  - id: P0-HTTP-TCP
+    capability_key: protocol.http.native_tcp.tls_or_none
+    protocol: http
+    transport: native_tcp
+    security: tls_or_none
+    state: unverified
+shared_capabilities:
+  - key: chain.two_hop.tcp
+    state: unverified
+    fixture_ids:
+      - chain-a-to-b
+      - chain-a-down-no-direct
+  - key: client_preset
+    state: unverified
+    reason: client import is recorded separately from kernel checks

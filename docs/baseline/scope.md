@@ -23,9 +23,9 @@
 | --- | --- | --- |
 | 角色与投入 | TL、BE-A、BE-B、FE、QA、OPS 为责任角色；实际人员、投入、独立审核人未指定 | TL；正式迭代承诺和基线评审前 |
 | 外部网络测试许可 | 未提供；本轮不执行外部节点连接或测速 | TL／OPS；任何外部网络演示前取得明确许可 |
-| 默认后续夹具 | 仅 T-053 自建隔离代理服务与 HTTP(S) 目标；临时凭证、可重建证书、test-only 私网例外 | BE-B／QA／OPS；T-053 实际实现与审核，当前尚未建立 |
+| 默认后续夹具 | T-053 已提供 `internal/isolation` Trojan TLS 代理、HTTP 目标与 `deploy/compose.isolation.yaml`；合成凭证、进程内测试 CA、test-only 标签；不进入开发／生产默认 | BE-B／QA／OPS；夹具已落地，三内核客户端走夹具仍待 T-025～028 |
 | 生产网络 | Runner 无数据库凭证／全局主密钥；无任意 shell、路径或用户原生配置；网络预算与隔离需后续实现 | BE-B／OPS；T-040～045、054、057 |
-| 内核／客户端 | 正式内核锁留 T-023；客户端导入与内核验证独立；尚无通过证据 | BE-A／QA；G0 候选登记、G3 全证据 |
+| 内核／客户端 | T-023 已锁定官方非预发布 linux 候选：Xray v26.3.27、sing-box v1.14.0、mihomo v1.19.30（amd64／arm64 哈希见 `compat/cores.lock.yaml`）。能力全部 `unverified`；客户端导入未测；arm64 未执行 | BE-A／QA；G0 候选已登记，G3 全证据 |
 | 许可／分发 | 开源及分发方式未指定，不把开发依赖锁当许可证审查 | TL／OPS；T-059、对外分发前 |
 
 本轮开发允许 Windows PowerShell 与 Docker Linux 容器；生产门槛仍是 Linux amd64／arm64。Docker 可用性与实际烟测必须以 T-002 证据为准，不能由本基线推断已经通过。
