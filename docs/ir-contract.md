@@ -56,9 +56,11 @@ Chain 使用 `hops: [{node_id}, {node_id}]` 和 `failure_policy: "fail_closed"`�
 
 ## 编译与执行接口
 
-`adapter.Compiler.Compile(ctx, FrozenInput, Target)` 返回 Artifact、Diagnostic 列表与错误。实现必须 Validate 输入，并要求目标与 `input.Target(target.Key)` 完全一致，只依赖冻结内容及固定编译器/构建代码，不读取数据库、网络或当前时间。错误或 unverified 能力必须阻止成功产物，不得直接回退。
+`adapter.Compiler.Compile(ctx, FrozenInput, Target)` 返回 Artifact、Diagnostic 列表与错误。实现必须 Validate 输入，并要求目标与 `input.Target(target.Key)` 完全一致，只依赖冻结内容及固定编译器/构建代码，不读取数据库、网络或当前时间。未知或 `unsupported` 组合必须失败且无 Artifact，不得直接回退。
 
-`RunnerAdapter`（别名 `CoreAdapter`）提供 Family、ValidateSpec、RunSpec、RedactLog。CommandSpec 只有 registry ExecutableID、参数数组与 Runner 分配的 WorkingDir，不提供 shell 字符串。`CommandSpec.Validate` 检查与 Runner 已知构建/目录一致及无 NUL 参数；它不等于执行器安全验收。实际参数白名单、路径权限/符号链接处理、环境、进程回收、隔离和预算由后续 Runner 框架承担。Artifact 的 Bytes/ContentHMAC 和 CommandSpec.Args 提供 Clone，避免调用方意外共享可变缓冲区。此任务没有内核命令实现或执行操作。
+T-024 覆盖：M0 骨架 Compile（`internal/compiler`，见 `docs/compiler-contract.md` 与 ADR-0003）在构建已锁定且组合列入 P0 时可以产出规范 Plan，并把 locked-but-unverified 记为信息诊断；**发布路径仍必须拒绝 unverified**。T-003 交付时尚未实现 Compile；不要把「Compile 返回 error」当成 unverified 门。
+
+`RunnerAdapter`（别名 `CoreAdapter`）提供 Family、ValidateSpec、RunSpec、RedactLog。CommandSpec 只有 registry ExecutableID、参数数组与 Runner 分配的 WorkingDir，不提供 shell 字符串。`CommandSpec.Validate` 检查与 Runner 已知构建/目录一致及无 NUL 参数；它不等于执行器安全验收。T-040 在 `internal/adapter/{xray,singbox,mihomo}` 与 `internal/runner/exec` 落地固定 argv、任务目录、环境白名单和进程回收。Artifact 的 Bytes/ContentHMAC 和 CommandSpec.Args 提供 Clone，避免调用方意外共享可变缓冲区。
 
 ## 诊断与验证证据
 

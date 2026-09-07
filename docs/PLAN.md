@@ -520,7 +520,15 @@ T-001 基线、候选范围与 ADR 位于 `docs/baseline/`、`docs/adr/`；三�
 
 T-023 锁定官方非预发布 linux 候选：Xray `v26.3.27`、sing-box `v1.14.0`、mihomo `v1.19.30`，各含 amd64／arm64 归档与二进制 SHA-256，见 `compat/cores.lock.yaml` 与 `docs/adr/0002-core-candidates.md`。能力模型在 `internal/capability`；P0 组合见 `compat/p0-combinations.yaml`，全部 `unverified`。amd64 在锁定 Debian 镜像中执行了 version 命令；arm64 只哈希。二进制不入库。
 
-T-053 提供 `internal/isolation` Trojan TLS 代理与 HTTP 目标、`deploy/compose.isolation.yaml`（test-only，不纳入开发 Compose）及绕行阻断测试。证据位于 `docs/evidence/T-023/`、`T-053/`。T-024、T-040 及三目标原型仍未开始。
+T-053 提供 `internal/isolation` Trojan TLS 代理与 HTTP 目标、`deploy/compose.isolation.yaml`（test-only，不纳入开发 Compose）及绕行阻断测试。证据位于 `docs/evidence/T-023/`、`T-053/`。
+
+## 12.5 第三窗口实施状态（2026-09-07）
+
+本轮实施 PLAN §12.1 第 4 步：T-024 与 T-040。两项实现及本地自动检查已完成，状态为 `in_review`；T-001～T-003、T-023、T-053 保持 `in_review`，其余仍为 `not_started`。`in_review` 不代替人工评审、任务 done 或 G0 通过。
+
+T-024 提供 `internal/compiler`：纯函数 Compile/Prepare、确定性 `n_`/`c_` 标签、规范 Plan JSON、最小 Golden（含 100 次字节一致）。`adapter_version` 为 `0.1.0-m0-skeleton`。能力保持 `unverified`；骨架允许记录该状态，不生成三内核原生配置。契约见 `docs/compiler-contract.md` 与 `docs/adr/0003-compile-and-exec-skeleton.md`。
+
+T-040 提供 `internal/runner/exec` 与三家族固定 argv 适配器。默认测试用本机 helper 覆盖环境、超时、取消与路径拒绝。真实 linux/amd64 内核正负 `config_validate` 与回环启动回收由 `scripts/verify-core-exec.mjs` 在锁定 Debian 镜像、`--network none` 下执行。内核仍不进入 Runner 镜像。证据位于 `docs/evidence/T-024/`、`T-040/`。T-025～T-027 与 G0 仍未开始。
 
 # 13. M4 增强队列与进入条件
 
@@ -563,6 +571,8 @@ M4 不计入 60 项 P0 任务和 198–324 人日基础估算。以下按功能�
 实施记录：2026-09-07，补齐 60 项机器清单、T-001 基线和 ADR，首轮 T-001～T-003 实施中，其他任务维持初始基线；仅同步现有工程目录映射与状态说明，不改变原任务范围、依赖和估算。最终评审与代码提交待完成，G0 尚未验收。
 
 实施记录：2026-09-07，第二窗口完成 T-023 内核候选锁与 T-053 隔离夹具，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。G0 仍未验收。
+
+实施记录：2026-09-07，第三窗口完成 T-024 公共编译骨架与 T-040 最小执行框架，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。能力仍全部 `unverified`，G0 仍未验收。
 
 ## 14.3 参考文档与引用方式
 

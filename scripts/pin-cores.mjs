@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import { spawn } from 'node:child_process';
@@ -119,7 +119,7 @@ function assetURL(candidate) {
 
 async function download(url, dest) {
   const response = await fetch(url, {
-    headers: { 'User-Agent': 'ProxyLoom-pin-cores/0.0.0-unverified', Accept: 'application/octet-stream' },
+    headers: { 'User-Agent': 'ProxyLoom-pin-cores/0.1.0-m0-skeleton', Accept: 'application/octet-stream' },
     redirect: 'follow',
   });
   if (!response.ok) throw new Error(`download failed ${response.status} for ${candidateLabel(url)}`);
@@ -188,6 +188,13 @@ async function pinOne(candidate) {
   }
   const binaryPath = await extractBinary(candidate, assetPath, work);
   const binaryHash = await sha256File(binaryPath);
+  const destBinary = join(dir, candidate.binary_name);
+  await pipeline(createReadStream(binaryPath), createWriteStream(destBinary));
+  try {
+    await chmod(destBinary, 0o755);
+  } catch {
+    // Windows cannot set POSIX execute bits; Docker Linux copies chmod later.
+  }
   await rm(work, { recursive: true, force: true });
   const id = uuidv5(`${candidate.family}|${candidate.git_tag}|${candidate.os}|${candidate.arch}|${binaryHash}`);
   return {

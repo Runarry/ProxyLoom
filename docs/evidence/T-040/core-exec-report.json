@@ -1,0 +1,30 @@
+{
+  "image": "debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171",
+  "network": "none",
+  "results": [
+    {
+      "family": "xray",
+      "id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "arch": "amd64",
+      "valid_check": "pass",
+      "invalid_check": "fail_closed",
+      "start_cancel": "reaped"
+    },
+    {
+      "family": "sing-box",
+      "id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "arch": "amd64",
+      "valid_check": "pass",
+      "invalid_check": "fail_closed",
+      "start_cancel": "reaped"
+    },
+    {
+      "family": "mihomo",
+      "id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "arch": "amd64",
+      "valid_check": "pass",
+      "invalid_check": "fail_closed",
+      "start_cancel": "reaped"
+    }
+  ]
+}

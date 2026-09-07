@@ -1,0 +1,10 @@
+mixed-port: 17803
+bind-address: 127.0.0.1
+allow-lan: false
+mode: direct
+log-level: silent
+external-controller: ""
+ipv6: false
+geodata-mode: false
+geo-auto-update: false
+find-process-mode: off

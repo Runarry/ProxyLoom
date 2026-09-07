@@ -19,7 +19,8 @@ assert.equal(moduleResult.status, 0, moduleResult.stderr || 'go list module fail
 const modulePath = moduleResult.stdout.trim();
 const local = (name) => name.startsWith(`${modulePath}/`);
 const ir = [...packages.keys()].filter((name) => local(name) && /\/internal\/ir(?:\/|$)/.test(name));
-const runner = [...packages.keys()].filter((name) => name === `${modulePath}/proxyloom-runner` || name.startsWith(`${modulePath}/proxyloom-runner/`));
+const compiler = [...packages.keys()].filter((name) => local(name) && /\/internal\/compiler(?:\/|$)/.test(name));
+const runner = [...packages.keys()].filter((name) => name === `${modulePath}/proxyloom-runner` || name.startsWith(`${modulePath}/proxyloom-runner/`) || (local(name) && /\/internal\/runner(?:\/|$)/.test(name)));
 const server = [...packages.keys()].filter((name) => name === `${modulePath}/proxyloom-server` || name.startsWith(`${modulePath}/proxyloom-server/`));
 assert.ok(ir.length, 'No IR packages found');
 assert.ok(runner.length, 'No Runner packages found');
@@ -52,7 +53,17 @@ function checkServer(name, seen = new Set()) {
     if (local(dep)) checkServer(dep, seen);
   }
 }
+function checkCompiler(name, seen = new Set()) {
+  if (seen.has(name)) return;
+  seen.add(name);
+  for (const dep of packages.get(name) ?? []) {
+    assert.ok(!/^net\/http(?:\/|$)/.test(dep) && dep !== 'os/exec' && !database(dep) && !forbiddenLocal(dep) && !/\/internal\/(?:isolation|runner)(?:\/|$)/.test(dep), `compiler boundary: ${name} imports ${dep}`);
+    if (local(dep)) checkCompiler(dep, seen);
+  }
+}
 for (const name of ir) checkIR(name);
+assert.ok(compiler.length, 'No compiler packages found');
+for (const name of compiler) checkCompiler(name);
 for (const name of runner) checkRunner(name);
 for (const name of server) checkServer(name);
-console.log('PASS: IR project dependencies exclude HTTP/database/exec; Runner dependency graph excludes database/identity/server; API and Runner exclude isolation fixtures.');
+console.log('PASS: IR and compiler exclude HTTP/database/exec; Runner dependency graph excludes database/identity/server; API and Runner exclude isolation fixtures.');

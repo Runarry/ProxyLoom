@@ -22,7 +22,9 @@ type Target = ir.Target
 // Compile implementations must validate input and require target to equal the
 // descriptor returned by input.Target(target.Key). All compilation decisions
 // must depend only on frozen data and immutable compiler/build code. No clock,
-// database or network lookup is permitted. Unverified combinations return errors.
+// database or network lookup is permitted. Unknown or unsupported combinations
+// return errors. The M0 skeleton may emit an artifact that records locked-but-
+// unverified capabilities; publication must still refuse unverified output.
 type Compiler interface {
 	Compile(ctx context.Context, input FrozenInput, target Target) (Artifact, []Diagnostic, error)
 }
@@ -50,6 +52,19 @@ func (Artifact) LogValue() slog.Value           { return slog.StringValue("Artif
 type JobWorkspace struct {
 	Directory      string
 	ConfigFilename string
+}
+
+func (v JobWorkspace) Validate() error {
+	if v.Directory == "" || !filepath.IsAbs(v.Directory) || filepath.Clean(v.Directory) != v.Directory {
+		return errors.New("job directory must be an absolute cleaned path")
+	}
+	if v.ConfigFilename == "" || filepath.Base(v.ConfigFilename) != v.ConfigFilename || strings.Contains(v.ConfigFilename, "..") {
+		return errors.New("config filename must be a basename inside the job directory")
+	}
+	if strings.ContainsRune(v.ConfigFilename, 0) {
+		return errors.New("config filename contains a forbidden NUL")
+	}
+	return nil
 }
 
 // CommandSpec selects a registry executable, never an executable path or shell

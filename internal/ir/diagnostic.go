@@ -10,29 +10,36 @@ type DiagnosticCode string
 type Severity string
 
 const (
-	SeverityError         Severity       = "error"
-	SeverityWarning       Severity       = "warning"
-	SeverityInfo          Severity       = "info"
-	InvalidJSON           DiagnosticCode = "IR_INVALID_JSON"
-	DuplicateField        DiagnosticCode = "IR_DUPLICATE_FIELD"
-	UnknownField          DiagnosticCode = "IR_UNKNOWN_FIELD"
-	RequiredField         DiagnosticCode = "IR_REQUIRED"
-	InvalidType           DiagnosticCode = "IR_INVALID_TYPE"
-	InvalidValue          DiagnosticCode = "IR_INVALID_VALUE"
-	UnsupportedVersion    DiagnosticCode = "IR_UNSUPPORTED_VERSION"
-	InvalidUnion          DiagnosticCode = "IR_INVALID_UNION"
-	InvalidSnapshot       DiagnosticCode = "IR_INVALID_SNAPSHOT"
-	DuplicateResource     DiagnosticCode = "IR_DUPLICATE_RESOURCE"
-	DuplicateTarget       DiagnosticCode = "IR_DUPLICATE_TARGET"
-	ReferenceMissing      DiagnosticCode = "IR_REFERENCE_MISSING"
-	ReferenceKind         DiagnosticCode = "IR_REFERENCE_KIND"
-	ReferenceRevision     DiagnosticCode = "IR_REFERENCE_REVISION"
-	ReferenceEpoch        DiagnosticCode = "IR_REFERENCE_EPOCH"
-	ScopeMismatch         DiagnosticCode = "IR_SCOPE_MISMATCH"
-	ResourceDisabled      DiagnosticCode = "IR_RESOURCE_DISABLED"
-	UnreachableResource   DiagnosticCode = "IR_UNREACHABLE_RESOURCE"
-	CapabilityUnsupported DiagnosticCode = "CAPABILITY_UNSUPPORTED"
-	CapabilityUnverified  DiagnosticCode = "CAPABILITY_UNVERIFIED"
+	SeverityError            Severity       = "error"
+	SeverityWarning          Severity       = "warning"
+	SeverityInfo             Severity       = "info"
+	InvalidJSON              DiagnosticCode = "IR_INVALID_JSON"
+	DuplicateField           DiagnosticCode = "IR_DUPLICATE_FIELD"
+	UnknownField             DiagnosticCode = "IR_UNKNOWN_FIELD"
+	RequiredField            DiagnosticCode = "IR_REQUIRED"
+	InvalidType              DiagnosticCode = "IR_INVALID_TYPE"
+	InvalidValue             DiagnosticCode = "IR_INVALID_VALUE"
+	UnsupportedVersion       DiagnosticCode = "IR_UNSUPPORTED_VERSION"
+	InvalidUnion             DiagnosticCode = "IR_INVALID_UNION"
+	InvalidSnapshot          DiagnosticCode = "IR_INVALID_SNAPSHOT"
+	DuplicateResource        DiagnosticCode = "IR_DUPLICATE_RESOURCE"
+	DuplicateTarget          DiagnosticCode = "IR_DUPLICATE_TARGET"
+	ReferenceMissing         DiagnosticCode = "IR_REFERENCE_MISSING"
+	ReferenceKind            DiagnosticCode = "IR_REFERENCE_KIND"
+	ReferenceRevision        DiagnosticCode = "IR_REFERENCE_REVISION"
+	ReferenceEpoch           DiagnosticCode = "IR_REFERENCE_EPOCH"
+	ScopeMismatch            DiagnosticCode = "IR_SCOPE_MISMATCH"
+	ResourceDisabled         DiagnosticCode = "IR_RESOURCE_DISABLED"
+	UnreachableResource      DiagnosticCode = "IR_UNREACHABLE_RESOURCE"
+	CapabilityUnsupported    DiagnosticCode = "CAPABILITY_UNSUPPORTED"
+	CapabilityUnverified     DiagnosticCode = "CAPABILITY_UNVERIFIED"
+	CompileTargetMismatch    DiagnosticCode = "COMPILE_TARGET_MISMATCH"
+	CompileUnknownBuild      DiagnosticCode = "COMPILE_UNKNOWN_BUILD"
+	CompileDigestMismatch    DiagnosticCode = "COMPILE_DIGEST_MISMATCH"
+	CompileAdapterVersion    DiagnosticCode = "COMPILE_ADAPTER_VERSION"
+	CompileFormatMismatch    DiagnosticCode = "COMPILE_FORMAT_MISMATCH"
+	CompileLabelCollision    DiagnosticCode = "COMPILE_LABEL_COLLISION"
+	CompileUnknownCapability DiagnosticCode = "COMPILE_UNKNOWN_CAPABILITY"
 )
 
 // FieldPath is an RFC 6901 JSON Pointer (the root is ""). Messages never
@@ -59,6 +66,8 @@ func (d Diagnostics) Error() string {
 func issue(code DiagnosticCode, path string) Diagnostic {
 	return Diagnostic{Code: code, Severity: SeverityError, FieldPath: path, Message: diagnosticMessage(code)}
 }
+
+func (c DiagnosticCode) Message() string { return diagnosticMessage(c) }
 
 func diagnosticMessage(code DiagnosticCode) string {
 	switch code {
@@ -96,6 +105,24 @@ func diagnosticMessage(code DiagnosticCode) string {
 		return "Disabled resources cannot enter a compile snapshot."
 	case UnreachableResource:
 		return "The snapshot contains a resource outside the member dependency closure."
+	case CapabilityUnsupported:
+		return "This capability is not adapted for the target and cannot be substituted."
+	case CapabilityUnverified:
+		return "This capability is locked but not verified; the skeleton records it and does not mark it verified."
+	case CompileTargetMismatch:
+		return "The compile target must equal the frozen target with the same key."
+	case CompileUnknownBuild:
+		return "The frozen core build is not in the locked catalog."
+	case CompileDigestMismatch:
+		return "The frozen core digest does not match the locked build."
+	case CompileAdapterVersion:
+		return "The frozen adapter version does not match the compiler skeleton."
+	case CompileFormatMismatch:
+		return "The frozen output format does not match the core family."
+	case CompileLabelCollision:
+		return "Deterministic labels could not be made unique without a random suffix."
+	case CompileUnknownCapability:
+		return "The node combination is not in the locked P0 capability list."
 	default:
 		return "The value does not satisfy the v1 contract."
 	}

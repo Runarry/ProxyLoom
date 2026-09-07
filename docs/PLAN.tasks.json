@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "T-001～T-003 保持 in_review。第二窗口 T-023、T-053 实现与本地检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。其余任务保留 not_started。",
+  "status_note": "T-001～T-003、T-023、T-053 保持 in_review。第三窗口 T-024、T-040 实现与本地检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。其余任务保留 not_started。",
   "tasks": [
     {
       "id": "T-001",
@@ -437,7 +437,7 @@
         "T-023"
       ],
       "acceptance": "相同冻结输入重复生成字节一致；同名及哈希碰撞可确定处理；无联网、随机标签或当前时间依赖。\nNFR-04；Golden 原型",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-025",
@@ -741,7 +741,7 @@
         "T-023"
       ],
       "acceptance": "仅本地回环入口；不接受任意命令／路径；正负检查真实执行；取消和超时回收子进程。\nAC-18（配置层）；执行框架烟测",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-041",

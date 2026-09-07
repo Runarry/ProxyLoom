@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -40,6 +41,36 @@ func TestCommandSpecBindsRegistryIdentityAndRunnerDirectory(t *testing.T) {
 	}
 	if valid.Args[0] != "check" {
 		t.Fatal("command clone changed original arguments")
+	}
+}
+
+func TestJobWorkspaceRejectsRelativeAndNestedFilenames(t *testing.T) {
+	directory := t.TempDir()
+	valid := adapter.JobWorkspace{Directory: directory, ConfigFilename: "config.json"}
+	if err := valid.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	for _, workspace := range []adapter.JobWorkspace{
+		{Directory: ".", ConfigFilename: "config.json"},
+		{Directory: directory, ConfigFilename: filepath.Join("sub", "config.json")},
+		{Directory: directory, ConfigFilename: filepath.Join("..", "config.json")},
+		{Directory: directory, ConfigFilename: ""},
+	} {
+		if workspace.Validate() == nil {
+			t.Fatalf("accepted %+v", workspace)
+		}
+	}
+}
+
+func TestRedactLogLineDoesNotMutateInput(t *testing.T) {
+	input := []byte(`"password":"secret-value" EXAMPLE_ONLY_A`)
+	clone := slices.Clone(input)
+	out := adapter.RedactLogLine(input)
+	if string(input) != string(clone) {
+		t.Fatal("redaction mutated caller buffer")
+	}
+	if bytes.Contains(out, []byte("EXAMPLE_ONLY_A")) || bytes.Contains(out, []byte("secret-value")) {
+		t.Fatalf("secrets remained %s", out)
 	}
 }
 
