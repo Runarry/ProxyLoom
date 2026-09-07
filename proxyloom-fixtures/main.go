@@ -32,9 +32,10 @@ func run(args []string) error {
 		role = args[0]
 	}
 	bind := os.Getenv("PROXYLOOM_ISOLATION_BIND")
+	log := &isolation.Log{}
 	switch role {
 	case "target":
-		target, err := isolation.StartHTTPTarget(bind, &isolation.Log{})
+		target, err := isolation.StartHTTPTarget(bind, log)
 		if err != nil {
 			return err
 		}
@@ -44,6 +45,7 @@ func run(args []string) error {
 		if err != nil {
 			return err
 		}
+		cfg.Log = log
 		proxy, err := isolation.StartTrojan(cfg)
 		if err != nil {
 			return err
@@ -51,6 +53,13 @@ func run(args []string) error {
 		defer proxy.Close()
 	default:
 		return errors.New("usage: proxyloom-fixtures target|a|b|init-certs [--out directory]")
+	}
+	if eventsBind := os.Getenv("PROXYLOOM_ISOLATION_EVENTS_BIND"); eventsBind != "" {
+		events, err := isolation.ListenEvents(eventsBind, log)
+		if err != nil {
+			return err
+		}
+		defer events.Close()
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

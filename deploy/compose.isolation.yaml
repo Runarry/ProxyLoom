@@ -19,6 +19,7 @@ services:
     environment:
       PROXYLOOM_ISOLATION_ROLE: target
       PROXYLOOM_ISOLATION_BIND: 0.0.0.0:8080
+      PROXYLOOM_ISOLATION_EVENTS_BIND: 0.0.0.0:9090
     networks:
       isolation:
         ipv4_address: 172.30.253.30
@@ -35,6 +36,7 @@ services:
       PROXYLOOM_ISOLATION_ALLOW_FROM: 172.30.253.10
       PROXYLOOM_ISOLATION_CERT_FILE: /certs/b.pem
       PROXYLOOM_ISOLATION_KEY_FILE: /certs/b-key.pem
+      PROXYLOOM_ISOLATION_EVENTS_BIND: 0.0.0.0:9090
     volumes:
       - type: bind
         source: ../.cache/isolation/certs/b.pem
@@ -62,6 +64,7 @@ services:
       PROXYLOOM_ISOLATION_PASSWORD: EXAMPLE_ONLY_A
       PROXYLOOM_ISOLATION_CERT_FILE: /certs/a.pem
       PROXYLOOM_ISOLATION_KEY_FILE: /certs/a-key.pem
+      PROXYLOOM_ISOLATION_EVENTS_BIND: 0.0.0.0:9090
     volumes:
       - type: bind
         source: ../.cache/isolation/certs/a.pem

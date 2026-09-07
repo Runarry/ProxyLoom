@@ -38,6 +38,8 @@ go test -mod=readonly -count=1 ./internal/isolation ./internal/capability ./prox
 
 Go regressions cover a single TLS write containing the Trojan header and application payload, fragmented writes, a payload larger than the read buffer, the existing chain/no-bypass checks, strict startup configuration and exported certificate trust. These are local-process checks.
 
-Container smoke testing is deferred. Compose parsing alone does not prove the network policy or mount permissions at runtime. The later container test must verify shared-CA trust, A→B success, direct B rejection with the correct password, and failure after stopping A. Xray/sing-box/Mihomo client acceptance remains in the subsequent kernel tasks; fixture checks do not mark any capability `verified` or complete G0.
+Container smoke is `node scripts/verify-isolation-compose.mjs`. It starts this Compose project, attaches a probe on the internal network, and checks shared-CA trust, A→B success, direct B rejection with the correct password (`forbidden_source`), and failure after stopping A. It does not mark any capability `verified` or complete G0.
+
+Real Xray/sing-box/Mihomo clients against these fixtures are `node scripts/verify-live-chain.mjs` (T-028). That runner installs the test CA into an ephemeral Linux container's system trust store; it does not disable TLS verification and does not inject a custom CA field into compiled configs.
 
 Private-network exceptions exist only in this test package and the isolation Compose file. Do not copy them into production or development defaults.

@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -213,8 +214,68 @@ func TestTimeoutAndCancelReapHelper(t *testing.T) {
 	if !res.Canceled {
 		t.Fatalf("expected cancel %+v", res)
 	}
-	if pid := childPID(res.Output); pid != 0 && pidAlive(t, pid) {
-		t.Fatalf("child %d still alive", pid)
+	if pid := childPID(res.Output); pid != 0 {
+		waitPIDReaped(t, pid)
+	}
+}
+
+func TestConcurrentRunDoesNotStealWait(t *testing.T) {
+	id, registry := coreRegistry(t, ir.Xray)
+	ws1, err := Allocate(t.TempDir(), "config.json", []byte(`{"listen":"127.0.0.1"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ws1.Close()
+	ws2, err := Allocate(t.TempDir(), "config.json", []byte(`{"listen":"127.0.0.1"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ws2.Close()
+	spec := adapter.CommandSpec{ExecutableID: id, Args: []string{helperFlag, "spawn-child"}, WorkingDir: ""}
+	ctx1, cancel1 := context.WithCancel(context.Background())
+	ctx2, cancel2 := context.WithCancel(context.Background())
+	defer cancel1()
+	defer cancel2()
+	var (
+		wg         sync.WaitGroup
+		res1, res2 Result
+		err1, err2 error
+	)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		s := spec
+		s.WorkingDir = ws1.Directory
+		res1, err1 = Run(ctx1, registry, s, ws1, Options{Timeout: 10 * time.Second})
+	}()
+	go func() {
+		defer wg.Done()
+		s := spec
+		s.WorkingDir = ws2.Directory
+		res2, err2 = Run(ctx2, registry, s, ws2, Options{Timeout: 10 * time.Second})
+	}()
+	time.Sleep(300 * time.Millisecond)
+	cancel1()
+	time.Sleep(300 * time.Millisecond)
+	cancel2()
+	wg.Wait()
+	if err1 != nil {
+		t.Fatalf("run1: %v", err1)
+	}
+	if err2 != nil {
+		t.Fatalf("run2: %v", err2)
+	}
+	if !res1.Canceled {
+		t.Fatalf("run1 expected cancel %+v", res1)
+	}
+	if !res2.Canceled {
+		t.Fatalf("run2 expected cancel %+v", res2)
+	}
+	if pid := childPID(res1.Output); pid != 0 {
+		waitPIDReaped(t, pid)
+	}
+	if pid := childPID(res2.Output); pid != 0 {
+		waitPIDReaped(t, pid)
 	}
 }
 
@@ -377,4 +438,79 @@ func pidAlive(t *testing.T, pid int) bool {
 		return false
 	}
 	return bytes.Contains(out, []byte(`"`+strconv.Itoa(pid)+`"`))
+}
+
+func waitPIDReaped(t *testing.T, pid int) {
+	t.Helper()
+	deadline := time.Now().Add(time.Second)
+	var last string
+	for {
+		last = pidProcInfo(pid)
+		if !pidAlive(t, pid) {
+			return
+		}
+		state, _, _, ok := linuxProcState(pid)
+		running := ok && (state == 'R' || state == 'S' || state == 'D' || state == 'I')
+		if time.Now().After(deadline) {
+			if running {
+				t.Fatalf("child %d still running: %s", pid, last)
+			}
+			t.Fatalf("child %d still present: %s", pid, last)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+func pidProcInfo(pid int) string {
+	if pid <= 0 {
+		return "pid<=0"
+	}
+	if runtime.GOOS == "windows" {
+		return "windows"
+	}
+	path := fmt.Sprintf("/proc/%d/stat", pid)
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Sprintf("proc_stat_err=%v", err)
+	}
+	state, ppid, pgrp, ok := parseProcStat(raw)
+	if !ok {
+		return fmt.Sprintf("stat=%q", strings.TrimSpace(string(raw)))
+	}
+	status := fmt.Sprintf("state=%c ppid=%d pgrp=%d stat=%s", state, ppid, pgrp, strings.TrimSpace(string(raw)))
+	if extra, err := os.ReadFile(fmt.Sprintf("/proc/%d/status", pid)); err == nil {
+		var lines []string
+		for _, line := range strings.Split(string(extra), "\n") {
+			if strings.HasPrefix(line, "Name:") || strings.HasPrefix(line, "State:") || strings.HasPrefix(line, "PPid:") || strings.HasPrefix(line, "NSpid:") {
+				lines = append(lines, line)
+			}
+		}
+		if len(lines) > 0 {
+			status += " status=[" + strings.Join(lines, "; ") + "]"
+		}
+	}
+	return status
+}
+
+func linuxProcState(pid int) (state byte, ppid, pgrp int, ok bool) {
+	raw, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return 0, 0, 0, false
+	}
+	return parseProcStat(raw)
+}
+
+func parseProcStat(raw []byte) (state byte, ppid, pgrp int, ok bool) {
+	s := string(raw)
+	rparen := strings.LastIndex(s, ")")
+	if rparen < 0 || rparen+2 >= len(s) {
+		return 0, 0, 0, false
+	}
+	fields := strings.Fields(s[rparen+2:])
+	if len(fields) < 3 || len(fields[0]) != 1 {
+		return 0, 0, 0, false
+	}
+	ppid, _ = strconv.Atoi(fields[1])
+	pgrp, _ = strconv.Atoi(fields[2])
+	return fields[0][0], ppid, pgrp, true
 }

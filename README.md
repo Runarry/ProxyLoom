@@ -1,6 +1,6 @@
 # ProxyLoom · 织流
 
-自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。当前实现 **M0 第四窗口（T-001～003 基座，T-023 内核锁，T-024 编译骨架，T-025～027 Trojan TCP/TLS 原生 Emit，T-040 最小执行器，T-053 隔离夹具）**：可以运行空 API、中文工程页、空 Runner 和 PostgreSQL 迁移入口；已锁定三内核官方 linux 候选，并能把同一份冻结 Node/Chain IR 编译成 Xray／sing-box／Mihomo 完整配置后交给锁定内核检查。还没有登录、节点 CRUD、订阅发布或真实链路验收。全部内核能力为 `unverified`。
+自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。当前实现 **M0 第五窗口（T-001～003 基座，T-023 内核锁，T-024 编译骨架，T-025～027 Trojan TCP/TLS 原生 Emit，T-040 最小执行器，T-053 隔离夹具，T-028 linux/amd64 夹具链路）**：可以运行空 API、中文工程页、空 Runner 和 PostgreSQL 迁移入口；已锁定三内核官方 linux 候选，并能把同一份冻结 Node/Chain IR 编译成 Xray／sing-box／Mihomo 完整配置，在隔离夹具中经锁定内核检查并走 A→B 探测。还没有登录、节点 CRUD、订阅发布或 G0 人工验收。全部内核能力为 `unverified`。
 
 ## 启动开发环境
 
@@ -40,6 +40,8 @@ Linux（或具备 CGO 编译器的 Windows）可运行 `node scripts/check.mjs`�
 
 Windows 未安装 CGO 编译器时，使用 `docker build -f deploy/Dockerfile.check .` 在锁定的 Linux 工具链中运行同一检查入口；源码只进入开发检查镜像，秘密目录被构建上下文排除。
 
+锁定内核配置检查：`node scripts/verify-compile-exec.mjs`。隔离 Compose 烟测：`node scripts/verify-isolation-compose.mjs`。真实链路矩阵：`node scripts/verify-live-chain.mjs`（临时 Linux 容器，不关闭 TLS 校验）。这些不把能力标为 `verified`，也不代替 G0 人工评审。
+
 受限环境可以把 `GOPATH`、`GOMODCACHE`、`GOCACHE` 分别放在仓库 `.cache/gopath`、`.cache/gomod`、`.cache/go-build`；不要关闭 Go 校验数据库或 TLS 校验来绕过缓存权限。
 
 ## 工程与接口
@@ -51,7 +53,8 @@ Windows 未安装 CGO 编译器时，使用 `docker build -f deploy/Dockerfile.c
 - IR：本地嵌入 JSON Schema v1、Go 类型与语义校验；两跳具体节点、严格字段、稳定引用、冻结快照。接口与例子见 `docs/ir-contract.md`。
 - 内核锁：`compat/cores.lock.yaml` 固定 Xray／sing-box／Mihomo 的 linux amd64 与 arm64 摘要；`adapter_version` 为 `0.1.0-m0-native`。`internal/capability` 在版本、摘要或架构不符时拒绝。能力保持 unverified。
 - 编译：`internal/compiler` 复用 `Prepare` 后由三家族 Emit 输出完整原生配置。当前只映射 Trojan／native_tcp／TLS；`node scripts/verify-compile-exec.mjs` 用锁定 linux/amd64 内核检查生成字节。
-- 隔离夹具：`internal/isolation` 与 `deploy/compose.isolation.yaml` 仅用于测试，不随开发 Compose 启动。
-- 管理 API、Runner mTLS/队列、发布和真实链路分别由后续任务提供；未知 `/api`、`/internal`、`/s` 路径不会返回前端成功页面。
+- 隔离夹具：`internal/isolation` 与 `deploy/compose.isolation.yaml` 仅用于测试，不随开发 Compose 启动。容器烟测：`node scripts/verify-isolation-compose.mjs`。
+- 真实链路（T-028）：`node scripts/verify-live-chain.mjs` 在临时 Linux 容器中冻结夹具地址、Compile、校验并经回环入口探测。不关闭 TLS 校验。G0 待人工评审。
+- 管理 API、Runner mTLS/队列和发布分别由后续任务提供；未知 `/api`、`/internal`、`/s` 路径不会返回前端成功页面。
 
 需求依据、范围与 ADR 见 `docs/baseline/README.md`。机器任务清单为 `docs/PLAN.tasks.json`，执行主入口为 `docs/PLAN.md`。逐任务证据在 `docs/evidence/`，首轮完成不代表 G0 或三内核兼容验证通过。

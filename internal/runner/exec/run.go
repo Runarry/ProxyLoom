@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	ose "os/exec"
@@ -148,9 +149,29 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 	limit := &limitBuffer{limit: opts.LogLimit}
 	cmd.Stdout = limit
 	cmd.Stderr = limit
-	if err := cmd.Start(); err != nil {
+	prepareReaper()
+	liveMu.Lock()
+	inFlight++
+	err = cmd.Start()
+	if err != nil {
+		inFlight--
+		liveMu.Unlock()
 		return Result{}, err
 	}
+	pid := cmd.Process.Pid
+	if pid > 0 {
+		livePids[pid] = struct{}{}
+	}
+	liveMu.Unlock()
+	defer func() {
+		liveMu.Lock()
+		delete(livePids, pid)
+		if inFlight > 0 {
+			inFlight--
+		}
+		liveMu.Unlock()
+		reapOrphans()
+	}()
 	done := make(chan error, 1)
 	go func() { done <- cmd.Wait() }()
 	result := Result{}
@@ -168,6 +189,7 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 			}
 		case <-time.After(killGrace):
 			killProcess(cmd)
+			reapOrphans()
 			err := <-done
 			if result.ExitCode == 0 {
 				result.ExitCode = exitCode(err)
@@ -242,4 +264,15 @@ func (l *limitBuffer) Write(p []byte) (int, error) {
 
 func (l *limitBuffer) Bytes() []byte {
 	return append([]byte(nil), l.buf.Bytes()...)
+}
+
+var (
+	liveMu   sync.Mutex
+	livePids = map[int]struct{}{}
+	inFlight int
+)
+
+func isLivePidLocked(pid int) bool {
+	_, ok := livePids[pid]
+	return ok
 }

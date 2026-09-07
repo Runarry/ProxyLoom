@@ -536,7 +536,13 @@ T-040 提供 `internal/runner/exec` 与三家族固定 argv 适配器。默认�
 
 `Compile` 复用 `Prepare` 后接入三家族原生 Emit。`adapter_version` 为 `0.1.0-m0-native`。受控范围为 Trojan／native_tcp／TLS 的独立 A、独立 B 与 A→B。链映射为 Xray `dialerProxy`、sing-box `detour`、Mihomo `dialer-proxy`；无法表达的字段与拨号冲突失败关闭。能力保持 `unverified`。契约见 `docs/compiler-contract.md` 与 `docs/adr/0004-native-emit.md`。
 
-锁定 linux/amd64 核对编译器生成字节做了正负配置检查与回环启动回收；手写配置回归仍由 `scripts/verify-core-exec.mjs` 执行。证据位于 `docs/evidence/T-025/`、`T-026/`、`T-027/`。T-028 真实链路与 G0 未开始。
+锁定 linux/amd64 核对编译器生成字节做了正负配置检查与回环启动回收；手写配置回归仍由 `scripts/verify-core-exec.mjs` 执行。证据位于 `docs/evidence/T-025/`、`T-026/`、`T-027/`。T-028 真实链路与 G0 见 §12.7。
+
+## 12.7 第五窗口实施状态（2026-09-07）
+
+本轮实施 PLAN §12.1 第 6 步：T-028。实现与 linux/amd64 夹具链路检查已完成，状态 `in_review`；T-001～T-003、T-023～T-027、T-040、T-053 保持 `in_review`，其余仍为 `not_started`。`in_review` 不代替人工评审、任务 done 或 G0 通过。上游 T-025～027／T-040／T-053 仍视为待评审依赖。
+
+`scripts/verify-live-chain.mjs` 冻结夹具地址后 `Compile`，同一原生字节经锁定内核检查并经回环入口探测隔离 HTTP 目标。三内核覆盖正向链、绕行 `forbidden_source`、原拓扑反向失败、独立反向拓扑、节点复用、停第一跳／末跳／整链、生命周期与观察反例。测试 CA 安装在临时容器系统信任中，未关闭 TLS 校验。`scripts/verify-isolation-compose.mjs` 补齐 T-053 容器烟测。证据位于 `docs/evidence/T-028/`。能力仍全部 `unverified`，G0 待人工评审，不进入 M1。
 
 # 13. M4 增强队列与进入条件
 
@@ -583,6 +589,8 @@ M4 不计入 60 项 P0 任务和 198–324 人日基础估算。以下按功能�
 实施记录：2026-09-07，第三窗口完成 T-024 公共编译骨架与 T-040 最小执行框架，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。能力仍全部 `unverified`，G0 仍未验收。
 
 实施记录：2026-09-07，第四窗口完成 T-025／T-026／T-027 三目标 Trojan TCP/TLS 原生 Emit、正负 Golden 与锁定 linux/amd64 内核检查，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。能力仍全部 `unverified`，G0 仍未验收。
+
+实施记录：2026-09-07，第五窗口完成 T-028 真实链路与不绕行验证（linux/amd64 Trojan TCP/TLS 夹具），状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。能力仍全部 `unverified`，G0 仍未验收，不进入 M1。
 
 ## 14.3 参考文档与引用方式
 

@@ -56,6 +56,53 @@ func (l *Log) Count(result string) int {
 	return n
 }
 
+func (l *Log) CountRole(role, result string) int {
+	n := 0
+	for _, event := range l.Events() {
+		if event.Role == role && event.Result == result {
+			n++
+		}
+	}
+	return n
+}
+
+func (l *Log) Seq() int {
+	events := l.Events()
+	if len(events) == 0 {
+		return 0
+	}
+	return events[len(events)-1].Seq
+}
+
+func (l *Log) After(seq int) []Event {
+	var out []Event
+	for _, event := range l.Events() {
+		if event.Seq > seq {
+			out = append(out, event)
+		}
+	}
+	return out
+}
+
+func (l *Log) Reset() {
+	if l == nil {
+		return
+	}
+	l.mu.Lock()
+	l.events = nil
+	l.mu.Unlock()
+}
+
+func (l *Log) Last(role, result string) (Event, bool) {
+	events := l.Events()
+	for i := len(events) - 1; i >= 0; i-- {
+		if events[i].Role == role && events[i].Result == result {
+			return events[i], true
+		}
+	}
+	return Event{}, false
+}
+
 func (Event) Format(state fmt.State, _ rune) { _, _ = fmt.Fprint(state, "isolation.Event{[REDACTED]}") }
 func (Event) LogValue() slog.Value           { return slog.StringValue("isolation.Event{[REDACTED]}") }
 

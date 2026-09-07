@@ -1,0 +1,33 @@
+{
+  "task": "T-028",
+  "adapter_version": "0.1.0-m0-native",
+  "goos": "linux",
+  "goarch": "amd64",
+  "cores_root_set": true,
+  "results": [
+    {"family": "xray", "scenario": "forward_chain", "status": "pass"},
+    {"family": "xray", "scenario": "bypass_forbidden_source", "status": "pass"},
+    {"family": "xray", "scenario": "direction_swap_original", "status": "pass"},
+    {"family": "xray", "scenario": "direction_swap_reverse", "status": "pass"},
+    {"family": "xray", "scenario": "node_reuse", "status": "pass"},
+    {"family": "xray", "scenario": "fail_closed", "status": "pass"},
+    {"family": "xray", "scenario": "lifecycle", "status": "pass"},
+    {"family": "xray", "scenario": "observation_detects_bypass", "status": "pass"},
+    {"family": "sing-box", "scenario": "forward_chain", "status": "pass"},
+    {"family": "sing-box", "scenario": "bypass_forbidden_source", "status": "pass"},
+    {"family": "sing-box", "scenario": "direction_swap_original", "status": "pass"},
+    {"family": "sing-box", "scenario": "direction_swap_reverse", "status": "pass"},
+    {"family": "sing-box", "scenario": "node_reuse", "status": "pass"},
+    {"family": "sing-box", "scenario": "fail_closed", "status": "pass"},
+    {"family": "sing-box", "scenario": "lifecycle", "status": "pass"},
+    {"family": "sing-box", "scenario": "observation_detects_bypass", "status": "pass"},
+    {"family": "mihomo", "scenario": "forward_chain", "status": "pass"},
+    {"family": "mihomo", "scenario": "bypass_forbidden_source", "status": "pass"},
+    {"family": "mihomo", "scenario": "direction_swap_original", "status": "pass"},
+    {"family": "mihomo", "scenario": "direction_swap_reverse", "status": "pass"},
+    {"family": "mihomo", "scenario": "node_reuse", "status": "pass"},
+    {"family": "mihomo", "scenario": "fail_closed", "status": "pass"},
+    {"family": "mihomo", "scenario": "lifecycle", "status": "pass"},
+    {"family": "mihomo", "scenario": "observation_detects_bypass", "status": "pass"}
+  ]
+}

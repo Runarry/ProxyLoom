@@ -37,6 +37,7 @@ func startTarget(bind string, tlsConfig *tls.Config, log *Log) (*Target, error) 
 	if tlsConfig != nil {
 		listener = tls.NewListener(listener, tlsConfig)
 	}
+	listener = &recordingListener{Listener: listener, log: log, role: "target"}
 	target := &Target{Addr: listener.Addr().String(), listener: listener, Log: log}
 	scheme := "http"
 	if tlsConfig != nil {
@@ -57,13 +58,38 @@ func startTarget(bind string, tlsConfig *tls.Config, log *Log) (*Target, error) 
 
 func (t *Target) handleProbe(w http.ResponseWriter, r *http.Request) {
 	id := t.seq.Add(1)
+	reqID := r.Header.Get("X-Request-ID")
+	if reqID == "" {
+		reqID = formatSeq(id)
+	}
 	if t.Log != nil {
-		t.Log.Record(Event{Role: "target", Remote: r.RemoteAddr, Result: "ok", RequestID: formatSeq(id)})
+		t.Log.Record(Event{Role: "target", Remote: r.RemoteAddr, Result: "ok", RequestID: reqID})
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true, "request_id": id, "remote_addr": r.RemoteAddr})
+	body := map[string]any{"ok": true, "request_id": id, "remote_addr": r.RemoteAddr}
+	if clientID := r.Header.Get("X-Request-ID"); clientID != "" {
+		body["client_request_id"] = clientID
+	}
+	_ = json.NewEncoder(w).Encode(body)
+}
+
+type recordingListener struct {
+	net.Listener
+	log  *Log
+	role string
+}
+
+func (l *recordingListener) Accept() (net.Conn, error) {
+	conn, err := l.Listener.Accept()
+	if err != nil {
+		return nil, err
+	}
+	if l.log != nil {
+		l.log.Record(Event{Role: l.role, Remote: conn.RemoteAddr().String(), Result: "accept"})
+	}
+	return conn, nil
 }
 
 func (t *Target) Close() error {

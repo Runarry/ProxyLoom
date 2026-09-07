@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,6 +96,132 @@ func TestChainSucceedsAndDirectBIsBlocked(t *testing.T) {
 	}
 	if logTarget.Count("ok") != before {
 		t.Fatal("stopping A produced an implicit direct success")
+	}
+}
+
+func TestChainExitSourceIsLastHopAndDirectIsObservable(t *testing.T) {
+	ca, err := isolation.NewTestCA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	leafA, err := ca.Issue("a.proxyloom.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	leafB, err := ca.Issue("b.proxyloom.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ipA := net.IPv4(127, 0, 1, 1)
+	ipB := net.IPv4(127, 0, 2, 1)
+	logA, logB, logTarget := &isolation.Log{}, &isolation.Log{}, &isolation.Log{}
+	target, err := isolation.StartHTTPTarget("127.0.9.1:0", logTarget)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer target.Close()
+	proxyB, err := isolation.StartTrojan(isolation.ProxyConfig{
+		Bind: net.JoinHostPort(ipB.String(), "0"), Host: "b.proxyloom.test", Password: "EXAMPLE_ONLY_B",
+		Certificate: leafB.Certificate, AllowFrom: []net.IP{ipA}, DialLocal: ipB, Role: "b", Log: logB,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxyB.Close()
+	proxyA, err := isolation.StartTrojan(isolation.ProxyConfig{
+		Bind: net.JoinHostPort(ipA.String(), "0"), Host: "a.proxyloom.test", Password: "EXAMPLE_ONLY_A",
+		Certificate: leafA.Certificate, DialLocal: ipA, Role: "a", Log: logA,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxyA.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	targetHost, targetPort, err := net.SplitHostPort(target.Addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clientA := isolation.ClientConfig{Address: proxyA.Addr, ServerName: "a.proxyloom.test", Password: "EXAMPLE_ONLY_A", RootCAs: ca.Pool}
+	clientB := isolation.ClientConfig{Address: proxyB.Addr, ServerName: "b.proxyloom.test", Password: "EXAMPLE_ONLY_B", RootCAs: ca.Pool}
+	conn, err := isolation.DialChain(ctx, clientA, clientB, targetHost, atoi(t, targetPort))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := isolation.ProbeHTTPWithID(conn, "target.proxyloom.test", "chain-source")
+	conn.Close()
+	if err != nil || !bytes.Contains(body, []byte(`"ok":true`)) || !bytes.Contains(body, []byte("chain-source")) {
+		t.Fatalf("chain probe failed: %v %s", err, body)
+	}
+	okEvent, ok := logTarget.Last("target", "ok")
+	if !ok {
+		t.Fatal("target missing ok event")
+	}
+	if isolation.RemoteIP(okEvent.Remote) != ipB.String() {
+		t.Fatalf("chain exit source %q, want B %s", okEvent.Remote, ipB)
+	}
+
+	directTarget, err := net.DialTimeout("tcp", target.Addr, 2*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	directBody, err := isolation.ProbeHTTPWithID(directTarget, "target.proxyloom.test", "direct-source")
+	directTarget.Close()
+	if err != nil || !bytes.Contains(directBody, []byte(`"ok":true`)) {
+		t.Fatalf("direct probe failed: %v %s", err, directBody)
+	}
+	foundDirect := false
+	for _, event := range logTarget.After(okEvent.Seq) {
+		if event.Result == "ok" && isolation.RemoteIP(event.Remote) != ipB.String() {
+			foundDirect = true
+		}
+	}
+	if !foundDirect {
+		t.Fatal("observation did not record a non-B direct target source")
+	}
+}
+
+func TestListenEventsServesHealthAndReset(t *testing.T) {
+	log := &isolation.Log{}
+	log.Record(isolation.Event{Role: "b", Result: "forbidden_source", Remote: "127.0.0.1:9"})
+	server, err := isolation.ListenEvents("127.0.0.1:0", log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	client := &http.Client{Timeout: 3 * time.Second, Transport: &http.Transport{Proxy: nil, DisableKeepAlives: true}}
+	health, err := client.Get("http://" + server.Addr + "/health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer health.Body.Close()
+	if health.StatusCode != 200 {
+		t.Fatalf("health %d", health.StatusCode)
+	}
+	events, err := client.Get("http://" + server.Addr + "/events")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer events.Body.Close()
+	body, err := io.ReadAll(events.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(body, []byte(`"forbidden_source"`)) || bytes.Contains(body, []byte("EXAMPLE_ONLY")) {
+		t.Fatalf("events payload %s", body)
+	}
+	req, err := http.NewRequest(http.MethodPost, "http://"+server.Addr+"/reset", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if log.Count("forbidden_source") != 0 {
+		t.Fatal("reset did not clear events")
 	}
 }
 

@@ -1,0 +1,10 @@
+{
+  "project": "proxyloom-isolation-t028",
+  "network": "proxyloom-isolation-t028_isolation",
+  "subnet": "172.30.253.0/24",
+  "phases": {
+    "startup": "pass",
+    "bypass": "pass",
+    "after_stop_a": "pass"
+  }
+}

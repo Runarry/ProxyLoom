@@ -68,4 +68,4 @@ T-024 提供 `Prepare`／确定性标签与规范 Plan。T-025～027 的 `Compil
 
 `fixtures/ir/manifest.json` 登记独立 Schema 和 Go 期望，包含六类节点、Trojan A/B/A→B、三目标冻结样例与结构/语义反例。所有 `.invalid` 域名、认证、UUID、版本和构建摘要均为离线合成内容，不能当真实构建锁或连接证据。
 
-本轮验证命令：`go test ./internal/ir ./internal/adapter ./internal/compiler ./schemas`；静态检查：`go vet ./internal/ir ./internal/adapter ./internal/compiler ./schemas`。IR 测试覆盖严格字段/联合、缺省与 false、整数精度、Unicode、默认日志脱敏、引用/修订/epoch/闭包、输入及读出别名 mutation、只排序集合和独立 Schema-vs-Go 夹具。T-025～027 覆盖 Trojan TCP/TLS 原生映射、链方向、标签隔离与锁定内核配置检查。真实链路方向/无绕行、数据库事务冻结与发布测试尚未执行，属于后续任务。
+本轮验证命令：`go test ./internal/ir ./internal/adapter ./internal/compiler ./schemas`；静态检查：`go vet ./internal/ir ./internal/adapter ./internal/compiler ./schemas`。IR 测试覆盖严格字段/联合、缺省与 false、整数精度、Unicode、默认日志脱敏、引用/修订/epoch/闭包、输入及读出别名 mutation、只排序集合和独立 Schema-vs-Go 夹具。T-025～027 覆盖 Trojan TCP/TLS 原生映射、链方向、标签隔离与锁定内核配置检查。T-028 在 linux/amd64 隔离夹具上对同一范围做了真实链路与不绕行探测；能力仍为 `unverified`。数据库事务冻结与发布测试尚未执行。

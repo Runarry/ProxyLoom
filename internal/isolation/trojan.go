@@ -300,10 +300,17 @@ func relay(a, b net.Conn, aReader io.Reader) {
 }
 
 func ProbeHTTP(conn net.Conn, host string) ([]byte, error) {
+	return ProbeHTTPWithID(conn, host, "")
+}
+
+func ProbeHTTPWithID(conn net.Conn, host, requestID string) ([]byte, error) {
 	if host == "" {
 		host = "target.proxyloom.test"
 	}
 	request := fmt.Sprintf("GET /probe HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", host)
+	if requestID != "" {
+		request = fmt.Sprintf("GET /probe HTTP/1.1\r\nHost: %s\r\nX-Request-ID: %s\r\nConnection: close\r\n\r\n", host, requestID)
+	}
 	if _, err := io.WriteString(conn, request); err != nil {
 		return nil, err
 	}

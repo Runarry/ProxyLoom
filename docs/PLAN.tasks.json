@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "T-001～T-003、T-023、T-024、T-040、T-053 保持 in_review。第四窗口 T-025、T-026、T-027 实现与锁定内核检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。T-028 及其余任务保留 not_started。",
+  "status_note": "T-001～T-003、T-023、T-024、T-025、T-026、T-027、T-040、T-053 保持 in_review。第五窗口 T-028 实现与 linux/amd64 夹具链路检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。其余任务保留 not_started。",
   "tasks": [
     {
       "id": "T-001",
@@ -509,7 +509,7 @@
         "T-053"
       ],
       "acceptance": "三内核方向正例通过、绕过 A 的反例失败；意外直连计数为 0；报告关联构建和测试配置。\nAC-07～AC-10（原型）；证据报告",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-029",

@@ -15,6 +15,10 @@ func sysProcAttr() *syscall.SysProcAttr {
 	return &syscall.SysProcAttr{CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP}
 }
 
+func prepareReaper() {}
+
+func reapOrphans() {}
+
 func terminate(cmd *ose.Cmd) {
 	killTree(cmd)
 }

@@ -35,4 +35,4 @@
 
 `fixtures/compiler/frozen-chain-a-b.json` 钉真实 linux/amd64 构建。Plan Golden：`fixtures/compiler/golden/xray-chain-a-b.json`（无节点秘密）。原生 Golden：`xray-native-chain-a-b.json`、`singbox-native-chain-a-b.json`、`mihomo-native-chain-a-b.yaml`（含合成夹具密码 `EXAMPLE_ONLY_*`）。同一输入连续 Compile 100 次字节一致。
 
-验证：`go test ./internal/compiler ./internal/adapter/...`。锁定真实内核正负检查与最小启动回收：`node scripts/verify-compile-exec.mjs`（先回归 `verify-core-exec.mjs` 手写配置，再检查本轮生成字节）。真实链路、绕行反例与 G0 属于 T-028。
+验证：`go test ./internal/compiler ./internal/adapter/...`。锁定真实内核正负检查与最小启动回收：`node scripts/verify-compile-exec.mjs`（先回归 `verify-core-exec.mjs` 手写配置，再检查本轮生成字节）。真实链路与绕行反例：`node scripts/verify-live-chain.mjs`（T-028）；G0 仍需人工评审。
