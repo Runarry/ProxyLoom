@@ -1,0 +1,53 @@
+# 本地环境与秘密；只保留无真实凭证的示例
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.template
+**/secrets/*
+!**/secrets/*.example
+!**/secrets/README.md
+
+# Go 构建与测试产物
+/bin/
+/proxyloom-server/bin/
+/proxyloom-runner/bin/
+/proxyloom-server/proxyloom-server
+/proxyloom-runner/proxyloom-runner
+*.exe
+*.test
+/coverage.out
+/proxyloom-server/coverage.out
+/proxyloom-runner/coverage.out
+/proxyloom-server/coverage/
+/proxyloom-runner/coverage/
+
+# Vue / Vite 依赖与生成产物；保留依赖锁文件
+node_modules/
+.pnpm-store/
+/proxyloom-web/dist/
+/proxyloom-web/.vite/
+/proxyloom-web/coverage/
+/proxyloom-web/playwright-report/
+/proxyloom-web/test-results/
+*.tsbuildinfo
+
+# 本地日志；保留夹具和脱敏验收证据
+*.log
+!**/fixtures/**/*.log
+!**/testdata/**/*.log
+!docs/evidence/**/*.log
+
+# 编辑器与系统临时文件
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
