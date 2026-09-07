@@ -119,7 +119,7 @@ function assetURL(candidate) {
 
 async function download(url, dest) {
   const response = await fetch(url, {
-    headers: { 'User-Agent': 'ProxyLoom-pin-cores/0.1.0-m0-skeleton', Accept: 'application/octet-stream' },
+    headers: { 'User-Agent': 'ProxyLoom-pin-cores/0.1.0-m0-native', Accept: 'application/octet-stream' },
     redirect: 'follow',
   });
   if (!response.ok) throw new Error(`download failed ${response.status} for ${candidateLabel(url)}`);

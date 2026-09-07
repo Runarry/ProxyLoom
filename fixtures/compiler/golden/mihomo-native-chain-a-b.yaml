@@ -1,0 +1,36 @@
+mixed-port: 17803
+bind-address: 127.0.0.1
+allow-lan: false
+mode: rule
+log-level: silent
+external-controller: ""
+ipv6: false
+geodata-mode: false
+geo-auto-update: false
+find-process-mode: "off"
+proxies:
+  - name: c_a6f71bf6_h2
+    type: trojan
+    server: b.example.invalid
+    port: 443
+    password: EXAMPLE_ONLY_B
+    sni: b.example.invalid
+    alpn:
+      - h2
+      - http/1.1
+    skip-cert-verify: false
+    dialer-proxy: c_a6f71bf6_h1
+  - name: c_a6f71bf6_h1
+    type: trojan
+    server: a.example.invalid
+    port: 443
+    password: EXAMPLE_ONLY_A
+    network: tcp
+    sni: a.example.invalid
+    alpn:
+      - h2
+      - http/1.1
+    skip-cert-verify: false
+    udp: false
+rules:
+  - MATCH,c_a6f71bf6_h2

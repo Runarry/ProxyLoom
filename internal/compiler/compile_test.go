@@ -24,19 +24,16 @@ func TestCompileChainPlanIsDeterministicAndNameIndependent(t *testing.T) {
 	if !ok {
 		t.Fatal("missing xray target")
 	}
-	first, diags, err := compiler.Compile(context.Background(), input, target)
+	graph, diags, err := compiler.Prepare(input, target)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if first.ContentType != PlanContentType || first.SnapshotID != "ffffffff-ffff-4fff-8fff-ffffffffffff" {
-		t.Fatalf("artifact identity %+v", first)
 	}
 	if !hasInfo(diags, ir.CapabilityUnverified) {
 		t.Fatal("unverified capability must be recorded")
 	}
-	plan := mustPlan(t, first.Bytes)
+	plan := BuildPlan(graph)
 	if plan.CapabilityState != capability.Unverified {
-		t.Fatal("skeleton must not mark capabilities verified")
+		t.Fatal("compiler must not mark capabilities verified")
 	}
 	if plan.Target.CoreBuildID != target.CoreBuildID || plan.Target.AdapterVersion != capability.AdapterVersion {
 		t.Fatal("plan target drifted from frozen pin")
@@ -63,6 +60,24 @@ func TestCompileChainPlanIsDeterministicAndNameIndependent(t *testing.T) {
 	}
 	if h2.DialerTag != h1.Tag || h1.DialerTag != "" {
 		t.Fatalf("h2 must dial h1: %+v %+v", h1, h2)
+	}
+	payload, err := marshalPlan(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(payload, []byte("EXAMPLE_ONLY")) {
+		t.Fatal("compile plan leaked fixture secrets")
+	}
+
+	first, _, err := compiler.Compile(context.Background(), input, target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.ContentType != "application/json" || first.SnapshotID != "ffffffff-ffff-4fff-8fff-ffffffffffff" {
+		t.Fatalf("artifact identity %+v", first)
+	}
+	if !bytes.Contains(first.Bytes, []byte(`"dialerProxy": "`+h1.Tag+`"`)) && !bytes.Contains(first.Bytes, []byte(`"dialerProxy":"`+h1.Tag+`"`)) {
+		t.Fatal("xray chain missing dialerProxy to h1")
 	}
 
 	renamed := mustFrozen(t, "frozen-chain-a-b.json")
@@ -103,18 +118,22 @@ func TestCompileChainPlanIsDeterministicAndNameIndependent(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		familyPlan := mustPlan(t, artifact.Bytes)
+		familyGraph, _, err := compiler.Prepare(input, familyTarget)
+		if err != nil {
+			t.Fatal(err)
+		}
+		familyPlan := BuildPlan(familyGraph)
 		if familyPlan.Chains[0].TagH1 != plan.Chains[0].TagH1 || familyPlan.Chains[0].TagH2 != plan.Chains[0].TagH2 {
 			t.Fatal("labels must be independent of core family")
 		}
 		if familyPlan.Target.Key != key || familyPlan.Target.CoreFamily != familyTarget.CoreFamily {
 			t.Fatal("family pin missing from plan")
 		}
+		if len(artifact.Bytes) == 0 {
+			t.Fatal("native artifact empty")
+		}
 	}
 
-	if bytes.Contains(first.Bytes, []byte("EXAMPLE_ONLY")) {
-		t.Fatal("compile plan leaked fixture secrets")
-	}
 	var logBuf bytes.Buffer
 	slog.New(slog.NewJSONHandler(&logBuf, nil)).Info("graph", "graph", mustGraph(t, compiler, input, target), "artifact", first)
 	if strings.Contains(logBuf.String(), "EXAMPLE_ONLY") {
@@ -134,11 +153,11 @@ func TestIndependentMembersKeepOriginalNodesUntaggedFromChain(t *testing.T) {
 		t.Fatal(err)
 	}
 	target, _ := input.Target("xray-default")
-	artifact, _, err := compiler.Compile(context.Background(), input, target)
+	graph, _, err := compiler.Prepare(input, target)
 	if err != nil {
 		t.Fatal(err)
 	}
-	plan := mustPlan(t, artifact.Bytes)
+	plan := BuildPlan(graph)
 	if len(plan.Outbounds) != 4 {
 		t.Fatalf("expected two independent nodes and two chain hops, got %d", len(plan.Outbounds))
 	}
@@ -227,7 +246,11 @@ func TestGoldenChainPlan(t *testing.T) {
 	compiler := mustCompiler(t)
 	input := mustFrozen(t, "frozen-chain-a-b.json")
 	target, _ := input.Target("xray-default")
-	artifact, _, err := compiler.Compile(context.Background(), input, target)
+	graph, _, err := compiler.Prepare(input, target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload, err := marshalPlan(BuildPlan(graph))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -236,7 +259,7 @@ func TestGoldenChainPlan(t *testing.T) {
 		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(goldenPath, artifact.Bytes, 0o644); err != nil {
+		if err := os.WriteFile(goldenPath, payload, 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -244,8 +267,8 @@ func TestGoldenChainPlan(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(want, artifact.Bytes) {
-		t.Fatalf("golden mismatch\nwant %s\ngot  %s", want, artifact.Bytes)
+	if !bytes.Equal(want, payload) {
+		t.Fatalf("golden mismatch\nwant %s\ngot  %s", want, payload)
 	}
 }
 
@@ -278,15 +301,6 @@ func readIR(t *testing.T, name string) []byte {
 		t.Fatal(err)
 	}
 	return data
-}
-
-func mustPlan(t *testing.T, data []byte) Plan {
-	t.Helper()
-	var plan Plan
-	if err := json.Unmarshal(data, &plan); err != nil {
-		t.Fatal(err)
-	}
-	return plan
 }
 
 func mustGraph(t *testing.T, compiler *Compiler, input ir.FrozenInput, target ir.Target) Graph {

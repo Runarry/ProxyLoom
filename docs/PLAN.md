@@ -528,7 +528,15 @@ T-053 提供 `internal/isolation` Trojan TLS 代理与 HTTP 目标、`deploy/com
 
 T-024 提供 `internal/compiler`：纯函数 Compile/Prepare、确定性 `n_`/`c_` 标签、规范 Plan JSON、最小 Golden（含 100 次字节一致）。`adapter_version` 为 `0.1.0-m0-skeleton`。能力保持 `unverified`；骨架允许记录该状态，不生成三内核原生配置。契约见 `docs/compiler-contract.md` 与 `docs/adr/0003-compile-and-exec-skeleton.md`。
 
-T-040 提供 `internal/runner/exec` 与三家族固定 argv 适配器。默认测试用本机 helper 覆盖环境、超时、取消与路径拒绝。真实 linux/amd64 内核正负 `config_validate` 与回环启动回收由 `scripts/verify-core-exec.mjs` 在锁定 Debian 镜像、`--network none` 下执行。内核仍不进入 Runner 镜像。证据位于 `docs/evidence/T-024/`、`T-040/`。T-025～T-027 与 G0 仍未开始。
+T-040 提供 `internal/runner/exec` 与三家族固定 argv 适配器。默认测试用本机 helper 覆盖环境、超时、取消与路径拒绝。真实 linux/amd64 内核正负 `config_validate` 与回环启动回收由 `scripts/verify-core-exec.mjs` 在锁定 Debian 镜像、`--network none` 下执行。内核仍不进入 Runner 镜像。证据位于 `docs/evidence/T-024/`、`T-040/`。
+
+## 12.6 第四窗口实施状态（2026-09-07）
+
+本轮实施 PLAN §12.1 第 5 步：T-025、T-026、T-027。三项实现及本地／锁定内核检查已完成，状态为 `in_review`；T-001～T-003、T-023、T-024、T-040、T-053 保持 `in_review`，T-028 及其余仍为 `not_started`。`in_review` 不代替人工评审、任务 done 或 G0 通过。T-024／T-040／T-053 仍视为待评审依赖，不当作已验收。
+
+`Compile` 复用 `Prepare` 后接入三家族原生 Emit。`adapter_version` 为 `0.1.0-m0-native`。受控范围为 Trojan／native_tcp／TLS 的独立 A、独立 B 与 A→B。链映射为 Xray `dialerProxy`、sing-box `detour`、Mihomo `dialer-proxy`；无法表达的字段与拨号冲突失败关闭。能力保持 `unverified`。契约见 `docs/compiler-contract.md` 与 `docs/adr/0004-native-emit.md`。
+
+锁定 linux/amd64 核对编译器生成字节做了正负配置检查与回环启动回收；手写配置回归仍由 `scripts/verify-core-exec.mjs` 执行。证据位于 `docs/evidence/T-025/`、`T-026/`、`T-027/`。T-028 真实链路与 G0 未开始。
 
 # 13. M4 增强队列与进入条件
 
@@ -573,6 +581,8 @@ M4 不计入 60 项 P0 任务和 198–324 人日基础估算。以下按功能�
 实施记录：2026-09-07，第二窗口完成 T-023 内核候选锁与 T-053 隔离夹具，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。G0 仍未验收。
 
 实施记录：2026-09-07，第三窗口完成 T-024 公共编译骨架与 T-040 最小执行框架，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。能力仍全部 `unverified`，G0 仍未验收。
+
+实施记录：2026-09-07，第四窗口完成 T-025／T-026／T-027 三目标 Trojan TCP/TLS 原生 Emit、正负 Golden 与锁定 linux/amd64 内核检查，状态 `in_review`；不改变 60 项 ID、范围、直接依赖和估算。能力仍全部 `unverified`，G0 仍未验收。
 
 ## 14.3 参考文档与引用方式
 

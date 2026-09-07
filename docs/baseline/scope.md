@@ -25,8 +25,8 @@
 | 外部网络测试许可 | 未提供；本轮不执行外部节点连接或测速 | TL／OPS；任何外部网络演示前取得明确许可 |
 | 默认后续夹具 | T-053 已提供 `internal/isolation` Trojan TLS 代理、HTTP 目标与 `deploy/compose.isolation.yaml`；合成凭证、进程内测试 CA、test-only 标签；不进入开发／生产默认 | BE-B／QA／OPS；夹具已落地，三内核客户端走夹具仍待 T-025～028 |
 | 生产网络 | Runner 无数据库凭证／全局主密钥；无任意 shell、路径或用户原生配置；网络预算与隔离需后续实现 | BE-B／OPS；T-040～045、054、057 |
-| 内核／客户端 | T-023 已锁定官方非预发布 linux 候选：Xray v26.3.27、sing-box v1.14.0、mihomo v1.19.30（amd64／arm64 哈希见 `compat/cores.lock.yaml`）。`adapter_version` 现为 `0.1.0-m0-skeleton`（T-024）。能力全部 `unverified`；客户端导入未测；arm64 未执行 | BE-A／QA；G0 候选已登记，G3 全证据 |
-| 编译骨架 | T-024 已提供确定性 Plan 编译入口与标签；不输出原生内核配置；unverified 写入 Plan 但不放行发布 | BE-A；T-025～027 再 Emit |
+| 内核／客户端 | T-023 已锁定官方非预发布 linux 候选：Xray v26.3.27、sing-box v1.14.0、mihomo v1.19.30（amd64／arm64 哈希见 `compat/cores.lock.yaml`）。`adapter_version` 现为 `0.1.0-m0-native`（T-025～027）。能力全部 `unverified`；客户端导入未测；arm64 未执行 | BE-A／QA；G0 候选已登记，G3 全证据 |
+| 编译骨架 | T-024 提供确定性 Prepare／标签／Plan；T-025～027 已对 Trojan TCP/TLS 输出三目标完整原生配置并经锁定 linux/amd64 内核正负检查。unverified 写入产物但不放行发布；原生检查通过不等于链路或客户端验证 | BE-A；T-028 再做真实链路，T-029 再补 P0 映射 |
 | 执行框架 | T-040 已提供固定 argv、任务目录、清环境与进程回收；amd64 真实配置检查已在隔离 Debian 容器执行；内核不进 Runner 镜像 | BE-B；T-041 再挂任务协议 |
 | 许可／分发 | 开源及分发方式未指定，不把开发依赖锁当许可证审查 | TL／OPS；T-059、对外分发前 |
 

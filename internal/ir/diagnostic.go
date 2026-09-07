@@ -40,6 +40,8 @@ const (
 	CompileFormatMismatch    DiagnosticCode = "COMPILE_FORMAT_MISMATCH"
 	CompileLabelCollision    DiagnosticCode = "COMPILE_LABEL_COLLISION"
 	CompileUnknownCapability DiagnosticCode = "COMPILE_UNKNOWN_CAPABILITY"
+	CompileUnmappedField     DiagnosticCode = "COMPILE_UNMAPPED_FIELD"
+	CompileDialConflict      DiagnosticCode = "COMPILE_DIAL_CONFLICT"
 )
 
 // FieldPath is an RFC 6901 JSON Pointer (the root is ""). Messages never
@@ -108,7 +110,7 @@ func diagnosticMessage(code DiagnosticCode) string {
 	case CapabilityUnsupported:
 		return "This capability is not adapted for the target and cannot be substituted."
 	case CapabilityUnverified:
-		return "This capability is locked but not verified; the skeleton records it and does not mark it verified."
+		return "This capability is locked but not verified; the compiler records it and does not mark it verified."
 	case CompileTargetMismatch:
 		return "The compile target must equal the frozen target with the same key."
 	case CompileUnknownBuild:
@@ -116,13 +118,17 @@ func diagnosticMessage(code DiagnosticCode) string {
 	case CompileDigestMismatch:
 		return "The frozen core digest does not match the locked build."
 	case CompileAdapterVersion:
-		return "The frozen adapter version does not match the compiler skeleton."
+		return "The frozen adapter version does not match the locked compiler adapter version."
 	case CompileFormatMismatch:
 		return "The frozen output format does not match the core family."
 	case CompileLabelCollision:
 		return "Deterministic labels could not be made unique without a random suffix."
 	case CompileUnknownCapability:
 		return "The node combination is not in the locked P0 capability list."
+	case CompileUnmappedField:
+		return "This field cannot be expressed by the current native adapter and cannot be dropped or rewritten."
+	case CompileDialConflict:
+		return "Chain dialer fields conflict with another outbound dial option and cannot be combined."
 	default:
 		return "The value does not satisfy the v1 contract."
 	}

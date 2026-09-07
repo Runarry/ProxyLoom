@@ -58,7 +58,7 @@ Chain 使用 `hops: [{node_id}, {node_id}]` 和 `failure_policy: "fail_closed"`�
 
 `adapter.Compiler.Compile(ctx, FrozenInput, Target)` 返回 Artifact、Diagnostic 列表与错误。实现必须 Validate 输入，并要求目标与 `input.Target(target.Key)` 完全一致，只依赖冻结内容及固定编译器/构建代码，不读取数据库、网络或当前时间。未知或 `unsupported` 组合必须失败且无 Artifact，不得直接回退。
 
-T-024 覆盖：M0 骨架 Compile（`internal/compiler`，见 `docs/compiler-contract.md` 与 ADR-0003）在构建已锁定且组合列入 P0 时可以产出规范 Plan，并把 locked-but-unverified 记为信息诊断；**发布路径仍必须拒绝 unverified**。T-003 交付时尚未实现 Compile；不要把「Compile 返回 error」当成 unverified 门。
+T-024 提供 `Prepare`／确定性标签与规范 Plan。T-025～027 的 `Compile`（见 `docs/compiler-contract.md` 与 ADR-0004）在构建已锁定且组合列入 P0 时产出完整原生配置，并把 locked-but-unverified 记为信息诊断；无法映射的字段失败关闭。**发布路径仍必须拒绝 unverified**。不要把「Compile 返回 error」当成 unverified 门，也不要把原生配置检查通过当成链路或客户端验证。
 
 `RunnerAdapter`（别名 `CoreAdapter`）提供 Family、ValidateSpec、RunSpec、RedactLog。CommandSpec 只有 registry ExecutableID、参数数组与 Runner 分配的 WorkingDir，不提供 shell 字符串。`CommandSpec.Validate` 检查与 Runner 已知构建/目录一致及无 NUL 参数；它不等于执行器安全验收。T-040 在 `internal/adapter/{xray,singbox,mihomo}` 与 `internal/runner/exec` 落地固定 argv、任务目录、环境白名单和进程回收。Artifact 的 Bytes/ContentHMAC 和 CommandSpec.Args 提供 Clone，避免调用方意外共享可变缓冲区。
 
@@ -68,4 +68,4 @@ T-024 覆盖：M0 骨架 Compile（`internal/compiler`，见 `docs/compiler-cont
 
 `fixtures/ir/manifest.json` 登记独立 Schema 和 Go 期望，包含六类节点、Trojan A/B/A→B、三目标冻结样例与结构/语义反例。所有 `.invalid` 域名、认证、UUID、版本和构建摘要均为离线合成内容，不能当真实构建锁或连接证据。
 
-本轮验证命令：`go test ./internal/ir ./internal/adapter ./schemas`；静态检查：`go vet ./internal/ir ./internal/adapter ./schemas`。测试覆盖严格字段/联合、缺省与 false、整数精度、Unicode、默认日志脱敏、引用/修订/epoch/闭包、输入及读出别名 mutation、只排序集合和独立 Schema-vs-Go 夹具。真实三内核校验、链路方向/无绕行、数据库事务冻结与发布测试尚未执行，属于后续任务。
+本轮验证命令：`go test ./internal/ir ./internal/adapter ./internal/compiler ./schemas`；静态检查：`go vet ./internal/ir ./internal/adapter ./internal/compiler ./schemas`。IR 测试覆盖严格字段/联合、缺省与 false、整数精度、Unicode、默认日志脱敏、引用/修订/epoch/闭包、输入及读出别名 mutation、只排序集合和独立 Schema-vs-Go 夹具。T-025～027 覆盖 Trojan TCP/TLS 原生映射、链方向、标签隔离与锁定内核配置检查。真实链路方向/无绕行、数据库事务冻结与发布测试尚未执行，属于后续任务。

@@ -19,7 +19,7 @@ const (
 	Verified    State = "verified"
 )
 
-const AdapterVersion = "0.1.0-m0-skeleton"
+const AdapterVersion = "0.1.0-m0-native"
 const FixtureSet = "isolation-v1"
 const IDNamespace ir.ID = "8c3f0e2a-4b91-41d6-a2c1-9f0e6b7d4a10"
 

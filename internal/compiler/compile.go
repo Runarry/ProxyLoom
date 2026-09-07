@@ -42,15 +42,9 @@ func (c *Compiler) Compile(ctx context.Context, input ir.FrozenInput, target ir.
 	if err != nil {
 		return adapter.Artifact{}, diags, err
 	}
-	payload, err := marshalPlan(BuildPlan(graph))
+	artifact, emitDiags, err := emitNative(graph)
 	if err != nil {
-		d := compileIssue(ir.InvalidSnapshot, "", target.Key, "")
-		return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
+		return adapter.Artifact{}, emitDiags, err
 	}
-	return adapter.Artifact{
-		SnapshotID:  graph.SnapshotID,
-		TargetKey:   target.Key,
-		ContentType: PlanContentType,
-		Bytes:       payload,
-	}, diags, nil
+	return artifact, diags, nil
 }

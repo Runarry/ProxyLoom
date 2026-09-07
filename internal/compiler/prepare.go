@@ -8,26 +8,15 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/Runarry/ProxyLoom/internal/adapter"
 	"github.com/Runarry/ProxyLoom/internal/capability"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 )
 
 const ChainTwoHop = "chain.two_hop.tcp"
 
-type IndependentOutbound struct {
-	Tag      string
-	Resource ir.Resource
-}
-
-type ChainInstance struct {
-	ResourceID    ir.ID
-	Revision      int64
-	TagH1         string
-	TagH2         string
-	Hop1          ir.Resource
-	Hop2          ir.Resource
-	FailurePolicy ir.FailurePolicy
-}
+type IndependentOutbound = adapter.IndependentOutbound
+type ChainInstance = adapter.ChainInstance
 
 // Graph is the deterministic compile expansion. It may contain credentials via
 // node resources and must not be logged.

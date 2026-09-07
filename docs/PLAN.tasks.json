@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "T-001～T-003、T-023、T-053 保持 in_review。第三窗口 T-024、T-040 实现与本地检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。其余任务保留 not_started。",
+  "status_note": "T-001～T-003、T-023、T-024、T-040、T-053 保持 in_review。第四窗口 T-025、T-026、T-027 实现与锁定内核检查完成，进入 in_review；人工评审待定，不代表 done 或 G0 通过。T-028 及其余任务保留 not_started。",
   "tasks": [
     {
       "id": "T-001",
@@ -454,7 +454,7 @@
         "T-024"
       ],
       "acceptance": "路由指向链末跳；链实例不污染原节点；有效配置通过、故意损坏的配置被真实内核拒绝。\nAC-07、AC-09 的 Xray 子集",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-026",
@@ -471,7 +471,7 @@
         "T-024"
       ],
       "acceptance": "完整正负配置经锁定内核检查；A→B 方向正确；未知关键参数不能被吞掉。\nAC-07、AC-09 的 sing-box 子集",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-027",
@@ -488,7 +488,7 @@
         "T-024"
       ],
       "acceptance": "配置正负检查可重复；同名节点标签无串用；链失败不会选择隐含直连。\nAC-07、AC-09 的 Mihomo 子集",
-      "status": "not_started"
+      "status": "in_review"
     },
     {
       "id": "T-028",

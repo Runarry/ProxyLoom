@@ -31,7 +31,7 @@ if (urls.some((url) => !url.startsWith('https://github.com/') || url.includes('l
 }
 if ((combinationsText.match(/id:\s*P0-/g) || []).length < 10) fail('P0 combination list must include the scope.md candidates');
 if (!/state:\s*unverified/.test(combinationsText)) fail('P0 combinations remain unverified');
-if (!lockText.includes('adapter_version: 0.1.0-m0-skeleton')) fail('adapter_version must be 0.1.0-m0-skeleton after T-024');
+if (!lockText.includes('adapter_version: 0.1.0-m0-native')) fail('adapter_version must be 0.1.0-m0-native after T-025');
 if (!lockText.includes('fixture_set: isolation-v1')) fail('fixture_set must be isolation-v1');
 
 console.log('PASS: cores.lock.yaml pins six official linux builds with unverified P0 combinations and no latest/verified placeholders.');

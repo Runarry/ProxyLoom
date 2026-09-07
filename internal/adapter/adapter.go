@@ -22,9 +22,10 @@ type Target = ir.Target
 // Compile implementations must validate input and require target to equal the
 // descriptor returned by input.Target(target.Key). All compilation decisions
 // must depend only on frozen data and immutable compiler/build code. No clock,
-// database or network lookup is permitted. Unknown or unsupported combinations
-// return errors. The M0 skeleton may emit an artifact that records locked-but-
-// unverified capabilities; publication must still refuse unverified output.
+// database or network lookup is permitted. Unknown, unsupported, or unmapped
+// combinations return errors. Locked-but-unverified capabilities may still
+// produce a native artifact that records that state; publication must refuse
+// unverified output.
 type Compiler interface {
 	Compile(ctx context.Context, input FrozenInput, target Target) (Artifact, []Diagnostic, error)
 }

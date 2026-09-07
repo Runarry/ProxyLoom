@@ -1,7 +1,7 @@
 # Official non-prerelease linux candidates. Digests were hashed from downloaded
 # GitHub release assets on 2026-09-07. Nothing in this file is verified.
 schema_version: 1
-adapter_version: 0.1.0-m0-skeleton
+adapter_version: 0.1.0-m0-native
 fixture_set: isolation-v1
 id_namespace: 8c3f0e2a-4b91-41d6-a2c1-9f0e6b7d4a10
 pinned_at: 2026-09-07T00:00:00Z
