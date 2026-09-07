@@ -1,0 +1,115 @@
+name: proxyloom-dev
+
+x-limits: &limits
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  cpus: 1
+  mem_limit: 512m
+  logging:
+    driver: json-file
+    options: {max-size: 5m, max-file: '2'}
+  stop_grace_period: 15s
+
+services:
+  postgres:
+    image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3
+    environment:
+      POSTGRES_DB: proxyloom
+      POSTGRES_USER: proxyloom_bootstrap
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_bootstrap_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      PGDATA: /var/lib/postgresql/proxyloom-data
+    secrets: [db_bootstrap_password, db_runtime_password, db_migration_password]
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-proxyloom.sh:ro
+    networks: [data]
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '2'}
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U proxyloom_bootstrap -d proxyloom']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: 'no'
+
+  migrate:
+    <<: *limits
+    image: proxyloom-api:m0-dev
+    build: {context: .., dockerfile: deploy/Dockerfile.api}
+    command: [migrate, up]
+    environment:
+      PROXYLOOM_MIGRATION_DSN_FILE: /run/secrets/migration_dsn
+    secrets: [migration_dsn]
+    networks: [data]
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: 'no'
+
+  api:
+    <<: *limits
+    image: proxyloom-api:m0-dev
+    build: {context: .., dockerfile: deploy/Dockerfile.api}
+    command: [serve]
+    environment:
+      PROXYLOOM_DEV_MODE: 'true'
+      PROXYLOOM_HTTP_ADDR: ':8080'
+      PROXYLOOM_PUBLIC_URL: http://127.0.0.1:${PROXYLOOM_DEV_PORT:-8080}
+      PROXYLOOM_WEB_DIR: /app/web
+      PROXYLOOM_DATABASE_DSN_FILE: /run/secrets/database_dsn
+      PROXYLOOM_MASTER_KEY_FILE: /run/secrets/master_key
+      PROXYLOOM_TOKEN_PEPPER_FILE: /run/secrets/token_pepper
+      PROXYLOOM_CONTENT_HMAC_KEY_FILE: /run/secrets/content_hmac_key
+    secrets: [database_dsn, master_key, token_pepper, content_hmac_key]
+    ports: ['127.0.0.1:${PROXYLOOM_DEV_PORT:-8080}:8080']
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=32m,uid=10001,gid=10001']
+    networks: [front, data, control]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, /app/proxyloom-server, healthcheck]
+      interval: 2s
+      timeout: 4s
+      retries: 30
+    restart: 'no'
+
+  runner:
+    <<: *limits
+    image: proxyloom-runner:m0-dev
+    build: {context: .., dockerfile: deploy/Dockerfile.runner}
+    command: [serve]
+    init: true
+    environment:
+      PROXYLOOM_HTTP_ADDR: '127.0.0.1:9092'
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=32m,uid=10002,gid=10002']
+    networks: [control]
+    healthcheck:
+      test: [CMD, /app/proxyloom-runner, healthcheck]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: 'no'
+
+networks:
+  front: {}
+  data: {internal: true}
+  control: {internal: true}
+
+volumes:
+  pgdata: {}
+
+secrets:
+  db_bootstrap_password: {file: ./secrets/local/db_bootstrap_password}
+  db_runtime_password: {file: ./secrets/local/db_runtime_password}
+  db_migration_password: {file: ./secrets/local/db_migration_password}
+  database_dsn: {file: ./secrets/local/database_dsn}
+  migration_dsn: {file: ./secrets/local/migration_dsn}
+  master_key: {file: ./secrets/local/master_key}
+  token_pepper: {file: ./secrets/local/token_pepper}
+  content_hmac_key: {file: ./secrets/local/content_hmac_key}

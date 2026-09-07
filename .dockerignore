@@ -1,0 +1,14 @@
+.git
+.cache
+**/node_modules
+**/.npm-cache
+**/.pnpm-store
+**/dist
+**/coverage
+**/bin
+**/secrets
+**/.env*
+**/*.log
+**/*.exe
+docs/evidence
+deploy/smoke-report.json

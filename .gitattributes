@@ -1,0 +1,11 @@
+* text=auto
+*.sh text eol=lf
+*.sql text eol=lf
+*.go text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+Dockerfile* text eol=lf
+# Frozen baseline hashes refer to exact input bytes on every checkout platform.
+docs/requirements_v1.0.md -text
+docs/project_design_v1.0.md -text

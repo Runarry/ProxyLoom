@@ -10,6 +10,9 @@
 !**/secrets/README.md
 
 # Go 构建与测试产物
+/.cache/
+/deploy/.env.dev
+/deploy/smoke-report.json
 /bin/
 /proxyloom-server/bin/
 /proxyloom-runner/bin/

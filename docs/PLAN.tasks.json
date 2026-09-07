@@ -1,0 +1,1156 @@
+{
+  "schema_version": 1,
+  "source": "docs/PLAN.md",
+  "baseline_date": "2026-09-07",
+  "status_note": "首轮 T-001～T-003 实现与本地自动检查已完成，进入 in_review；人工基线评审待定，不代表 done 或 G0 通过。其他任务保留 not_started。",
+  "tasks": [
+    {
+      "id": "T-001",
+      "work_package": "WP-01",
+      "title": "冻结基线与命名",
+      "milestone": "M0",
+      "role": "TL",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 3
+      },
+      "implementation": "建立 docs/baseline、ADR 和范围清单；新代码统一 proxyloom／PROXYLOOM_*；确认 P0 组合、测试许可、角色与网络边界。",
+      "dependencies": [],
+      "acceptance": "两份输入文档摘要已记录；范围及未决项有负责人；不改写既有 FR、AC 编号。\n基线评审",
+      "status": "in_review"
+    },
+    {
+      "id": "T-002",
+      "work_package": "WP-01",
+      "title": "工程骨架与开发环境",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "建立 Go API、Runner、Vue 工程和最小开发 Compose；添加迁移入口、健康检查骨架、格式化及单元测试工作流。",
+      "dependencies": [
+        "T-001"
+      ],
+      "acceptance": "干净环境可以构建、启动空服务并运行测试；无生产凭证、固定默认密码或自动下载 latest。\nAC-21（开发烟测）",
+      "status": "in_review"
+    },
+    {
+      "id": "T-003",
+      "work_package": "WP-01",
+      "title": "IR 与共享接口骨架",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现 schemas/、internal/ir/；冻结 Node、Chain、TargetRef、诊断、Adapter、冻结输入接口及原型样例。",
+      "dependencies": [
+        "T-001",
+        "T-002"
+      ],
+      "acceptance": "认证／传输／安全分型；缺省与 false 可区分；Node 不含链字段；编译接口不依赖数据库或网络。\nAC-03、AC-08；Schema 测试",
+      "status": "in_review"
+    },
+    {
+      "id": "T-004",
+      "work_package": "WP-01",
+      "title": "资源修订与引用存储",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 7
+      },
+      "implementation": "实现 resources、revisions、refs、tags 及迁移；固定锁顺序；乐观版本、catalog_revision 和 security_epoch。",
+      "dependencies": [
+        "T-003"
+      ],
+      "acceptance": "事务提交无无头资源；错 kind／跨 scope 引用被拒；并发更新不丢失；历史引用不会被级联删除。\nAC-06、AC-15、AC-17",
+      "status": "not_started"
+    },
+    {
+      "id": "T-005",
+      "work_package": "WP-01",
+      "title": "秘密、摘要与脱敏基座",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现信封加密、AAD、独立用途密钥、内容 HMAC、日志脱敏与文件密钥注入；区分主密钥换包和节点认证轮换。",
+      "dependencies": [
+        "T-002",
+        "T-003"
+      ],
+      "acceptance": "错 key／篡改密文失败；缺密钥不生成替代值；普通日志和列表无秘密；重包不改变配置内容摘要。\nAC-23；加密专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-006",
+      "work_package": "WP-01",
+      "title": "管理员认证与信任边界",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现一次性初始化、密码哈希、Cookie 会话、CSRF、Origin 检查、重认证、退出及受控重置。",
+      "dependencies": [
+        "T-004",
+        "T-005"
+      ],
+      "acceptance": "初始化不可复用；重置使会话失效；管理／订阅／Runner 凭证不能互用；敏感读取被审计。\nAC-01、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-007",
+      "work_package": "WP-01",
+      "title": "完整 API 契约与通用约定",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "完善 api/openapi.yaml、分页、错误码、If-Match、幂等、SSE 契约；同步新增预览确认字段和测试父批次契约。",
+      "dependencies": [
+        "T-003"
+      ],
+      "acceptance": "未知字段拒绝；同键异请求冲突；412／428／409 区分；前端类型与契约无漂移。\nAC-06、AC-19；契约测试",
+      "status": "not_started"
+    },
+    {
+      "id": "T-008",
+      "work_package": "WP-01",
+      "title": "持续质量检查与测试入口",
+      "milestone": "M1",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "建立 Go／TS 检查、Schema／OpenAPI 差异检查、测试命令、秘密扫描和 PR 模板；先接小型可重复样例。",
+      "dependencies": [
+        "T-002",
+        "T-003",
+        "T-007"
+      ],
+      "acceptance": "失败测试阻止合并；生成文件可重建；无证据的任务不能自动标完成；高级流水线交由 T-059 汇总。\nNFR-12；CI 自检",
+      "status": "not_started"
+    },
+    {
+      "id": "T-009",
+      "work_package": "WP-02",
+      "title": "六类 URI 解析与标准化",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 5,
+        "max": 8
+      },
+      "implementation": "实现 SS、VMess、VLESS、Trojan、SOCKS5、HTTP CONNECT 的约定方言与解析夹具；隔离未知元数据。",
+      "dependencies": [
+        "T-003"
+      ],
+      "acceptance": "中文、IPv6、转义正例与缺认证／重复键负例通过；不伪造默认值，不自动执行插件。\nAC-02、AC-03",
+      "status": "not_started"
+    },
+    {
+      "id": "T-010",
+      "work_package": "WP-02",
+      "title": "批量导入与确认提交",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现文本／文件／Base64 检测、层数与体积限制、候选加密保存、逐行诊断、选中提交与过期清理。",
+      "dependencies": [
+        "T-004",
+        "T-005",
+        "T-007",
+        "T-009"
+      ],
+      "acceptance": "预览不改正式库；混合失败不阻断合法项预览；只提交选中有效项；同幂等键不重复落库。\nAC-02、AC-03",
+      "status": "not_started"
+    },
+    {
+      "id": "T-011",
+      "work_package": "WP-02",
+      "title": "节点 CRUD 与生命周期",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现手动新增、编辑、搜索、标签、克隆、启停、软删除、修订及引用影响；统一秘密保留／清除语义。",
+      "dependencies": [
+        "T-004",
+        "T-005",
+        "T-006",
+        "T-007"
+      ],
+      "acceptance": "遮罩不当密码保存；过期修订返回 412；克隆生成新 ID；安全停用及认证变化递增 epoch。\nAC-06、AC-17、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-012",
+      "work_package": "WP-02",
+      "title": "来源身份与去重",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现来源内稳定键、人工绑定、内容 HMAC 和匹配建议；将身份匹配与重复检测分开。",
+      "dependencies": [
+        "T-009",
+        "T-011"
+      ],
+      "acceptance": "改名不破坏引用；同名异节点不静默合并；无可靠匹配的认证变更进入冲突处理。\nAC-04、AC-05",
+      "status": "not_started"
+    },
+    {
+      "id": "T-013",
+      "work_package": "WP-02",
+      "title": "受限来源抓取器",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现 internal/safefetch/：解析后 IP 校验及固定拨号、逐跳检查、认证头保护、压缩和超时限额。",
+      "dependencies": [
+        "T-001",
+        "T-005",
+        "T-007"
+      ],
+      "acceptance": "私网、IPv4 映射 IPv6、重绑定及恶意重定向受阻；保留 Host／SNI；不继承环境代理。\nAC-20；SafeFetcher 专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-014",
+      "work_package": "WP-02",
+      "title": "远程来源与周期刷新",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现来源 CRUD、持久刷新调度、退避、HTTP 元数据及快照；使用 API Worker，不交由外部 Runner 抓取。",
+      "dependencies": [
+        "T-010",
+        "T-012",
+        "T-013",
+        "T-039"
+      ],
+      "acceptance": "同来源只有一个有效提交；重启后调度可恢复；超时、空响应、解析失败不空覆盖旧数据。\nAC-04、AC-05",
+      "status": "not_started"
+    },
+    {
+      "id": "T-015",
+      "work_package": "WP-02",
+      "title": "人工覆盖与冲突合并",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现来源基线＋类型化字段覆盖，binding_revision CAS、逐字段恢复来源值及 stale／conflict 状态。",
+      "dependencies": [
+        "T-012",
+        "T-014"
+      ],
+      "acceptance": "刷新保留人工名称；凭证变更走安全更新；模糊匹配须确认；来源恢复可识别原绑定。\nAC-04、AC-05、AC-17",
+      "status": "not_started"
+    },
+    {
+      "id": "T-016",
+      "work_package": "WP-02",
+      "title": "URI 与 Base64 节点导出",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "实现只针对可表达原始节点的 URI／Base64 导出及敏感操作鉴权；不把复杂方案伪装成节点列表。",
+      "dependencies": [
+        "T-009",
+        "T-011",
+        "T-017"
+      ],
+      "acceptance": "往返解析保留连接语义；链／路由方案直接转 URI 被拒；独立“仅导出原始节点”需明确确认。\nAC-03；节点导出专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-017",
+      "work_package": "WP-03",
+      "title": "两跳链领域与接口",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "实现 Chain CRUD、有序引用、方向交换、复用及影响查看；两端只允许具体 Node。",
+      "dependencies": [
+        "T-003",
+        "T-011"
+      ],
+      "acceptance": "A→B 与 B→A 独立；A→A、三跳、策略组作链跳拒绝；原节点修订不被链编辑修改。\nAC-07、AC-08",
+      "status": "not_started"
+    },
+    {
+      "id": "T-018",
+      "work_package": "WP-03",
+      "title": "依赖图与展开校验",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现统一引用图、循环路径诊断、节点／链／策略／路由／DNS 依赖展开及展开限额。",
+      "dependencies": [
+        "T-003",
+        "T-017"
+      ],
+      "acceptance": "缺失、跨 scope、错类型、循环、超限均定位；显式排除必要依赖产生错误而非漏项。\nAC-08、AC-12、AC-13",
+      "status": "not_started"
+    },
+    {
+      "id": "T-019",
+      "work_package": "WP-03",
+      "title": "策略组模型与接口",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现 fixed、manual_select、latency_best、round_robin，成员与默认项、健康检查及目标显式覆盖。",
+      "dependencies": [
+        "T-017",
+        "T-018"
+      ],
+      "acceptance": "空组、嵌套、非法默认项拒绝；不把手动选择变成固定，不把轮询变成低延迟选优。\nAC-10、AC-11",
+      "status": "not_started"
+    },
+    {
+      "id": "T-020",
+      "work_package": "WP-03",
+      "title": "路由与文本规则集",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现域名、后缀、CIDR、端口、网络类型、有序规则、默认出口及可版本化内联规则集。",
+      "dependencies": [
+        "T-018",
+        "T-019"
+      ],
+      "acceptance": "不同字段 AND／同字段 OR；首匹配顺序一致；非法 CIDR 有行号；无默认出口不可发布。\nAC-12",
+      "status": "not_started"
+    },
+    {
+      "id": "T-021",
+      "work_package": "WP-03",
+      "title": "DNS 方案与引导依赖",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现代理服务器引导解析、业务解析、local／指定 UDP／HTTPS 预设及基本域名规则；显式绑定出口。",
+      "dependencies": [
+        "T-018",
+        "T-020"
+      ],
+      "acceptance": "DNS 自环／间接环拒绝；不隐式增加解析服务；解析验证与 HTTP 测试结论分开。\nAC-12；DNS 专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-022",
+      "work_package": "WP-03",
+      "title": "审核预设与目标约束",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现三个通用完整配置预设、平台／本地入口限制、目标键及策略覆盖白名单；客户端导入单独记录。",
+      "dependencies": [
+        "T-019",
+        "T-020",
+        "T-021"
+      ],
+      "acceptance": "未做客户端测试只显示内核状态；不能注入任意监听、文件、自动下载或覆盖系统标签。\nAC-11、AC-23；预设安全专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-023",
+      "work_package": "WP-04",
+      "title": "内核候选锁与能力证据模型",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "建立 compat/cores.lock.yaml、能力状态、证据结构、来源／构建特性／两架构清单；选定候选构建。",
+      "dependencies": [
+        "T-001",
+        "T-003"
+      ],
+      "acceptance": "候选值来自实际构建；未验证保持 unverified；版本、摘要、架构不符拒绝执行；P0 组合有待测列表。\n构建烟测；NFR-13 的前置",
+      "status": "not_started"
+    },
+    {
+      "id": "T-024",
+      "work_package": "WP-04",
+      "title": "公共编译骨架与标签",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现纯函数式编译入口、确定性标签、目标 AST／序列化、结构化诊断及最小 Golden。",
+      "dependencies": [
+        "T-003",
+        "T-023"
+      ],
+      "acceptance": "相同冻结输入重复生成字节一致；同名及哈希碰撞可确定处理；无联网、随机标签或当前时间依赖。\nNFR-04；Golden 原型",
+      "status": "not_started"
+    },
+    {
+      "id": "T-025",
+      "work_package": "WP-04",
+      "title": "Xray 纵向原型",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "先打通一种受控节点、独立 A／B 与 A→B 的完整 Xray 配置生成、检查和最小运行。",
+      "dependencies": [
+        "T-024"
+      ],
+      "acceptance": "路由指向链末跳；链实例不污染原节点；有效配置通过、故意损坏的配置被真实内核拒绝。\nAC-07、AC-09 的 Xray 子集",
+      "status": "not_started"
+    },
+    {
+      "id": "T-026",
+      "work_package": "WP-04",
+      "title": "sing-box 纵向原型",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "完成相同 IR 的 sing-box 原型，显式检测链依赖与拨号字段冲突，不照搬 Xray 原生结构。",
+      "dependencies": [
+        "T-024"
+      ],
+      "acceptance": "完整正负配置经锁定内核检查；A→B 方向正确；未知关键参数不能被吞掉。\nAC-07、AC-09 的 sing-box 子集",
+      "status": "not_started"
+    },
+    {
+      "id": "T-027",
+      "work_package": "WP-04",
+      "title": "Mihomo 纵向原型",
+      "milestone": "M0",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "完成相同 IR 的 Mihomo YAML 原型，稳定序列化并生成独立链实例；禁用隐式下载资源。",
+      "dependencies": [
+        "T-024"
+      ],
+      "acceptance": "配置正负检查可重复；同名节点标签无串用；链失败不会选择隐含直连。\nAC-07、AC-09 的 Mihomo 子集",
+      "status": "not_started"
+    },
+    {
+      "id": "T-028",
+      "work_package": "WP-04",
+      "title": "真实链路与不绕行验证",
+      "milestone": "M0",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "在夹具中限制 B 只接受 A；观察 A／B／目标连接，测试交换方向、共享节点、停第一跳和整链故障。",
+      "dependencies": [
+        "T-025",
+        "T-026",
+        "T-027",
+        "T-040",
+        "T-053"
+      ],
+      "acceptance": "三内核方向正例通过、绕过 A 的反例失败；意外直连计数为 0；报告关联构建和测试配置。\nAC-07～AC-10（原型）；证据报告",
+      "status": "not_started"
+    },
+    {
+      "id": "T-029",
+      "work_package": "WP-04",
+      "title": "完成 P0 三目标映射",
+      "milestone": "M1",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 7,
+        "max": 11
+      },
+      "implementation": "按候选清单补齐节点参数、策略、路由、DNS；轮询仅按已验目标适配；增加组专属标签和拒绝兜底。",
+      "dependencies": [
+        "T-009",
+        "T-019",
+        "T-020",
+        "T-021",
+        "T-022",
+        "T-025",
+        "T-026",
+        "T-027"
+      ],
+      "acceptance": "所有承诺组合有正负 Golden／内核测试；组不误选中间跳；策略全故障无直连；不支持差异明确可见。\nAC-10～AC-12；全部承诺组合",
+      "status": "not_started"
+    },
+    {
+      "id": "T-030",
+      "work_package": "WP-04",
+      "title": "最终产物安全与诊断",
+      "milestone": "M2",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "在完整输出上执行监听、文件、下载、控制接口和保留字段检查；整合逐字段能力差异及稳定摘要。",
+      "dependencies": [
+        "T-018",
+        "T-022",
+        "T-029"
+      ],
+      "acceptance": "扩展／预设不能绕过限制；声明支持字段不丢失；相同输入 100 次字节一致；错误可定位资源与字段。\nNFR-04；AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-031",
+      "work_package": "WP-05",
+      "title": "多组订阅方案管理",
+      "milestone": "M2",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现订阅 CRUD、复制、手动包含／排除、标签筛选、路由／DNS／目标选择、启停及影响预览。",
+      "dependencies": [
+        "T-007",
+        "T-011",
+        "T-019",
+        "T-022"
+      ],
+      "acceptance": "两组不同成员互不覆盖；复制不复制节点身份；必要依赖与显式排除冲突必须可见。\nAC-13",
+      "status": "not_started"
+    },
+    {
+      "id": "T-032",
+      "work_package": "WP-05",
+      "title": "冻结快照与输入失效",
+      "milestone": "M2",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "短事务冻结方案、筛选结果、全部修订、epoch、构建及预设；保存完整冻结载荷和目录版本。",
+      "dependencies": [
+        "T-004",
+        "T-018",
+        "T-031"
+      ],
+      "acceptance": "输入读取一致；事务外编译不再读活动对象；编辑节点或标签后旧批次变 obsolete。\nAC-13、AC-15",
+      "status": "not_started"
+    },
+    {
+      "id": "T-033",
+      "work_package": "WP-05",
+      "title": "编译编排与真实校验集成",
+      "milestone": "M2",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "持久化编译批次和加密输出；对所有启用目标创建最终字节 config_validate 任务并聚合状态。",
+      "dependencies": [
+        "T-030",
+        "T-032",
+        "T-039",
+        "T-041"
+      ],
+      "acceptance": "不能用最小探测配置代替发布物校验；任何目标失败阻止批次 ready；离线 Runner 明确阻塞而不假通过。\nAC-14、AC-18（配置层）",
+      "status": "not_started"
+    },
+    {
+      "id": "T-034",
+      "work_package": "WP-05",
+      "title": "脱敏差异与确认绑定",
+      "milestone": "M2",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "输出依赖、目标差异和脱敏预览；服务端绑定 effective_preview_hash、batch_id 与操作者确认。",
+      "dependencies": [
+        "T-005",
+        "T-033"
+      ],
+      "acceptance": "未确认或预览变化不能发布；自动依赖凭证范围明确；完整秘密导出仍需单独重认证。\nAC-13、AC-15、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-035",
+      "work_package": "WP-05",
+      "title": "原子发布和受控回滚",
+      "milestone": "M2",
+      "role": "BE-A",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "全目标同批发布，事务切换 head，校验 generation／目录／安全状态；回滚创建新事件。",
+      "dependencies": [
+        "T-004",
+        "T-033",
+        "T-034"
+      ],
+      "acceptance": "并发只见完整旧版或新版；禁止混用目标；停用节点、旧凭证、禁用构建不能借回滚复活。\nAC-14～AC-17",
+      "status": "not_started"
+    },
+    {
+      "id": "T-036",
+      "work_package": "WP-05",
+      "title": "独立订阅令牌",
+      "milestone": "M2",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现一次性原值展示、HMAC 校验、目标范围、到期、撤销及轮换；令牌幂等重放只返回元数据。",
+      "dependencies": [
+        "T-005",
+        "T-006",
+        "T-031"
+      ],
+      "acceptance": "令牌不能跨方案／目标／API 使用；丢失签发响应须撤销重签；明文不落库、不进入访问日志。\nAC-16、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-037",
+      "work_package": "WP-05",
+      "title": "订阅读取与实时安全检查",
+      "milestone": "M2",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现 /s/{token}/{target_key}，主库逐次授权和依赖安全检查；只读固定字节；no-store 和通用错误。",
+      "dependencies": [
+        "T-035",
+        "T-036"
+      ],
+      "acceptance": "GET 不触发刷新、编译、测速；DB 故障失败关闭；Runner 离线仍读安全有效版本；无 200 空配置。\nAC-16、AC-17",
+      "status": "not_started"
+    },
+    {
+      "id": "T-038",
+      "work_package": "WP-05",
+      "title": "发布撤销并发故障验证",
+      "milestone": "M2",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "注入并发首次发布、失效编译、令牌撤销、节点轮换、构建停用、数据库断连和历史回滚。",
+      "dependencies": [
+        "T-008",
+        "T-035",
+        "T-037"
+      ],
+      "acceptance": "撤销提交后开始的新请求无受影响字节；缓存不能绕过授权；失败批次不破坏仍安全的旧版。\nAC-14～AC-17；NFR-07、NFR-08",
+      "status": "not_started"
+    },
+    {
+      "id": "T-039",
+      "work_package": "WP-06",
+      "title": "持久任务与 Worker 基座",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现队列、attempt、lease_seq、心跳、取消、幂等及父批次；区分 API Worker 与 Runner 可领取类型。",
+      "dependencies": [
+        "T-004",
+        "T-005",
+        "T-007"
+      ],
+      "acceptance": "能力过滤进入领取事务；重启可恢复；迟到租约不能覆盖结果；配置错误不重试；父批次汇总一致。\nAC-19（调度层）；租约专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-040",
+      "work_package": "WP-06",
+      "title": "最小安全内核执行框架",
+      "milestone": "M0",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现固定二进制与 argv、独立任务目录、日志限额、清环境、配置检查、启动、超时和进程组清理。",
+      "dependencies": [
+        "T-002",
+        "T-023"
+      ],
+      "acceptance": "仅本地回环入口；不接受任意命令／路径；正负检查真实执行；取消和超时回收子进程。\nAC-18（配置层）；执行框架烟测",
+      "status": "not_started"
+    },
+    {
+      "id": "T-041",
+      "work_package": "WP-06",
+      "title": "Runner 内部协议与发布校验",
+      "milestone": "M1",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现 mTLS 登记、构建核验、能力槽位、任务领取／续租／结果回传；提供可供 M2 使用的配置校验服务。",
+      "dependencies": [
+        "T-006",
+        "T-039",
+        "T-040"
+      ],
+      "acceptance": "Runner 无 DB 和主密钥；只接获准类型；实际构建不符拒绝；最终配置字节摘要一致；日志双层脱敏。\nAC-18、AC-19 的校验子集",
+      "status": "not_started"
+    },
+    {
+      "id": "T-042",
+      "work_package": "WP-06",
+      "title": "真实连通性与测试目标",
+      "milestone": "M3",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现登记目标、批准第一跳地址、最小测试配置、统一代理 HTTP(S) 请求、响应断言和分阶段指标。",
+      "dependencies": [
+        "T-013",
+        "T-024",
+        "T-039",
+        "T-041",
+        "T-043"
+      ],
+      "acceptance": "完整两跳实际运行；目标故障可判 inconclusive；任务状态与 verdict 分离；地址安全策略覆盖内核执行。\nAC-09、AC-18、AC-20",
+      "status": "not_started"
+    },
+    {
+      "id": "T-043",
+      "work_package": "WP-06",
+      "title": "配额预留与预算结算",
+      "milestone": "M3",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现全局／本机并发、UTC 日桶、每 attempt 预留、实际用量或保守结算；先覆盖连通性再开放吞吐。",
+      "dependencies": [
+        "T-004",
+        "T-039"
+      ],
+      "acceptance": "批量请求不超卖；重复回传仅结算一次；失联保守计量；跨日固定归属；取消失败同样计入用量。\nAC-19；NFR-05",
+      "status": "not_started"
+    },
+    {
+      "id": "T-044",
+      "work_package": "WP-06",
+      "title": "受控下载测速",
+      "milestone": "M3",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现读体字节／时长双上限、单调时间、单位换算、缓存控制与样本充分性；吞吐默认不自动重试。",
+      "dependencies": [
+        "T-042",
+        "T-043"
+      ],
+      "acceptance": "达到上限立即停止应用读取；短样本不显示最大带宽；报告位置／目标／版本及限制原因。\nAC-18、AC-19",
+      "status": "not_started"
+    },
+    {
+      "id": "T-045",
+      "work_package": "WP-06",
+      "title": "Runner 故障与清理加固",
+      "milestone": "M3",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "测试失联前自停、fencing、重复结果、端口竞争、取消风暴、崩溃、日志膨胀和进程重启恢复。",
+      "dependencies": [
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044"
+      ],
+      "acceptance": "确认取消后清理目标 ≤5 秒；迟到结果不改状态；无永久 running、孤儿进程或重复测速；记录实测。\nAC-19；NFR-06、NFR-14",
+      "status": "not_started"
+    },
+    {
+      "id": "T-046",
+      "work_package": "WP-06",
+      "title": "结果历史与任务事件",
+      "milestone": "M3",
+      "role": "BE-B",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现查询、对象修订绑定、样本聚合、SSE 序列及过期窗口回退；批次子任务状态可独立追踪。",
+      "dependencies": [
+        "T-042",
+        "T-044",
+        "T-045"
+      ],
+      "acceptance": "编辑节点后旧结果标历史；断线先读快照后重放，事件不重复累加；3 样本不展示误导 P95。\nAC-18、AC-19；NFR-14",
+      "status": "not_started"
+    },
+    {
+      "id": "T-047",
+      "work_package": "WP-07",
+      "title": "前端壳与通用体验",
+      "milestone": "M1",
+      "role": "FE",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现登录、路由、API 客户端、统一错误、会话及中文基础布局；UTC 存储按浏览器时区展示。",
+      "dependencies": [
+        "T-002",
+        "T-006",
+        "T-007"
+      ],
+      "acceptance": "前后端类型一致；不持久化秘密到 localStorage；键盘操作、长名称和错误文本可用。\nAC-01、AC-23；可用性专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-048",
+      "work_package": "WP-07",
+      "title": "节点与来源管理界面",
+      "milestone": "M1",
+      "role": "FE",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 7
+      },
+      "implementation": "实现六类动态节点表单、兼容状态、导入确认、来源刷新差异、覆盖标记、分页及修订冲突处理。",
+      "dependencies": [
+        "T-010",
+        "T-011",
+        "T-014",
+        "T-015",
+        "T-023",
+        "T-047"
+      ],
+      "acceptance": "隐藏旧字段不误提交；遮罩不回写；412 保留草稿；导入确认前不改库；秘密复制须明确授权。\nAC-02～AC-06、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-049",
+      "work_package": "WP-07",
+      "title": "编排管理界面",
+      "milestone": "M1",
+      "role": "FE",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现两跳卡片、方向交换、策略、规则排序、DNS 依赖及目标差异；字段错误可跳转。",
+      "dependencies": [
+        "T-017",
+        "T-019",
+        "T-020",
+        "T-021",
+        "T-022",
+        "T-047"
+      ],
+      "acceptance": "第一跳／最终出口用文字标注；不支持策略无误导；链结果与独立节点结果不混用。\nAC-07、AC-08、AC-11、AC-12",
+      "status": "not_started"
+    },
+    {
+      "id": "T-050",
+      "work_package": "WP-07",
+      "title": "订阅与发布向导",
+      "milestone": "M2",
+      "role": "FE",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现成员→规则／DNS→目标→依赖差异→检查→发布；提供令牌一次展示、撤销、历史和回滚。",
+      "dependencies": [
+        "T-031",
+        "T-034",
+        "T-035",
+        "T-036",
+        "T-037",
+        "T-047"
+      ],
+      "acceptance": "发布请求绑定实际预览；自动依赖凭证范围明确；blocked／obsolete／failed 区分；移动端可复制链接。\nAC-13～AC-17、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-051",
+      "work_package": "WP-07",
+      "title": "任务中心与测速历史",
+      "milestone": "M3",
+      "role": "FE",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现批量测试、任务详情、取消、预算反馈、SSE 重连、修订历史及网络位置说明。",
+      "dependencies": [
+        "T-041",
+        "T-046",
+        "T-047"
+      ],
+      "acceptance": "关闭页面不误取消；任务执行失败与节点失败区分；刷新能恢复；单位、样本和截断原因可见。\nAC-18、AC-19",
+      "status": "not_started"
+    },
+    {
+      "id": "T-052",
+      "work_package": "WP-07",
+      "title": "概览、内核与系统页面",
+      "milestone": "M3",
+      "role": "FE",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现登记构建、停用、限额、保留策略、审计筛选与问题导航；完成中文／时区／键盘验收。",
+      "dependencies": [
+        "T-023",
+        "T-047",
+        "T-051"
+      ],
+      "acceptance": "不显示伪造用户用量或主密钥；设置白名单受权限保护；未验证组合不能显示已支持。\nAC-23；FR-039 专项",
+      "status": "not_started"
+    },
+    {
+      "id": "T-053",
+      "work_package": "WP-08",
+      "title": "隔离测试夹具与证据目录",
+      "milestone": "M0",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 2,
+        "max": 4
+      },
+      "implementation": "建立 fixtures/、受控代理服务端与 HTTP 端、证书和脱敏日志采集；test-only 私网策略与生产分离。",
+      "dependencies": [
+        "T-002",
+        "T-003"
+      ],
+      "acceptance": "夹具可重建、不依赖个人节点；可阻断绕行；测试白名单不打包为生产默认；证据能追溯提交。\nAC-09、AC-10 的前置",
+      "status": "not_started"
+    },
+    {
+      "id": "T-054",
+      "work_package": "WP-08",
+      "title": "生产容器与部署流程",
+      "milestone": "M3",
+      "role": "OPS",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "完成 API／Runner 两镜像、一次性迁移、三常驻服务、网络分段、非 root 权限、健康与日志轮换。",
+      "dependencies": [
+        "T-041",
+        "T-050"
+      ],
+      "acceptance": "两架构烟测；DB／Runner 无公网端口；secret 对指定 UID 可读；无 Docker Socket、特权或 TUN 依赖。\nAC-21；NFR-10、NFR-13",
+      "status": "not_started"
+    },
+    {
+      "id": "T-055",
+      "work_package": "WP-08",
+      "title": "可观测性与保留治理",
+      "milestone": "M3",
+      "role": "OPS",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "实现关键审计落点、指标与告警、低基数标签、白名单限额、可达性清理及默认保留周期。",
+      "dependencies": [
+        "T-005",
+        "T-037",
+        "T-039",
+        "T-046"
+      ],
+      "acceptance": "活动发布与必要修订不被清理；日志截断脱敏；GC 可暂停、不长事务阻塞读取；故障手册可执行。\nAC-23；NFR-09、NFR-14",
+      "status": "not_started"
+    },
+    {
+      "id": "T-056",
+      "work_package": "WP-08",
+      "title": "备份恢复与密钥演练",
+      "milestone": "M3",
+      "role": "OPS",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 6
+      },
+      "implementation": "实现备份、分离密钥清单、隔离恢复、访问权限重置、任务隔离、密钥换包及兼容镜像回退。",
+      "dependencies": [
+        "T-005",
+        "T-006",
+        "T-037",
+        "T-045",
+        "T-054"
+      ],
+      "acceptance": "旧备份令牌／会话／Runner 登记失效；任务不重跑测速；缺密钥失败；节点可解密；记录 RPO／RTO。\nAC-21、AC-22；NFR-11",
+      "status": "not_started"
+    },
+    {
+      "id": "T-057",
+      "work_package": "WP-08",
+      "title": "安全专项回归",
+      "milestone": "M3",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 7
+      },
+      "implementation": "覆盖 SSRF 两条路径、重绑定、配置／路径／环境注入、权限边界、秘密扫描和故障无直连。",
+      "dependencies": [
+        "T-013",
+        "T-030",
+        "T-037",
+        "T-041",
+        "T-044",
+        "T-054",
+        "T-055"
+      ],
+      "acceptance": "抓取安全不被当作内核沙箱；负例实际受阻；可信管理员部署边界写入交付；阻断级问题清零。\nAC-10、AC-20、AC-23",
+      "status": "not_started"
+    },
+    {
+      "id": "T-058",
+      "work_package": "WP-08",
+      "title": "容量与全部兼容回归",
+      "milestone": "M3",
+      "role": "QA",
+      "estimate_person_days": {
+        "min": 4,
+        "max": 7
+      },
+      "implementation": "按 SRS 的数据集和负载执行 NFR-01～14；重跑全部承诺组合和关键行为；归档实测报告。",
+      "dependencies": [
+        "T-029",
+        "T-037",
+        "T-045",
+        "T-054",
+        "T-055"
+      ],
+      "acceptance": "报告包含环境、版本、样本、错误率；不把估计写成通过；80% 核心覆盖与关键不变量测试齐备。\nAC-24；NFR-01～NFR-14",
+      "status": "not_started"
+    },
+    {
+      "id": "T-059",
+      "work_package": "WP-08",
+      "title": "发布流水线与供应链",
+      "milestone": "M3",
+      "role": "OPS",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "整合两架构构建／烟测、SBOM、扫描、锁摘要、构建溯源、许可证与适用源码提供材料。",
+      "dependencies": [
+        "T-008",
+        "T-023",
+        "T-028",
+        "T-029",
+        "T-054",
+        "T-057",
+        "T-058"
+      ],
+      "acceptance": "构建清单无待填版本；禁止 latest；每个 verified 能力有证据；上游更新生成新 CoreBuild 而非替换旧 ID。\nNFR-13；发布清单审查",
+      "status": "not_started"
+    },
+    {
+      "id": "T-060",
+      "work_package": "WP-08",
+      "title": "P0 联验与正式交付",
+      "milestone": "M3",
+      "role": "TL",
+      "estimate_person_days": {
+        "min": 3,
+        "max": 5
+      },
+      "implementation": "逐条收集 FR／NFR／AC 证据；完成管理员演示、安装升级恢复手册、已知限制、RC 和正式版本审批。",
+      "dependencies": [
+        "T-038",
+        "T-048",
+        "T-049",
+        "T-050",
+        "T-051",
+        "T-052",
+        "T-055",
+        "T-056",
+        "T-057",
+        "T-058",
+        "T-059"
+      ],
+      "acceptance": "40 项 FR 的 P0 子项、14 项 NFR、24 个 AC 均有结论；P1 无混入；门槛不通过不得标记 v1.0 完成。\nAC-01～AC-24；NFR-01～NFR-14",
+      "status": "not_started"
+    }
+  ]
+}

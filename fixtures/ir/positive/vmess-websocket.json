@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "protocol": "vmess",
+  "endpoint": {
+    "host": "a.example.invalid",
+    "port": 443
+  },
+  "auth": {
+    "kind": "vmess_aead",
+    "uuid": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+    "cipher": "auto"
+  },
+  "transport": {
+    "kind": "websocket",
+    "path": "/proxy?ed=2048",
+    "host": "ws.example.invalid"
+  },
+  "security": {
+    "mode": "tls",
+    "server_name": "a.example.invalid",
+    "verify_certificate": true,
+    "alpn": [
+      "h2",
+      "http/1.1"
+    ]
+  },
+  "features": {
+    "udp": false
+  },
+  "extensions": {}
+}

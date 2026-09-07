@@ -1,0 +1,23 @@
+FROM node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff AS web
+WORKDIR /src/proxyloom-web
+RUN npm install --global pnpm@10.33.2
+COPY proxyloom-web/package.json proxyloom-web/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY proxyloom-web/ ./
+RUN pnpm typecheck && pnpm build
+
+FROM golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c AS build
+WORKDIR /src
+ENV GOTOOLCHAIN=local
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+COPY . .
+RUN CGO_ENABLED=0 go build -mod=readonly -trimpath -buildvcs=false -o /out/proxyloom-server ./proxyloom-server
+
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /out/proxyloom-server /app/proxyloom-server
+COPY --from=web /src/proxyloom-web/dist /app/web
+USER 10001:10001
+ENTRYPOINT ["/app/proxyloom-server"]
+CMD ["serve"]

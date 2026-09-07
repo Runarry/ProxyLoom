@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "resource_id": "44444444-4444-4444-8444-444444444444",
+    "scope_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "kind": "policy_group",
+    "revision": 1,
+    "schema_version": 1,
+    "name": "Reserved",
+    "tags": [],
+    "enabled": true,
+    "security_epoch": 1
+  },
+  "payload": {
+    "arbitrary": "EXAMPLE_ONLY_FORBIDDEN"
+  }
+}

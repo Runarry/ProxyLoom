@@ -1,0 +1,149 @@
+{
+  "description": "Synthetic offline IR fixtures. Structural validity is separate from frozen graph validity; no capability or real build verification is claimed.",
+  "cases": [
+    {
+      "name": "positive/trojan-a.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/trojan-b.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/shadowsocks-aead.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/vmess-websocket.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/vless-reality.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/socks5-anonymous.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/http-connect.json",
+      "definition": "node",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/chain-a-b.json",
+      "definition": "chain",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/resource-trojan-a.json",
+      "definition": "resource",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/resource-ref.json",
+      "definition": "target_ref",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/builtin-reject.json",
+      "definition": "target_ref",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "positive/frozen-a-b.json",
+      "definition": "frozen_input",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "negative/node-chain-field.json",
+      "definition": "node",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/auth-mismatch.json",
+      "definition": "node",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/node-version.json",
+      "definition": "node",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/native-extension.json",
+      "definition": "node",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/feature-null.json",
+      "definition": "node",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/mixed-ref.json",
+      "definition": "target_ref",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/chain-three-hops.json",
+      "definition": "chain",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/chain-duplicate.json",
+      "definition": "chain",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/chain-policy-hop.json",
+      "definition": "chain",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/reserved-resource.json",
+      "definition": "resource",
+      "schema_valid": false,
+      "go_valid": false
+    },
+    {
+      "name": "negative/frozen-missing-hop.json",
+      "definition": "frozen_input",
+      "schema_valid": true,
+      "go_valid": false
+    },
+    {
+      "name": "negative/frozen-stale-epoch.json",
+      "definition": "frozen_input",
+      "schema_valid": true,
+      "go_valid": false
+    }
+  ]
+}

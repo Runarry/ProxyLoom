@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proxyloom.invalid/schemas/ir-v1.schema.json",
+  "title": "ProxyLoom typed IR v1",
+  "description": "Structural contract only. Use format assertions. Frozen reference closure, scope, revision and epoch checks are application invariants. No kernel capability is certified by this schema.",
+  "oneOf": [
+    { "$ref": "#/$defs/node" },
+    { "$ref": "#/$defs/chain" },
+    { "$ref": "#/$defs/target_ref" },
+    { "$ref": "#/$defs/resource" },
+    { "$ref": "#/$defs/frozen_input" }
+  ],
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "version": { "type": "integer", "const": 1 },
+    "revision": { "type": "integer", "minimum": 1, "maximum": 9223372036854775807 },
+    "text": { "type": "string", "minLength": 1, "pattern": "^[^\\x00-\\x1f\\x7f]+$" },
+    "secret": { "type": "string", "minLength": 1, "pattern": "^[^\\x00]+$", "not": { "enum": ["********", "REDACTED", "<redacted>", "[REDACTED]"] } },
+    "host": {
+      "type": "string", "minLength": 1, "maxLength": 253, "pattern": "^[^A-Z]+$",
+      "anyOf": [{ "format": "hostname" }, { "format": "ipv4" }, { "format": "ipv6" }]
+    },
+    "endpoint": {
+      "type": "object", "additionalProperties": false, "required": ["host", "port"],
+      "properties": { "host": { "$ref": "#/$defs/host" }, "port": { "type": "integer", "minimum": 1, "maximum": 65535 } }
+    },
+    "method_password_auth": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "method", "password"],
+      "properties": { "kind": { "const": "method_password" }, "method": { "enum": ["aes-128-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"] }, "password": { "$ref": "#/$defs/secret" } }
+    },
+    "vmess_auth": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "uuid", "cipher"],
+      "properties": { "kind": { "const": "vmess_aead" }, "uuid": { "$ref": "#/$defs/uuid" }, "cipher": { "enum": ["auto", "aes-128-gcm", "chacha20-poly1305", "none", "zero"] } }
+    },
+    "uuid_auth": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "uuid"],
+      "properties": { "kind": { "const": "uuid" }, "uuid": { "$ref": "#/$defs/uuid" } }
+    },
+    "password_auth": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "password"],
+      "properties": { "kind": { "const": "password" }, "password": { "$ref": "#/$defs/secret" } }
+    },
+    "username_password_auth": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "username", "password"],
+      "properties": { "kind": { "const": "username_password" }, "username": { "$ref": "#/$defs/secret" }, "password": { "$ref": "#/$defs/secret" } }
+    },
+    "no_auth": {
+      "type": "object", "additionalProperties": false, "required": ["kind"],
+      "properties": { "kind": { "const": "none" } }
+    },
+    "auth": {
+      "type": "object", "required": ["kind"],
+      "properties": { "kind": { "enum": ["method_password", "vmess_aead", "uuid", "password", "username_password", "none"] } },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "method_password" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/method_password_auth" } },
+        { "if": { "properties": { "kind": { "const": "vmess_aead" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/vmess_auth" } },
+        { "if": { "properties": { "kind": { "const": "uuid" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/uuid_auth" } },
+        { "if": { "properties": { "kind": { "const": "password" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/password_auth" } },
+        { "if": { "properties": { "kind": { "const": "username_password" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/username_password_auth" } },
+        { "if": { "properties": { "kind": { "const": "none" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/no_auth" } }
+      ]
+    },
+    "native_tcp": {
+      "type": "object", "additionalProperties": false, "required": ["kind"],
+      "properties": { "kind": { "const": "native_tcp" } }
+    },
+    "websocket": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "path"],
+      "properties": { "kind": { "const": "websocket" }, "path": { "type": "string", "pattern": "^/[^\\x00-\\x20\\x7f#]*$" }, "host": { "$ref": "#/$defs/host" } }
+    },
+    "transport": {
+      "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["native_tcp", "websocket"] } },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "native_tcp" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/native_tcp" } },
+        { "if": { "properties": { "kind": { "const": "websocket" } }, "required": ["kind"] }, "then": { "$ref": "#/$defs/websocket" } }
+      ]
+    },
+    "alpn": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } },
+    "fingerprint": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+    "no_security": {
+      "type": "object", "additionalProperties": false, "required": ["mode"],
+      "properties": { "mode": { "const": "none" } }
+    },
+    "tls": {
+      "type": "object", "additionalProperties": false, "required": ["mode", "server_name", "verify_certificate"],
+      "properties": { "mode": { "const": "tls" }, "server_name": { "$ref": "#/$defs/host" }, "verify_certificate": { "type": "boolean" }, "alpn": { "$ref": "#/$defs/alpn" }, "client_fingerprint": { "$ref": "#/$defs/fingerprint" } }
+    },
+    "reality": {
+      "type": "object", "additionalProperties": false, "required": ["mode", "server_name", "public_key", "short_id", "client_fingerprint"],
+      "properties": {
+        "mode": { "const": "reality" }, "server_name": { "$ref": "#/$defs/host" },
+        "public_key": { "type": "string", "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$" },
+        "short_id": { "type": "string", "pattern": "^([0-9a-f]{2}){0,8}$" },
+        "client_fingerprint": { "$ref": "#/$defs/fingerprint" }, "alpn": { "$ref": "#/$defs/alpn" }
+      }
+    },
+    "security": {
+      "type": "object", "required": ["mode"], "properties": { "mode": { "enum": ["none", "tls", "reality"] } },
+      "allOf": [
+        { "if": { "properties": { "mode": { "const": "none" } }, "required": ["mode"] }, "then": { "$ref": "#/$defs/no_security" } },
+        { "if": { "properties": { "mode": { "const": "tls" } }, "required": ["mode"] }, "then": { "$ref": "#/$defs/tls" } },
+        { "if": { "properties": { "mode": { "const": "reality" } }, "required": ["mode"] }, "then": { "$ref": "#/$defs/reality" } }
+      ]
+    },
+    "features": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "udp": { "type": "boolean" }, "multiplex": { "type": "boolean" }, "protocol_variant": { "enum": ["xtls-rprx-vision"] } }
+    },
+    "extensions": { "type": "object", "additionalProperties": false, "description": "The v1 extension whitelist is empty; even empty native namespaces are rejected." },
+    "origin": {
+      "type": "object", "additionalProperties": false, "required": ["source_resource_id", "source_item_id", "match_method"],
+      "properties": { "source_resource_id": { "$ref": "#/$defs/uuid" }, "source_item_id": { "$ref": "#/$defs/uuid" }, "match_method": { "enum": ["stable_external_key", "manual_binding", "exact_fingerprint"] } }
+    },
+    "node": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "protocol", "endpoint", "auth", "transport", "security", "features", "extensions"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/version" }, "protocol": { "enum": ["shadowsocks", "vmess", "vless", "trojan", "socks5", "http"] },
+        "endpoint": { "$ref": "#/$defs/endpoint" }, "auth": { "$ref": "#/$defs/auth" }, "transport": { "$ref": "#/$defs/transport" }, "security": { "$ref": "#/$defs/security" },
+        "features": { "$ref": "#/$defs/features" }, "extensions": { "$ref": "#/$defs/extensions" }, "origin": { "$ref": "#/$defs/origin" }
+      },
+      "allOf": [
+        { "if": { "properties": { "protocol": { "const": "shadowsocks" } } }, "then": { "properties": { "auth": { "$ref": "#/$defs/method_password_auth" }, "transport": { "$ref": "#/$defs/native_tcp" }, "security": { "$ref": "#/$defs/no_security" } } } },
+        { "if": { "properties": { "protocol": { "const": "vmess" } } }, "then": { "properties": { "auth": { "$ref": "#/$defs/vmess_auth" }, "security": { "properties": { "mode": { "enum": ["none", "tls"] } } } } } },
+        { "if": { "properties": { "protocol": { "const": "vless" } } }, "then": { "properties": { "auth": { "$ref": "#/$defs/uuid_auth" } } } },
+        { "if": { "properties": { "protocol": { "const": "trojan" } } }, "then": { "properties": { "auth": { "$ref": "#/$defs/password_auth" }, "security": { "$ref": "#/$defs/tls" } } } },
+        { "if": { "properties": { "protocol": { "enum": ["socks5", "http"] } } }, "then": { "properties": { "auth": { "properties": { "kind": { "enum": ["none", "username_password"] } } }, "transport": { "$ref": "#/$defs/native_tcp" }, "security": { "properties": { "mode": { "enum": ["none", "tls"] } } } } } },
+        { "if": { "properties": { "security": { "properties": { "mode": { "const": "reality" } }, "required": ["mode"] } }, "required": ["security"] }, "then": { "properties": { "protocol": { "const": "vless" }, "transport": { "$ref": "#/$defs/native_tcp" } } } },
+        { "if": { "properties": { "features": { "required": ["protocol_variant"] } }, "required": ["features"] }, "then": { "properties": { "protocol": { "const": "vless" }, "transport": { "$ref": "#/$defs/native_tcp" }, "security": { "properties": { "mode": { "enum": ["tls", "reality"] } } } } } }
+      ]
+    },
+    "resource_kind": { "enum": ["node", "chain", "policy_group", "routing_profile", "dns_profile", "rule_set", "client_preset", "subscription_profile", "source"] },
+    "target_ref": {
+      "type": "object", "required": ["type"], "properties": { "type": { "enum": ["resource_ref", "builtin"] } },
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "resource_ref" } }, "required": ["type"] }, "then": {
+          "type": "object", "additionalProperties": false, "required": ["type", "kind", "resource_id"],
+          "properties": { "type": { "const": "resource_ref" }, "kind": { "enum": ["node", "chain", "policy_group"] }, "resource_id": { "$ref": "#/$defs/uuid" } }
+        } },
+        { "if": { "properties": { "type": { "const": "builtin" } }, "required": ["type"] }, "then": {
+          "type": "object", "additionalProperties": false, "required": ["type", "builtin"],
+          "properties": { "type": { "const": "builtin" }, "builtin": { "enum": ["direct", "reject"] } }
+        } }
+      ]
+    },
+    "node_ref": {
+      "type": "object", "additionalProperties": false, "required": ["node_id"], "properties": { "node_id": { "$ref": "#/$defs/uuid" } }
+    },
+    "chain": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "hops", "failure_policy"],
+      "properties": { "schema_version": { "$ref": "#/$defs/version" }, "hops": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/node_ref" } }, "failure_policy": { "const": "fail_closed" } }
+    },
+    "metadata": {
+      "type": "object", "additionalProperties": false, "required": ["resource_id", "scope_id", "kind", "revision", "schema_version", "name", "tags", "enabled", "security_epoch"],
+      "properties": {
+        "resource_id": { "$ref": "#/$defs/uuid" }, "scope_id": { "$ref": "#/$defs/uuid" }, "kind": { "$ref": "#/$defs/resource_kind" }, "revision": { "$ref": "#/$defs/revision" },
+        "schema_version": { "$ref": "#/$defs/version" }, "name": { "$ref": "#/$defs/text" }, "tags": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }, "enabled": { "type": "boolean" }, "security_epoch": { "$ref": "#/$defs/revision" }
+      }
+    },
+    "resource": {
+      "type": "object", "additionalProperties": false, "required": ["metadata", "payload"],
+      "properties": { "metadata": { "$ref": "#/$defs/metadata" }, "payload": { "type": "object" } },
+      "allOf": [
+        { "properties": { "metadata": { "properties": { "kind": { "enum": ["node", "chain"] } } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "node" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/node" } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "chain" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/chain" } } } }
+      ]
+    },
+    "frozen_ref": {
+      "type": "object", "additionalProperties": false, "required": ["resource_id", "kind", "revision", "security_epoch"],
+      "properties": { "resource_id": { "$ref": "#/$defs/uuid" }, "kind": { "enum": ["node", "chain"] }, "revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" } }
+    },
+    "target": {
+      "type": "object", "additionalProperties": false,
+      "required": ["key", "core_family", "core_build_id", "core_build_sha256", "adapter_version", "client_preset_id", "client_preset_revision", "format"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" }, "core_family": { "enum": ["xray", "sing-box", "mihomo"] }, "core_build_id": { "$ref": "#/$defs/uuid" },
+        "core_build_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "adapter_version": { "$ref": "#/$defs/text" },
+        "client_preset_id": { "$ref": "#/$defs/uuid" }, "client_preset_revision": { "$ref": "#/$defs/revision" }, "format": { "enum": ["xray_json", "singbox_json", "mihomo_yaml"] }
+      },
+      "allOf": [
+        { "if": { "properties": { "core_family": { "const": "xray" } } }, "then": { "properties": { "format": { "const": "xray_json" } } } },
+        { "if": { "properties": { "core_family": { "const": "sing-box" } } }, "then": { "properties": { "format": { "const": "singbox_json" } } } },
+        { "if": { "properties": { "core_family": { "const": "mihomo" } } }, "then": { "properties": { "format": { "const": "mihomo_yaml" } } } }
+      ]
+    },
+    "frozen_input": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "snapshot_id", "scope_id", "catalog_revision", "security_epoch", "resources", "members", "targets"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/version" }, "snapshot_id": { "$ref": "#/$defs/uuid" }, "scope_id": { "$ref": "#/$defs/uuid" },
+        "catalog_revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" },
+        "resources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/resource" } },
+        "members": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/frozen_ref" } },
+        "targets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/target" } }
+      }
+    }
+  }
+}

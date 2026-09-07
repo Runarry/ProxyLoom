@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "protocol": "vless",
+  "endpoint": {
+    "host": "a.example.invalid",
+    "port": 443
+  },
+  "auth": {
+    "kind": "uuid",
+    "uuid": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+  },
+  "transport": {
+    "kind": "native_tcp"
+  },
+  "security": {
+    "mode": "reality",
+    "server_name": "reality.example.invalid",
+    "public_key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "short_id": "0123abcd",
+    "client_fingerprint": "chrome",
+    "alpn": [
+      "h2",
+      "http/1.1"
+    ]
+  },
+  "features": {
+    "protocol_variant": "xtls-rprx-vision"
+  },
+  "extensions": {}
+}

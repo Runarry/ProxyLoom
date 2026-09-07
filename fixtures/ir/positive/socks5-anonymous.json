@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "protocol": "socks5",
+  "endpoint": {
+    "host": "a.example.invalid",
+    "port": 443
+  },
+  "auth": {
+    "kind": "none"
+  },
+  "transport": {
+    "kind": "native_tcp"
+  },
+  "security": {
+    "mode": "none"
+  },
+  "features": {
+    "udp": false
+  },
+  "extensions": {}
+}

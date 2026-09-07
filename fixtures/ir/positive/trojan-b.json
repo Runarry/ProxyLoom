@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "protocol": "trojan",
+  "endpoint": {
+    "host": "b.example.invalid",
+    "port": 443
+  },
+  "auth": {
+    "kind": "password",
+    "password": "EXAMPLE_ONLY_B"
+  },
+  "transport": {
+    "kind": "native_tcp"
+  },
+  "security": {
+    "mode": "tls",
+    "server_name": "b.example.invalid",
+    "verify_certificate": true,
+    "alpn": [
+      "h2",
+      "http/1.1"
+    ]
+  },
+  "features": {},
+  "extensions": {}
+}

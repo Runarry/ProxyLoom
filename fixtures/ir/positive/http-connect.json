@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "protocol": "http",
+  "endpoint": {
+    "host": "a.example.invalid",
+    "port": 443
+  },
+  "auth": {
+    "kind": "username_password",
+    "username": "EXAMPLE_ONLY_USER",
+    "password": "EXAMPLE_ONLY_PASSWORD"
+  },
+  "transport": {
+    "kind": "native_tcp"
+  },
+  "security": {
+    "mode": "none"
+  },
+  "features": {
+    "udp": false
+  },
+  "extensions": {}
+}

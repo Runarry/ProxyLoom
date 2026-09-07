@@ -1,0 +1,9 @@
+FROM node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff AS node
+FROM golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+WORKDIR /src
+ENV GOTOOLCHAIN=local
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+COPY . .
+RUN node scripts/check.mjs

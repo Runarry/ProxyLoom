@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "baseline_date": "2026-09-07",
+  "scope": "WP-01 M0 development baseline; not a production release or core compatibility lock",
+  "go": "1.26.0",
+  "node": "24.6.0",
+  "pnpm": "10.33.2",
+  "observed_host": { "os": "windows", "arch": "amd64", "docker_engine": "29.7.2", "docker_compose": "5.5.0" },
+  "go_direct_dependencies": {
+    "github.com/gin-gonic/gin": "v1.11.0",
+    "github.com/jackc/pgx/v5": "v5.7.6",
+    "github.com/santhosh-tekuri/jsonschema/v6": "v6.0.2"
+  },
+  "frontend_direct_dependencies": {
+    "vue": "3.5.42", "vue-router": "4.6.4", "pinia": "3.0.4",
+    "typescript": "5.9.3", "vite": "8.2.2", "@vitejs/plugin-vue": "6.0.8", "vue-tsc": "3.2.5"
+  },
+  "images": {
+    "go_builder": "golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c",
+    "node_builder": "node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff",
+    "postgres": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+    "runtime": "debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171"
+  },
+  "verification": {
+    "dependency_sources": ["https://proxy.golang.org", "https://registry.npmjs.org"],
+    "image_source": "https://registry-1.docker.io/v2/library/",
+    "method": "Official module/npm metadata and docker buildx imagetools inspect; manifests resolved during implementation",
+    "integrity_files": ["go.sum", "proxyloom-web/pnpm-lock.yaml"],
+    "runtime_image_evidence": "docs/evidence/T-002/summary.md"
+  }
+}

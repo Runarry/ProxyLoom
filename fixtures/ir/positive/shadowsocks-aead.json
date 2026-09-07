@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "protocol": "shadowsocks",
+  "endpoint": {
+    "host": "a.example.invalid",
+    "port": 443
+  },
+  "auth": {
+    "kind": "method_password",
+    "method": "aes-128-gcm",
+    "password": "EXAMPLE_ONLY_SS"
+  },
+  "transport": {
+    "kind": "native_tcp"
+  },
+  "security": {
+    "mode": "none"
+  },
+  "features": {
+    "udp": false
+  },
+  "extensions": {}
+}
