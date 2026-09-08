@@ -75,6 +75,14 @@ func TestSDDRouteInventoryAndAuthenticationSurfaces(t *testing.T) {
 	if err := json.Unmarshal(data, &expected); err != nil {
 		t.Fatal(err)
 	}
+	implementedData, err := os.ReadFile(filepath.Join("..", "fixtures", "api", "implemented-routes.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var implemented map[string][]string
+	if err := json.Unmarshal(implementedData, &implemented); err != nil {
+		t.Fatal(err)
+	}
 	doc := document(t)
 	if doc["openapi"] != "3.1.0" {
 		t.Fatal("OpenAPI 3.1 contract required")
@@ -98,8 +106,14 @@ func TestSDDRouteInventoryAndAuthenticationSurfaces(t *testing.T) {
 				t.Fatalf("invalid operation ID on %s %s", method, path)
 			}
 			seenIDs[id] = true
-			if operation["x-implementation-status"] != "contract-only" {
-				t.Fatalf("route must remain unmounted contract: %s %s", method, path)
+			status := "contract-only"
+			for _, mounted := range implemented[path] {
+				if mounted == method {
+					status = "implemented"
+				}
+			}
+			if operation["x-implementation-status"] != status {
+				t.Fatalf("route implementation inventory differs: %s %s", method, path)
 			}
 			if len(object(t, operation["responses"])) == 0 {
 				t.Fatal("operation without typed responses")
@@ -155,6 +169,19 @@ func TestSDDRouteInventoryAndAuthenticationSurfaces(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("route inventory differs: expected %d paths, actual %d paths", len(expected), len(actual))
+	}
+	for path, methods := range implemented {
+		for _, method := range methods {
+			found := false
+			for _, candidate := range actual[path] {
+				if candidate == method {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("implemented route is not in contract: %s %s", method, path)
+			}
+		}
 	}
 	t.Logf("checked %d individual P0 operations on %d paths", operations, len(paths))
 }

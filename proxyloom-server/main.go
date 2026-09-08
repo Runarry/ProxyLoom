@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/config"
+	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/server"
 	"github.com/Runarry/ProxyLoom/internal/storage"
 )
@@ -32,6 +33,8 @@ func run(ctx context.Context, args []string, lookup config.Lookup, logger *slog.
 		args = []string{"serve"}
 	}
 	switch {
+	case len(args) > 1 && args[0] == "admin":
+		return adminCommand(ctx, args[1:], lookup, output)
 	case len(args) == 1 && args[0] == "healthcheck":
 		addr, err := config.HTTPAddress(lookup, ":8080")
 		if err != nil {
@@ -61,16 +64,34 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		return err
 	}
 	defer pool.Close()
+	setupToken, err := cfg.ReadSetupToken()
+	if err != nil {
+		return err
+	}
+	defer clear(setupToken)
+	keys, err := cfg.ReadKeys()
+	if err != nil {
+		return err
+	}
+	defer keys.Clear()
+	identities, err := storage.NewIdentity(pool, identity.Options{
+		ScopeID: identity.DefaultScopeID, SetupToken: setupToken, TokenPepper: keys.TokenPepper,
+	})
+	if err != nil {
+		return errors.New("identity_configuration_invalid")
+	}
 	handler, err := server.NewHandler(cfg.WebDir, server.Dependencies{
 		Database: func(ctx context.Context) error { return storage.Ready(ctx, pool) },
 		Secrets:  cfg.ValidateSecrets,
+		Identity: identities, PublicURL: cfg.PublicURL, Development: cfg.Development,
+		TrustedProxies: cfg.TrustedProxies(),
 	}, logger)
 	if err != nil {
 		return err
 	}
 	defer handler.Close()
 	if cfg.Development {
-		logger.Info("development_mode", "http_loopback_public_url", true, "management_api", false)
+		logger.Info("development_mode", "http_loopback_public_url", true, "management_api", true)
 	}
 	return server.Serve(ctx, cfg.HTTPAddr, handler, logger)
 }

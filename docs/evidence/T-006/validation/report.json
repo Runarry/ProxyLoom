@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "run_id": "d7f4b61f-0abb-478c-b6a6-e0e211a525aa",
+  "started_at": "2026-09-08T13:22:21.713Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "full",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s ./internal/catalog ./internal/storage ./internal/secretbox ./internal/apicontract ./internal/identity ./internal/server ./internal/config ./proxyloom-server ./api",
+  "source_manifest_sha256": "634e2e43f4b8c28febf423ecfc71f792137f06e4eb544bcb9c1cdd4f39aff0d9",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresMigrationFreshPrefixRepeatAndRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityAdminResetCommand",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogDatabaseConstraintsAndPrivileges",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogReferenceScopeKindAndFixedRevision",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogLifecycle",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogConcurrentTransactions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogIdempotencyConcurrentReplayConflictAndRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogRewrapCASPreservesImmutableState",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogScopedPagination",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresFoundationAPITransactionBoundary",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityHTTPSAcceptance",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySetupConcurrentAtomicAndNeverReopens",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySessionLifecyclePersistenceAndReset",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityExpiryEpochDisableAndForeignCredentials",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityLoginDoesNotRevokeAnotherUser",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityRateLimitsPersistRecoverAndBound",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityAuditFailureRollsBackSensitiveTransitions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityResetSerializesLoginAndReauthentication",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPrivilegesAndDatabaseLoss",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPersistedDigestsTamperingAndLiveUserVersion",
+      "result": "pass"
+    }
+  ],
+  "identity_tests": [
+    {
+      "name": "TestPostgresIdentityAdminResetCommand",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityHTTPSAcceptance",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySetupConcurrentAtomicAndNeverReopens",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySessionLifecyclePersistenceAndReset",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityExpiryEpochDisableAndForeignCredentials",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityLoginDoesNotRevokeAnotherUser",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityRateLimitsPersistRecoverAndBound",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityAuditFailureRollsBackSensitiveTransitions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityResetSerializesLoginAndReauthentication",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPrivilegesAndDatabaseLoss",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPersistedDigestsTamperingAndLiveUserVersion",
+      "result": "pass"
+    }
+  ],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-08T13:22:46.260Z",
+  "source_commit": "1ff4c094d9d268c8afae82a6987ba216892b2a46"
+}

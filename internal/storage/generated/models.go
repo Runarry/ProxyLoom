@@ -23,6 +23,29 @@ type IdempotencyKey struct {
 	ExpiresAt        pgtype.Timestamptz
 }
 
+type IdentityAuditEvent struct {
+	ID          pgtype.UUID
+	ScopeID     pgtype.UUID
+	ActorID     pgtype.UUID
+	Action      string
+	Outcome     string
+	AccountHash []byte
+	SourceHash  []byte
+	RequestID   string
+	CreatedAt   pgtype.Timestamptz
+}
+
+type IdentityRateLimit struct {
+	KeyHash     []byte
+	WindowStart pgtype.Timestamptz
+	Attempts    int32
+}
+
+type IdentityState struct {
+	Singleton       bool
+	SetupConsumedAt pgtype.Timestamptz
+}
+
 type ProxyloomSchemaMigration struct {
 	Version   int64
 	Name      string
@@ -84,4 +107,27 @@ type Scope struct {
 	CatalogRevision        int64
 	AuthEpoch              int64
 	LastCatalogTransaction int64
+}
+
+type Session struct {
+	IDHash      []byte
+	ScopeID     pgtype.UUID
+	UserID      pgtype.UUID
+	AuthVersion int64
+	AuthEpoch   int64
+	CreatedAt   pgtype.Timestamptz
+	ExpiresAt   pgtype.Timestamptz
+	LastSeenAt  pgtype.Timestamptz
+	ReauthAt    pgtype.Timestamptz
+}
+
+type User struct {
+	ID           pgtype.UUID
+	ScopeID      pgtype.UUID
+	Login        string
+	PasswordHash string
+	Role         string
+	Disabled     bool
+	AuthVersion  int64
+	CreatedAt    pgtype.Timestamptz
 }

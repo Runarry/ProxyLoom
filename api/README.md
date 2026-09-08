@@ -1,8 +1,8 @@
 # HTTP contract boundary
 
-`openapi.yaml` is the full P0 OpenAPI 3.1 contract. All 86 operations on 57 paths
-remain `contract-only` in this implementation window. The document does not
-register business handlers or assert kernel capability.
+`openapi.yaml` is the full P0 OpenAPI 3.1 contract. Five authentication operations are implemented; the remaining operations on the
+57 paths remain `contract-only`. `fixtures/api/implemented-routes.json` is checked
+against the live HTTP route table. API implementation does not assert kernel capability.
 
 Management uses its session Cookie. Runner operations belong to a separate mTLS
 listener. Subscription retrieval requires its independent path token, live
@@ -48,3 +48,11 @@ external schema references. Drift checks rebuild in a fresh `.cache` directory
 and compare without changing the checked-in output. Go schema/DTO checks are
 `go test -mod=readonly ./api ./internal/apicontract`; persistent behavior is
 covered separately by PostgreSQL integration checks.
+
+T-006 authentication uses HttpOnly/Secure/SameSite=Lax cookies, exact configured
+Origin checks and session-bound X-CSRF-Token on authenticated writes. Setup/login
+require Origin and JSON without a pre-existing session token. The explicit HTTP
+loopback development exception omits Secure only. CurrentUser carries csrf_token;
+it never carries the opaque session ID. New administrator passwords are 12–1024
+UTF-8 bytes; usernames are exact lowercase ASCII identifiers. See
+`docs/m1-identity-contract.md` and ADR-0008 for initialization/reset lifecycle.

@@ -1,10 +1,48 @@
 [
-  {"file":"chain-create.json","schema":"ChainCreateRequest","valid":true},
-  {"file":"node-patch-clear.json","schema":"NodePatchRequest","valid":true,"note":"Null is structurally accepted; merged required password fails with HTTP 422."},
-  {"file":"runner-heartbeat.json","schema":"RunnerJobHeartbeatRequest","valid":true},
-  {"file":"publish.json","schema":"PublishRequest","valid":true},
-  {"file":"test-create.json","schema":"TestCreateRequest","valid":true},
-  {"file":"invalid-arbitrary-runner-input.json","schema":"RunnerJobHeartbeatRequest","valid":false},
-  {"file":"invalid-null-node-patch.json","schema":"NodePatchRequest","valid":false},
-  {"file":"invalid-confirmation.json","schema":"PublishRequest","valid":false}
+  {
+    "file": "chain-create.json",
+    "schema": "ChainCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "node-patch-clear.json",
+    "schema": "NodePatchRequest",
+    "valid": true,
+    "note": "Null is structurally accepted; merged required password fails with HTTP 422."
+  },
+  {
+    "file": "runner-heartbeat.json",
+    "schema": "RunnerJobHeartbeatRequest",
+    "valid": true
+  },
+  {
+    "file": "publish.json",
+    "schema": "PublishRequest",
+    "valid": true
+  },
+  {
+    "file": "test-create.json",
+    "schema": "TestCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "invalid-arbitrary-runner-input.json",
+    "schema": "RunnerJobHeartbeatRequest",
+    "valid": false
+  },
+  {
+    "file": "invalid-null-node-patch.json",
+    "schema": "NodePatchRequest",
+    "valid": false
+  },
+  {
+    "file": "invalid-confirmation.json",
+    "schema": "PublishRequest",
+    "valid": false
+  },
+  {
+    "file": "auth-session.json",
+    "schema": "SessionResponse",
+    "valid": true
+  }
 ]

@@ -67,7 +67,8 @@ services:
       PROXYLOOM_MASTER_KEY_ID: dev-master-v1
       PROXYLOOM_TOKEN_PEPPER_FILE: /run/secrets/token_pepper
       PROXYLOOM_CONTENT_HMAC_KEY_FILE: /run/secrets/content_hmac_key
-    secrets: [database_dsn, master_key, token_pepper, content_hmac_key]
+      PROXYLOOM_SETUP_TOKEN_FILE: /run/secrets/setup_token
+    secrets: [database_dsn, master_key, token_pepper, content_hmac_key, setup_token]
     ports: ['127.0.0.1:${PROXYLOOM_DEV_PORT:-8080}:8080']
     tmpfs: ['/tmp:rw,noexec,nosuid,size=32m,uid=10001,gid=10001']
     networks: [front, data, control]
@@ -114,3 +115,4 @@ secrets:
   master_key: {file: ./secrets/local/master_key}
   token_pepper: {file: ./secrets/local/token_pepper}
   content_hmac_key: {file: ./secrets/local/content_hmac_key}
+  setup_token: {file: ./secrets/local/setup_token}

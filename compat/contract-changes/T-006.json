@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "task": "T-006",
+  "summary": "Implement the five administrator authentication routes: SameSite Strict to Lax with exact-Origin plus synchronizer CSRF defenses; required CurrentUser csrf_token, bounded authentication input schemas, logout body, explicit error responses and implementation metadata. Add immutable identity persistence with generated queries.",
+  "documents": [
+    "docs/m1-identity-contract.md",
+    "docs/adr/0008-identity-and-quality.md"
+  ],
+  "fixtures": [
+    "fixtures/api/auth-session.json",
+    "fixtures/api/implemented-routes.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/models.go",
+    "internal/storage/generated/querier.go",
+    "internal/storage/generated/identity.sql.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "beb7051172c2eb33eb2ce9a8e37428909757e7c9951245afcd2406970d2d065f",
+      "after_sha256": "becc307d3d94f8d9142595597e5cd9e04d660e4a8676ae58002abca45e5aa287",
+      "changes": [
+        {
+          "pointer": "/components/parameters/CSRFToken",
+          "before_sha256": null,
+          "after_sha256": "14e4a6b3690c9f82f598bec29c37d4291e361014fe4b05ecd4d6acea969d9423"
+        },
+        {
+          "pointer": "/components/responses/SessionResponse/description",
+          "before_sha256": "06cd4e2a5b206abff841131ee69b44c447dbb833be784d6a4a5008ec9f80610b",
+          "after_sha256": "5bd49ceeaa96662387d29442146fc2c42e98bf9ac3a0b6220bf1a989eb24dcca"
+        },
+        {
+          "pointer": "/components/responses/SessionResponse/headers/Set-Cookie/description",
+          "before_sha256": "573db78e57b2698211ab439256257f8ba0e3836c65277537aac212c7c147ac30",
+          "after_sha256": "84ef0d5a09f8892bffcf3a857d55d07f1b0d1b6877f265de733c5217028d3254"
+        },
+        {
+          "pointer": "/components/schemas/AuthPassword",
+          "before_sha256": null,
+          "after_sha256": "aafb700bab58a50fd8c2ee50ab46852738b26e8fd48044bd9c4025e4fa185982"
+        },
+        {
+          "pointer": "/components/schemas/AuthUsername",
+          "before_sha256": null,
+          "after_sha256": "4554824d0f4ad3b3022c329a89737a5b14e0c6b0778948505a7a20b0cf9e9003"
+        },
+        {
+          "pointer": "/components/schemas/CurrentUser/properties/csrf_token",
+          "before_sha256": null,
+          "after_sha256": "8557e43930d51280ae9ac13ddb6957543d4c63266b33bf94470b04e5131c81f4"
+        },
+        {
+          "pointer": "/components/schemas/CurrentUser/properties/username/$ref",
+          "before_sha256": "bb5d751d7214a3877e4fd0a356da88e1e053aeb0abd6faf553a73a0937660239",
+          "after_sha256": "3f7d0d65334c68c2c28a41a7c3f420c953adf8940ed685a1a5ccc6cefdd75982"
+        },
+        {
+          "pointer": "/components/schemas/CurrentUser/required",
+          "before_sha256": "63f1618a5b99a21ccd6154803cd98d9b30385e192cb6a6916f8ccb91f74b5e67",
+          "after_sha256": "65a0a798c4ca7fab904e7801a07e0ad9d09e4ab4b8e3b013ddfee89d39a22f27"
+        },
+        {
+          "pointer": "/components/schemas/LoginRequest/properties/password/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "9fe3f4a94d70e09aa4d2932c1449f108ea46288d853ac9c592e4fd6a7491e650"
+        },
+        {
+          "pointer": "/components/schemas/LoginRequest/properties/username/$ref",
+          "before_sha256": "bb5d751d7214a3877e4fd0a356da88e1e053aeb0abd6faf553a73a0937660239",
+          "after_sha256": "3f7d0d65334c68c2c28a41a7c3f420c953adf8940ed685a1a5ccc6cefdd75982"
+        },
+        {
+          "pointer": "/components/schemas/LogoutRequest",
+          "before_sha256": null,
+          "after_sha256": "38eda73750648c5b0fa57556fb953e33cafdb6e1e7ed481d3033cd729ba8cda8"
+        },
+        {
+          "pointer": "/components/schemas/ReauthenticationRequest/properties/password/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "9fe3f4a94d70e09aa4d2932c1449f108ea46288d853ac9c592e4fd6a7491e650"
+        },
+        {
+          "pointer": "/components/schemas/SetupRequest/properties/password/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "9fe3f4a94d70e09aa4d2932c1449f108ea46288d853ac9c592e4fd6a7491e650"
+        },
+        {
+          "pointer": "/components/schemas/SetupRequest/properties/setup_token/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "63c5dfc36e70e37cd91ba9ec4df3a6715045abeea44c53ecadc97662d8ffc74e"
+        },
+        {
+          "pointer": "/components/schemas/SetupRequest/properties/username/$ref",
+          "before_sha256": "bb5d751d7214a3877e4fd0a356da88e1e053aeb0abd6faf553a73a0937660239",
+          "after_sha256": "3f7d0d65334c68c2c28a41a7c3f420c953adf8940ed685a1a5ccc6cefdd75982"
+        },
+        {
+          "pointer": "/components/schemas/SetupToken",
+          "before_sha256": null,
+          "after_sha256": "eda6e927c4e16861e21d44987c1fd6675ca4a735c01dab1b1cc9df233c439997"
+        },
+        {
+          "pointer": "/components/securitySchemes/SessionCookie/description",
+          "before_sha256": "bbb6871bf70b3b0e1ff6d65bfd929d57f12834f890f84051ff9ca18840bf25fa",
+          "after_sha256": "399d77506b531f554245710588b7e4318e490c3a6f59a685b4745f5d462cb5bb"
+        },
+        {
+          "pointer": "/info/description",
+          "before_sha256": "17d665b107289cd99a177ae09a38e7f3df93aeeae4fd435b6ca7c9046a04f91e",
+          "after_sha256": "7801f3d85f5c8db2b7c9956837f28187d36f1dc40210f474a9000d9f2eec1e1f"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/description",
+          "before_sha256": null,
+          "after_sha256": "9df6846fdd3b311dcbd9c8d6fc99b5bec5f3f2363c986a9388171ed2a13eb60a"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/responses/403",
+          "before_sha256": null,
+          "after_sha256": "f7d4efe7196633996efaa5e77ba84e0d00e2456ee2de5504bb9bac83969c29e3"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/responses/422",
+          "before_sha256": null,
+          "after_sha256": "2a50e00dd83e58c27c56b6b56e2bbc580c91c6597aaf1f194e20f625cf1f4eec"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/description",
+          "before_sha256": "9c4a6641b0a717cca7677976621bf178530e7626e3a5374413832889791fe43f",
+          "after_sha256": "4bdaad8b88b9c0150dcd9b50a071b4a4b4a360fd885e85395674d147effa793a"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/parameters",
+          "before_sha256": null,
+          "after_sha256": "43360e9a6dedbcb288998888387957e44793652179c357b4c7bf9d1035f9c003"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/requestBody",
+          "before_sha256": null,
+          "after_sha256": "e3b3b092b7ca78c44a973151607efedf3b9cbfb80096a6a90765a9c4617f8ff4"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/responses/400",
+          "before_sha256": null,
+          "after_sha256": "c1f2785fba6bdef82720d860bebe1d6c89f34b73fb6baee089b7bac7deca4389"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/responses/422",
+          "before_sha256": null,
+          "after_sha256": "2a50e00dd83e58c27c56b6b56e2bbc580c91c6597aaf1f194e20f625cf1f4eec"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1me/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/description",
+          "before_sha256": null,
+          "after_sha256": "7af1c9170d7994f9d418a1486162c1701450ca62209752ce31afb9e327fd150e"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/parameters",
+          "before_sha256": null,
+          "after_sha256": "43360e9a6dedbcb288998888387957e44793652179c357b4c7bf9d1035f9c003"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/responses/422",
+          "before_sha256": null,
+          "after_sha256": "2a50e00dd83e58c27c56b6b56e2bbc580c91c6597aaf1f194e20f625cf1f4eec"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/description",
+          "before_sha256": "374714fefe133457d4681af384ef6c9f4fec6950f411b2aef27ea7d5ef450a9a",
+          "after_sha256": "de308c164cd7f8881097528c8c1460c7cf087be965ccf2c67368d6da3fc50b37"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/responses/401",
+          "before_sha256": null,
+          "after_sha256": "0920ec8821a71dd5f211f197c75d127ad226371b823bffacd75bc590b4f1f16e"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000004_identity.up.sql",
+      "before_sha256": null,
+      "after_sha256": "c4687d5db878efdf261fa544a663858e31e17465307f249b4d9b038e748e172b",
+      "changes": []
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-// Package server exposes the T-002 health endpoints and the frontend shell.
+// Package server exposes the health endpoints, administrator API and frontend shell.
 package server
 
 import (
@@ -12,10 +12,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/apicontract"
+	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,6 +31,11 @@ const ReadinessTimeout = 2 * time.Second
 type Dependencies struct {
 	Database func(context.Context) error
 	Secrets  func() error
+	// A nil Identity preserves the health/static bootstrap handler.
+	Identity       identity.Service
+	PublicURL      string
+	Development    bool
+	TrustedProxies []string
 }
 
 type Handler struct {
@@ -42,6 +49,17 @@ func init() { gin.SetMode(gin.ReleaseMode) }
 func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (*Handler, error) {
 	if dependencies.Database == nil || dependencies.Secrets == nil || logger == nil {
 		return nil, errors.New("server_dependencies_invalid")
+	}
+	var authentication *Authentication
+	if dependencies.Identity != nil {
+		var err error
+		authentication, err = NewAuthentication(dependencies.Identity, AuthenticationConfig{
+			PublicURL: dependencies.PublicURL, Development: dependencies.Development,
+			TrustedProxies: dependencies.TrustedProxies,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	root, err := os.OpenRoot(webDir)
 	if err != nil {
@@ -72,6 +90,9 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 	router.HEAD("/healthz", live)
 	router.GET("/readyz", ready)
 	router.HEAD("/readyz", ready)
+	if authentication != nil {
+		authentication.mount(router)
+	}
 	router.NoRoute(handler.static)
 	handler.boundary = apicontract.RequestIDs(router)
 	return handler, nil
@@ -81,6 +102,23 @@ func (h *Handler) Close() error { return h.web.Close() }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.boundary.ServeHTTP(w, r)
+}
+
+// Routes inventories the actual registered service routes. Operational health
+// endpoints and the SPA fallback are excluded; method names match the contract
+// manifest. Callers receive a copy, so they cannot change routing.
+func (h *Handler) Routes() map[string][]string {
+	routes := make(map[string][]string)
+	for _, route := range h.router.Routes() {
+		if route.Path == "/healthz" || route.Path == "/readyz" {
+			continue
+		}
+		routes[route.Path] = append(routes[route.Path], strings.ToLower(route.Method))
+	}
+	for _, methods := range routes {
+		slices.Sort(methods)
+	}
+	return routes
 }
 
 func notFound(c *gin.Context) {
@@ -184,7 +222,7 @@ func safeAccessLog(logger *slog.Logger) gin.HandlerFunc {
 		started := time.Now()
 		c.Next()
 		route := c.FullPath()
-		if route != "/healthz" && route != "/readyz" {
+		if !safeRegisteredRoute(route) {
 			route = "unmatched"
 			if value, ok := c.Get("safe_route"); ok && value == "static" {
 				route = "static"
@@ -197,6 +235,16 @@ func safeAccessLog(logger *slog.Logger) gin.HandlerFunc {
 			method = "other"
 		}
 		logger.Info("http_request", "request_id", apicontract.RequestID(c.Request.Context()), "route", route, "method", method, "status", c.Writer.Status(), "duration_ms", time.Since(started).Milliseconds())
+	}
+}
+
+func safeRegisteredRoute(route string) bool {
+	switch route {
+	case "/healthz", "/readyz", "/api/v1/setup", "/api/v1/auth/login",
+		"/api/v1/auth/logout", "/api/v1/auth/me", "/api/v1/auth/reauth":
+		return true
+	default:
+		return false
 	}
 }
 

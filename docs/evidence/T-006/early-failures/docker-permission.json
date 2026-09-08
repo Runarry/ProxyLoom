@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "run_id": "41020170-25f3-4ebb-90d1-9dfa084ba04e",
+  "started_at": "2026-09-08T13:14:38.034Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [],
+  "cleanup": [],
+  "result": "fail",
+  "error": "foundation_engine_failed",
+  "ended_at": "2026-09-08T13:14:38.243Z",
+  "source_commit": "1ff4c094d9d268c8afae82a6987ba216892b2a46"
+}

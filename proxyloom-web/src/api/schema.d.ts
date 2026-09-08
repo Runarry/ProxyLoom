@@ -26,7 +26,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Authenticate and rotate the management session */
+        /**
+         * Authenticate and rotate the management session
+         * @description Requires exact Origin and application/json; no existing session or CSRF token required. Login does not establish a recent reauthentication marker.
+         */
         post: operations["login"];
         delete?: never;
         options?: never;
@@ -45,7 +48,7 @@ export interface paths {
         put?: never;
         /**
          * Revoke the current management session
-         * @description Authentication operations have no resource If-Match precondition.
+         * @description Requires exact Origin, application/json and X-CSRF-Token. Authentication operations have no resource If-Match precondition.
          */
         post: operations["logout"];
         delete?: never;
@@ -80,7 +83,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Establish a recent authentication marker on the current session */
+        /**
+         * Establish a recent authentication marker on the current session
+         * @description Requires exact Origin, application/json and X-CSRF-Token. The marker expires after five minutes.
+         */
         post: operations["reauthenticate"];
         delete?: never;
         options?: never;
@@ -684,7 +690,7 @@ export interface paths {
         put?: never;
         /**
          * Initialize the administrator once while the system is empty
-         * @description Requires the configured one-time setup credential. Never accepts a scope or resource revision.
+         * @description Requires the configured one-time setup credential, exact Origin and JSON. Never accepts a scope or resource revision. Disabled after the first successful initialization.
          */
         post: operations["setup"];
         delete?: never;
@@ -1190,6 +1196,10 @@ export interface components {
             page: components["schemas"]["PageInfo"];
             request_id: components["schemas"]["RequestID"];
         };
+        /** @description UTF-8 password, at most 1024 bytes. New passwords require at least 12 bytes; domain violations return 422. Passwords are never normalized. */
+        AuthPassword: string;
+        /** @description Exact lowercase ASCII identifier; no implicit trimming or case conversion. */
+        AuthUsername: string;
         BooleanFieldConstraint: {
             allowed_values: boolean[];
             field_path: components["schemas"]["SafeFieldPath"];
@@ -1429,12 +1439,14 @@ export interface components {
         /** @description Canonical nonnegative decimal int64 string, 0..9223372036854775807. No signs or leading zeros. */
         Counter: string;
         CurrentUser: {
+            /** @description Session-bound token for X-CSRF-Token. Keep in memory only; never an authorization substitute. */
+            csrf_token: string;
             recent_authentication_expires_at?: components["schemas"]["Timestamp"];
             /** @constant */
             role: "administrator";
             session_expires_at: components["schemas"]["Timestamp"];
             user_id: components["schemas"]["UUID"];
-            username: components["schemas"]["ShortText"];
+            username: components["schemas"]["AuthUsername"];
         };
         Diagnostic: {
             code: components["schemas"]["ErrorCode"];
@@ -1780,9 +1792,10 @@ export interface components {
             protocol: "socks5" | "http" | "mixed";
         };
         LoginRequest: {
-            password: components["schemas"]["Secret"];
-            username: components["schemas"]["ShortText"];
+            password: components["schemas"]["AuthPassword"];
+            username: components["schemas"]["AuthUsername"];
         };
+        LogoutRequest: Record<string, never>;
         MemberRef: {
             /** @enum {string} */
             kind: "node" | "chain";
@@ -2165,7 +2178,7 @@ export interface components {
             reason: string;
         };
         ReauthenticationRequest: {
-            password: components["schemas"]["Secret"];
+            password: components["schemas"]["AuthPassword"];
         };
         ReferenceListResponse: {
             data: components["schemas"]["ResourceReference"][];
@@ -2505,10 +2518,12 @@ export interface components {
             request_id: components["schemas"]["RequestID"];
         };
         SetupRequest: {
-            password: components["schemas"]["Secret"];
-            setup_token: components["schemas"]["Secret"];
-            username: components["schemas"]["ShortText"];
+            password: components["schemas"]["AuthPassword"];
+            setup_token: components["schemas"]["SetupToken"];
+            username: components["schemas"]["AuthUsername"];
         };
+        /** @description Canonical unpadded base64url encoding of 32 random bytes from the controlled host command. */
+        SetupToken: string;
         SHA256: string;
         /** @enum {string} */
         ShadowsocksMethod: "aes-128-gcm" | "aes-256-gcm" | "chacha20-ietf-poly1305";
@@ -3530,11 +3545,11 @@ export interface components {
                 "application/json": components["schemas"]["RunnerLeaseResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Authenticated current user and CSRF token; no-store. Session cookie is set on setup/login and refreshed without extending absolute expiry. */
         SessionResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
-                /** @description Set or rotate proxyloom_session with Secure; HttpOnly; SameSite=Strict. Session identifiers are never response-body fields. */
+                /** @description Set or rotate proxyloom_session with Secure; HttpOnly; SameSite=Lax. Session identifiers are never response-body fields. */
                 "Set-Cookie"?: string;
                 "X-Request-ID": components["headers"]["RequestID"];
                 [name: string]: unknown;
@@ -3730,6 +3745,8 @@ export interface components {
     parameters: {
         CoreBuildID: components["schemas"]["UUID"];
         CoreFamily: components["schemas"]["CoreFamily"];
+        /** @description Session-bound CSRF token returned by setup/login/me/reauth. Used together with an exact Origin check. */
+        CSRFToken: string;
         /** @description Opaque authenticated continuation tied to scope, collection, order and normalized filter digest. A changed filter or invalid cursor is 400; authorization is checked separately on every request. */
         Cursor: string;
         Enabled: boolean;
@@ -3807,6 +3824,9 @@ export interface operations {
             200: components["responses"]["SessionResponse"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            413: components["responses"]["TooLarge"];
+            422: components["responses"]["UnprocessableEntity"];
             429: components["responses"]["RateLimited"];
             503: components["responses"]["Unavailable"];
         };
@@ -3814,15 +3834,25 @@ export interface operations {
     logout: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description Session-bound CSRF token returned by setup/login/me/reauth. Used together with an exact Origin check. */
+                "X-CSRF-Token": components["parameters"]["CSRFToken"];
+            };
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LogoutRequest"];
+            };
+        };
         responses: {
             200: components["responses"]["Acknowledgement"];
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            413: components["responses"]["TooLarge"];
+            422: components["responses"]["UnprocessableEntity"];
             503: components["responses"]["Unavailable"];
         };
     };
@@ -3843,7 +3873,10 @@ export interface operations {
     reauthenticate: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description Session-bound CSRF token returned by setup/login/me/reauth. Used together with an exact Origin check. */
+                "X-CSRF-Token": components["parameters"]["CSRFToken"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3857,6 +3890,8 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            413: components["responses"]["TooLarge"];
+            422: components["responses"]["UnprocessableEntity"];
             429: components["responses"]["RateLimited"];
             503: components["responses"]["Unavailable"];
         };
@@ -5001,8 +5036,10 @@ export interface operations {
         responses: {
             201: components["responses"]["SessionResponse"];
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["TooLarge"];
             422: components["responses"]["UnprocessableEntity"];
             429: components["responses"]["RateLimited"];
             503: components["responses"]["Unavailable"];

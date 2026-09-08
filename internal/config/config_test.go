@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -96,7 +97,7 @@ func TestSecretValidation(t *testing.T) {
 }
 
 func TestPublicURLPolicy(t *testing.T) {
-	for _, tc := range []struct {
+	for index, tc := range []struct {
 		url, dev string
 		valid    bool
 	}{
@@ -119,7 +120,7 @@ func TestPublicURLPolicy(t *testing.T) {
 		{"", "", false},
 		{"https://example.test", "yes", false},
 	} {
-		t.Run(tc.url+tc.dev, func(t *testing.T) {
+		t.Run("case_"+strconv.Itoa(index), func(t *testing.T) {
 			env := apiEnvironment(t)
 			env["PROXYLOOM_PUBLIC_URL"], env["PROXYLOOM_DEV_MODE"] = tc.url, tc.dev
 			_, err := LoadAPI(lookup(env))

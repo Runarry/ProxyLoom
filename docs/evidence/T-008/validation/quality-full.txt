@@ -1,0 +1,421 @@
+> secret-scan
+{
+  "schema_version": 1,
+  "result": "pass",
+  "candidate_files": 372,
+  "index_blobs": 321,
+  "findings": []
+}
+> node-version
+v24.6.0
+> tool-locks
+PASS: tool versions, direct dependencies, Docker base digests, Compose PostgreSQL and CI versions match tools.lock.json.
+> pnpm-version
+10.33.2
+> frontend-frozen-install
+Recreating G:\Projects\ProxyLoom\proxyloom-web\node_modules
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +89
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 89, reused 27, downloaded 0, added 27
+Progress: resolved 89, reused 27, downloaded 46, added 70
+Progress: resolved 89, reused 27, downloaded 60, added 85
+Progress: resolved 89, reused 27, downloaded 61, added 88
+Progress: resolved 89, reused 27, downloaded 62, added 88
+Progress: resolved 89, reused 27, downloaded 62, added 89, done
+
+dependencies:
++ pinia 3.0.4
++ vue 3.5.42
++ vue-router 4.6.4
+
+devDependencies:
++ @vitejs/plugin-vue 6.0.8
++ openapi-typescript 7.9.1
++ typescript 5.9.3
++ vite 8.2.2
++ vue-tsc 3.2.5
+
+Done in 7.2s using pnpm v10.33.2
+> sqlc-locked-install
+PASS: locked sqlc 1.31.1 (windows_amd64).
+> quality-and-script-selftests
+✔ summarizes failed tests and source diagnostics, omitting successful test output (4.9228ms)
+✔ retains compile stderr even when Go emitted no test failure event (2.2921ms)
+✔ redacts registered secrets and DSNs plus common credential forms (0.8183ms)
+✔ neutralizes workflow commands, terminal controls and line injections (0.6036ms)
+✔ bounds UTF-8 bytes and total lines (2.2597ms)
+✔ successful runs and empty input produce no failure summary (0.192ms)
+✔ existing stopped container refuses all mutations (8.1051ms)
+✔ existing orphan container refuses all mutations (2.8151ms)
+✔ existing network refuses all mutations (3.0954ms)
+✔ existing volume refuses all mutations (4.0563ms)
+✔ container query failure fails closed (2.6672ms)
+✔ network query failure fails closed (3.0149ms)
+✔ volume query failure fails closed (4.2752ms)
+✔ all networks query failure fails closed (3.2438ms)
+✔ inspect query failure fails closed (4.0517ms)
+✔ occupied overlapping 172.30.0.0/16 does not change existing resources (3.1974ms)
+✔ occupied overlapping 172.30.252.0/23 does not change existing resources (3.4337ms)
+✔ occupied overlapping 172.30.253.128/25 does not change existing resources (3.1292ms)
+✔ occupied overlapping 172.30.253.0/24 does not change existing resources (2.2104ms)
+✔ CIDR overlap handles boundaries, host bits and IPv6 (6.6308ms)
+✔ partial up failure (exit code) cleans only this run (4.9788ms)
+✔ partial up failure (exception) cleans only this run (6.3013ms)
+✔ cleanup failure cannot publish a pass report or message (10.9045ms)
+✔ phase and cleanup exceptions preserve both failures without a pass (6.3058ms)
+✔ successful runs isolate project and output, publish only after cleanup (22.7837ms)
+﹣ unreadable-runtime fails before invoking psql (1.2694ms) # Requires a POSIX shell; exercised on Linux CI
+﹣ unreadable-migration fails before invoking psql (0.198ms) # Requires a POSIX shell; exercised on Linux CI
+﹣ empty-runtime fails before invoking psql (0.1581ms) # Requires a POSIX shell; exercised on Linux CI
+﹣ empty-migration fails before invoking psql (0.1595ms) # Requires a POSIX shell; exercised on Linux CI
+﹣ valid credentials are exported to psql (0.1601ms) # Requires a POSIX shell; exercised on Linux CI
+✔ unknown breaking Schema mutation fails and one exact reviewed change passes (2812.143ms)
+✔ contract declarations require documentation and fixtures changed in the same diff (1148.4259ms)
+✔ OpenAPI removal is blocked; declared API changes also require generated TypeScript changes (3151.689ms)
+✔ source digests catch precision-losing JSON numeric changes and immutable migration edits (2360.4639ms)
+✔ missing PR base fails closed, and checks never rewrite task status or capabilities (907.272ms)
+✔ an actually failing node test exits nonzero through the same runner used by CI (567.2988ms)
+✔ entry cannot retain a passing result if its final source inventory fails (659.6844ms)
+✔ real API drift checker rejects a modified generated file in an isolated copy (1626.3081ms)
+✔ registered output secrets and workflow commands do not leak from subprocesses (226.6867ms)
+✔ evidence staging is all-or-nothing, bounded and limited to named files (34.7164ms)
+✔ collector loads registered runtime secrets before accepting even metadata-named evidence (24.9596ms)
+✔ detects private keys, subscriptions, credential URIs and registered values without echoing them (5.1316ms)
+✔ wide-character and binary files are inspected instead of skipped (0.9913ms)
+✔ fixture exceptions are exact file, detector and whole line, never directories or registered secrets (1.1274ms)
+✔ repository scanner catches untracked candidates and staged secrets hidden by clean working files (1739.9242ms)
+✔ real scanner CLI exits nonzero on synthetic secrets in an independent repository (691.1448ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 41
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 5
+ℹ todo 0
+ℹ duration_ms 10695.9945
+> engineering
+> C:\Program Files\nodejs\node.exe scripts/check-locks.mjs
+PASS: tool versions, direct dependencies, Docker base digests, Compose PostgreSQL and CI versions match tools.lock.json.
+> C:\Program Files\nodejs\node.exe scripts/check-plan.mjs
+PASS: 60 unique sequential tasks match PLAN metadata and form an acyclic dependency graph.
+> C:\Program Files\nodejs\node.exe scripts/check-boundaries.mjs
+PASS: IR and compiler exclude HTTP/database/exec; Runner dependency graph excludes database/identity/server; API and Runner exclude isolation fixtures.
+> C:\Program Files\nodejs\node.exe scripts/check-sqlc.mjs
+PASS: sqlc generated queries match the locked generator.
+> C:\Program Files\nodejs\node.exe scripts/verify-cores.mjs
+PASS: cores.lock.yaml pins six official linux builds with unverified P0 combinations and no latest/verified placeholders.
+> C:\Program Files\nodejs\node.exe --test scripts/isolation-compose.test.mjs
+✔ existing stopped container refuses all mutations (4.9857ms)
+✔ existing orphan container refuses all mutations (1.6251ms)
+✔ existing network refuses all mutations (1.4239ms)
+✔ existing volume refuses all mutations (1.4064ms)
+✔ container query failure fails closed (1.5902ms)
+✔ network query failure fails closed (1.3352ms)
+✔ volume query failure fails closed (1.1661ms)
+✔ all networks query failure fails closed (1.3174ms)
+✔ inspect query failure fails closed (1.3112ms)
+✔ occupied overlapping 172.30.0.0/16 does not change existing resources (2.0166ms)
+✔ occupied overlapping 172.30.252.0/23 does not change existing resources (1.8944ms)
+✔ occupied overlapping 172.30.253.128/25 does not change existing resources (1.4367ms)
+✔ occupied overlapping 172.30.253.0/24 does not change existing resources (1.143ms)
+✔ CIDR overlap handles boundaries, host bits and IPv6 (3.9511ms)
+✔ partial up failure (exit code) cleans only this run (3.0786ms)
+✔ partial up failure (exception) cleans only this run (2.4593ms)
+✔ cleanup failure cannot publish a pass report or message (6.5049ms)
+✔ phase and cleanup exceptions preserve both failures without a pass (2.8553ms)
+✔ successful runs isolate project and output, publish only after cleanup (12.9733ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 164.2291
+> gofmt -l G:\Projects\ProxyLoom\api\schema.go G:\Projects\ProxyLoom\api\schema_test.go G:\Projects\ProxyLoom\compat\embed.go G:\Projects\ProxyLoom\internal\adapter\adapter.go G:\Projects\ProxyLoom\internal\adapter\adapter_test.go G:\Projects\ProxyLoom\internal\adapter\emit.go G:\Projects\ProxyLoom\internal\adapter\emit_test.go G:\Projects\ProxyLoom\internal\adapter\mihomo\emit.go G:\Projects\ProxyLoom\internal\adapter\mihomo\emit_test.go G:\Projects\ProxyLoom\internal\adapter\mihomo\mihomo.go G:\Projects\ProxyLoom\internal\adapter\mihomo\mihomo_test.go G:\Projects\ProxyLoom\internal\adapter\redact.go G:\Projects\ProxyLoom\internal\adapter\singbox\emit.go G:\Projects\ProxyLoom\internal\adapter\singbox\emit_test.go G:\Projects\ProxyLoom\internal\adapter\singbox\singbox.go G:\Projects\ProxyLoom\internal\adapter\singbox\singbox_test.go G:\Projects\ProxyLoom\internal\adapter\xray\emit.go G:\Projects\ProxyLoom\internal\adapter\xray\emit_test.go G:\Projects\ProxyLoom\internal\adapter\xray\xray.go G:\Projects\ProxyLoom\internal\adapter\xray\xray_test.go G:\Projects\ProxyLoom\internal\apicontract\auth.go G:\Projects\ProxyLoom\internal\apicontract\contract_test.go G:\Projects\ProxyLoom\internal\apicontract\cursor.go G:\Projects\ProxyLoom\internal\apicontract\errors.go G:\Projects\ProxyLoom\internal\apicontract\http.go G:\Projects\ProxyLoom\internal\apicontract\idempotency.go G:\Projects\ProxyLoom\internal\apicontract\jobs.go G:\Projects\ProxyLoom\internal\apicontract\jobs_test.go G:\Projects\ProxyLoom\internal\apicontract\json.go G:\Projects\ProxyLoom\internal\apicontract\node.go G:\Projects\ProxyLoom\internal\apicontract\read.go G:\Projects\ProxyLoom\internal\capability\catalog.go G:\Projects\ProxyLoom\internal\capability\catalog_test.go G:\Projects\ProxyLoom\internal\capability\parse.go G:\Projects\ProxyLoom\internal\catalog\catalog.go G:\Projects\ProxyLoom\internal\catalog\redaction.go G:\Projects\ProxyLoom\internal\catalog\resource.go G:\Projects\ProxyLoom\internal\catalog\resource_test.go G:\Projects\ProxyLoom\internal\chainverify\core.go G:\Projects\ProxyLoom\internal\chainverify\freeze.go G:\Projects\ProxyLoom\internal\chainverify\freeze_test.go G:\Projects\ProxyLoom\internal\chainverify\lifecycle_test.go G:\Projects\ProxyLoom\internal\chainverify\live_helpers_test.go G:\Projects\ProxyLoom\internal\chainverify\live_test.go G:\Projects\ProxyLoom\internal\chainverify\report.go G:\Projects\ProxyLoom\internal\chainverify\socks.go G:\Projects\ProxyLoom\internal\chainverify\topo.go G:\Projects\ProxyLoom\internal\compiler\compile.go G:\Projects\ProxyLoom\internal\compiler\compile_test.go G:\Projects\ProxyLoom\internal\compiler\emit.go
+> gofmt -l G:\Projects\ProxyLoom\internal\compiler\label.go G:\Projects\ProxyLoom\internal\compiler\label_test.go G:\Projects\ProxyLoom\internal\compiler\native_test.go G:\Projects\ProxyLoom\internal\compiler\plan.go G:\Projects\ProxyLoom\internal\compiler\prepare.go G:\Projects\ProxyLoom\internal\compiler\protocol.go G:\Projects\ProxyLoom\internal\config\config.go G:\Projects\ProxyLoom\internal\config\config_test.go G:\Projects\ProxyLoom\internal\config\identity_test.go G:\Projects\ProxyLoom\internal\config\keys.go G:\Projects\ProxyLoom\internal\config\keys_test.go G:\Projects\ProxyLoom\internal\identity\credentials.go G:\Projects\ProxyLoom\internal\identity\credentials_test.go G:\Projects\ProxyLoom\internal\identity\identity.go G:\Projects\ProxyLoom\internal\identity\redaction.go G:\Projects\ProxyLoom\internal\ir\diagnostic.go G:\Projects\ProxyLoom\internal\ir\frozen.go G:\Projects\ProxyLoom\internal\ir\frozen_test.go G:\Projects\ProxyLoom\internal\ir\ir_test.go G:\Projects\ProxyLoom\internal\ir\json.go G:\Projects\ProxyLoom\internal\ir\node.go G:\Projects\ProxyLoom\internal\ir\redaction.go G:\Projects\ProxyLoom\internal\ir\resource.go G:\Projects\ProxyLoom\internal\ir\value_validation.go G:\Projects\ProxyLoom\internal\isolation\cert.go G:\Projects\ProxyLoom\internal\isolation\compose_smoke_test.go G:\Projects\ProxyLoom\internal\isolation\events.go G:\Projects\ProxyLoom\internal\isolation\isolation_test.go G:\Projects\ProxyLoom\internal\isolation\log.go G:\Projects\ProxyLoom\internal\isolation\target.go G:\Projects\ProxyLoom\internal\isolation\trojan.go G:\Projects\ProxyLoom\internal\isolation\trojan_payload_test.go G:\Projects\ProxyLoom\internal\runner\exec\env.go G:\Projects\ProxyLoom\internal\runner\exec\exec_linux_test.go G:\Projects\ProxyLoom\internal\runner\exec\exec_nolinux_test.go G:\Projects\ProxyLoom\internal\runner\exec\exec_test.go G:\Projects\ProxyLoom\internal\runner\exec\proc_linux.go G:\Projects\ProxyLoom\internal\runner\exec\proc_nolinux.go G:\Projects\ProxyLoom\internal\runner\exec\proc_unix.go G:\Projects\ProxyLoom\internal\runner\exec\proc_windows.go G:\Projects\ProxyLoom\internal\runner\exec\registry.go G:\Projects\ProxyLoom\internal\runner\exec\run.go G:\Projects\ProxyLoom\internal\runner\exec\signal_unix.go G:\Projects\ProxyLoom\internal\runner\exec\signal_windows.go G:\Projects\ProxyLoom\internal\runner\exec\workspace.go G:\Projects\ProxyLoom\internal\runner\runner.go G:\Projects\ProxyLoom\internal\runner\runner_test.go G:\Projects\ProxyLoom\internal\secretbox\redaction.go G:\Projects\ProxyLoom\internal\secretbox\secretbox.go G:\Projects\ProxyLoom\internal\secretbox\secretbox_test.go
+> gofmt -l G:\Projects\ProxyLoom\internal\server\auth.go G:\Projects\ProxyLoom\internal\server\auth_test.go G:\Projects\ProxyLoom\internal\server\auth_transport.go G:\Projects\ProxyLoom\internal\server\auth_transport_test.go G:\Projects\ProxyLoom\internal\server\server.go G:\Projects\ProxyLoom\internal\server\server_test.go G:\Projects\ProxyLoom\internal\storage\catalog.go G:\Projects\ProxyLoom\internal\storage\catalog_constraints_postgres_test.go G:\Projects\ProxyLoom\internal\storage\catalog_postgres_test.go G:\Projects\ProxyLoom\internal\storage\catalog_reads.go G:\Projects\ProxyLoom\internal\storage\catalog_test.go G:\Projects\ProxyLoom\internal\storage\catalog_transactions_postgres_test.go G:\Projects\ProxyLoom\internal\storage\foundation_acceptance_test.go G:\Projects\ProxyLoom\internal\storage\generated\catalog.sql.go G:\Projects\ProxyLoom\internal\storage\generated\db.go G:\Projects\ProxyLoom\internal\storage\generated\idempotency.sql.go G:\Projects\ProxyLoom\internal\storage\generated\identity.sql.go G:\Projects\ProxyLoom\internal\storage\generated\models.go G:\Projects\ProxyLoom\internal\storage\generated\querier.go G:\Projects\ProxyLoom\internal\storage\idempotency.go G:\Projects\ProxyLoom\internal\storage\identity.go G:\Projects\ProxyLoom\internal\storage\identity_http_acceptance_test.go G:\Projects\ProxyLoom\internal\storage\identity_postgres_test.go G:\Projects\ProxyLoom\internal\storage\migrations.go G:\Projects\ProxyLoom\internal\storage\migrations_test.go G:\Projects\ProxyLoom\internal\storage\postgres_test.go G:\Projects\ProxyLoom\internal\storage\storage.go G:\Projects\ProxyLoom\internal\storage\storage_test.go G:\Projects\ProxyLoom\migrations\migrations.go G:\Projects\ProxyLoom\migrations\migrations_test.go G:\Projects\ProxyLoom\proxyloom-fixtures\certs.go G:\Projects\ProxyLoom\proxyloom-fixtures\certs_unix_test.go G:\Projects\ProxyLoom\proxyloom-fixtures\config.go G:\Projects\ProxyLoom\proxyloom-fixtures\main.go G:\Projects\ProxyLoom\proxyloom-fixtures\main_test.go G:\Projects\ProxyLoom\proxyloom-runner\healthcheck.go G:\Projects\ProxyLoom\proxyloom-runner\main.go G:\Projects\ProxyLoom\proxyloom-runner\main_test.go G:\Projects\ProxyLoom\proxyloom-server\admin.go G:\Projects\ProxyLoom\proxyloom-server\admin_postgres_test.go G:\Projects\ProxyLoom\proxyloom-server\admin_test.go G:\Projects\ProxyLoom\proxyloom-server\healthcheck.go G:\Projects\ProxyLoom\proxyloom-server\main.go G:\Projects\ProxyLoom\proxyloom-server\main_test.go G:\Projects\ProxyLoom\schemas\schema.go
+> go mod verify
+all modules verified
+> go mod tidy -diff
+> go vet -mod=readonly ./...
+> go test -mod=readonly -race ./...
+ok  	github.com/Runarry/ProxyLoom/api	(cached)
+?   	github.com/Runarry/ProxyLoom/compat	[no test files]
+ok  	github.com/Runarry/ProxyLoom/internal/adapter	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/mihomo	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/singbox	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/xray	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/apicontract	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/capability	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/catalog	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/chainverify	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/compiler	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/config	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/identity	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/ir	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/isolation	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/runner	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/runner/exec	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/secretbox	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/server	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/storage	(cached)
+?   	github.com/Runarry/ProxyLoom/internal/storage/generated	[no test files]
+ok  	github.com/Runarry/ProxyLoom/migrations	(cached)
+ok  	github.com/Runarry/ProxyLoom/proxyloom-fixtures	(cached)
+ok  	github.com/Runarry/ProxyLoom/proxyloom-runner	(cached)
+ok  	github.com/Runarry/ProxyLoom/proxyloom-server	(cached)
+?   	github.com/Runarry/ProxyLoom/schemas	[no test files]
+PASS: engineering checks. Frontend checks run separately in CI.
+> frontend-types-and-build
+
+> proxyloom-web@0.1.0 build G:\Projects\ProxyLoom\proxyloom-web
+> pnpm typecheck && vite build
+
+
+> proxyloom-web@0.1.0 typecheck G:\Projects\ProxyLoom\proxyloom-web
+> vue-tsc --noEmit
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 38 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.58 kB │ gzip:  0.40 kB
+dist/assets/index-CBBS0NJ_.css   2.99 kB │ gzip:  1.16 kB
+dist/assets/index-BvphhFNh.js   95.29 kB │ gzip: 37.35 kB
+
+✓ built in 224ms
+> api-generated-drift
+PASS: API types match local OpenAPI regeneration.
+> contract-base-diff
+{
+  "schema_version": 1,
+  "base_commit": "1ff4c094d9d268c8afae82a6987ba216892b2a46",
+  "result": "pass",
+  "changes": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "beb7051172c2eb33eb2ce9a8e37428909757e7c9951245afcd2406970d2d065f",
+      "after_sha256": "becc307d3d94f8d9142595597e5cd9e04d660e4a8676ae58002abca45e5aa287",
+      "changes": [
+        {
+          "pointer": "/components/parameters/CSRFToken",
+          "before_sha256": null,
+          "after_sha256": "14e4a6b3690c9f82f598bec29c37d4291e361014fe4b05ecd4d6acea969d9423"
+        },
+        {
+          "pointer": "/components/responses/SessionResponse/description",
+          "before_sha256": "06cd4e2a5b206abff841131ee69b44c447dbb833be784d6a4a5008ec9f80610b",
+          "after_sha256": "5bd49ceeaa96662387d29442146fc2c42e98bf9ac3a0b6220bf1a989eb24dcca"
+        },
+        {
+          "pointer": "/components/responses/SessionResponse/headers/Set-Cookie/description",
+          "before_sha256": "573db78e57b2698211ab439256257f8ba0e3836c65277537aac212c7c147ac30",
+          "after_sha256": "84ef0d5a09f8892bffcf3a857d55d07f1b0d1b6877f265de733c5217028d3254"
+        },
+        {
+          "pointer": "/components/schemas/AuthPassword",
+          "before_sha256": null,
+          "after_sha256": "aafb700bab58a50fd8c2ee50ab46852738b26e8fd48044bd9c4025e4fa185982"
+        },
+        {
+          "pointer": "/components/schemas/AuthUsername",
+          "before_sha256": null,
+          "after_sha256": "4554824d0f4ad3b3022c329a89737a5b14e0c6b0778948505a7a20b0cf9e9003"
+        },
+        {
+          "pointer": "/components/schemas/CurrentUser/properties/csrf_token",
+          "before_sha256": null,
+          "after_sha256": "8557e43930d51280ae9ac13ddb6957543d4c63266b33bf94470b04e5131c81f4"
+        },
+        {
+          "pointer": "/components/schemas/CurrentUser/properties/username/$ref",
+          "before_sha256": "bb5d751d7214a3877e4fd0a356da88e1e053aeb0abd6faf553a73a0937660239",
+          "after_sha256": "3f7d0d65334c68c2c28a41a7c3f420c953adf8940ed685a1a5ccc6cefdd75982"
+        },
+        {
+          "pointer": "/components/schemas/CurrentUser/required",
+          "before_sha256": "63f1618a5b99a21ccd6154803cd98d9b30385e192cb6a6916f8ccb91f74b5e67",
+          "after_sha256": "65a0a798c4ca7fab904e7801a07e0ad9d09e4ab4b8e3b013ddfee89d39a22f27"
+        },
+        {
+          "pointer": "/components/schemas/LoginRequest/properties/password/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "9fe3f4a94d70e09aa4d2932c1449f108ea46288d853ac9c592e4fd6a7491e650"
+        },
+        {
+          "pointer": "/components/schemas/LoginRequest/properties/username/$ref",
+          "before_sha256": "bb5d751d7214a3877e4fd0a356da88e1e053aeb0abd6faf553a73a0937660239",
+          "after_sha256": "3f7d0d65334c68c2c28a41a7c3f420c953adf8940ed685a1a5ccc6cefdd75982"
+        },
+        {
+          "pointer": "/components/schemas/LogoutRequest",
+          "before_sha256": null,
+          "after_sha256": "38eda73750648c5b0fa57556fb953e33cafdb6e1e7ed481d3033cd729ba8cda8"
+        },
+        {
+          "pointer": "/components/schemas/ReauthenticationRequest/properties/password/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "9fe3f4a94d70e09aa4d2932c1449f108ea46288d853ac9c592e4fd6a7491e650"
+        },
+        {
+          "pointer": "/components/schemas/SetupRequest/properties/password/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "9fe3f4a94d70e09aa4d2932c1449f108ea46288d853ac9c592e4fd6a7491e650"
+        },
+        {
+          "pointer": "/components/schemas/SetupRequest/properties/setup_token/$ref",
+          "before_sha256": "52b01ee9da560c83782a2dc889bb588149cffed43c210bfa17017d72dca24257",
+          "after_sha256": "63c5dfc36e70e37cd91ba9ec4df3a6715045abeea44c53ecadc97662d8ffc74e"
+        },
+        {
+          "pointer": "/components/schemas/SetupRequest/properties/username/$ref",
+          "before_sha256": "bb5d751d7214a3877e4fd0a356da88e1e053aeb0abd6faf553a73a0937660239",
+          "after_sha256": "3f7d0d65334c68c2c28a41a7c3f420c953adf8940ed685a1a5ccc6cefdd75982"
+        },
+        {
+          "pointer": "/components/schemas/SetupToken",
+          "before_sha256": null,
+          "after_sha256": "eda6e927c4e16861e21d44987c1fd6675ca4a735c01dab1b1cc9df233c439997"
+        },
+        {
+          "pointer": "/components/securitySchemes/SessionCookie/description",
+          "before_sha256": "bbb6871bf70b3b0e1ff6d65bfd929d57f12834f890f84051ff9ca18840bf25fa",
+          "after_sha256": "399d77506b531f554245710588b7e4318e490c3a6f59a685b4745f5d462cb5bb"
+        },
+        {
+          "pointer": "/info/description",
+          "before_sha256": "17d665b107289cd99a177ae09a38e7f3df93aeeae4fd435b6ca7c9046a04f91e",
+          "after_sha256": "7801f3d85f5c8db2b7c9956837f28187d36f1dc40210f474a9000d9f2eec1e1f"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/description",
+          "before_sha256": null,
+          "after_sha256": "9df6846fdd3b311dcbd9c8d6fc99b5bec5f3f2363c986a9388171ed2a13eb60a"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/responses/403",
+          "before_sha256": null,
+          "after_sha256": "f7d4efe7196633996efaa5e77ba84e0d00e2456ee2de5504bb9bac83969c29e3"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/responses/422",
+          "before_sha256": null,
+          "after_sha256": "2a50e00dd83e58c27c56b6b56e2bbc580c91c6597aaf1f194e20f625cf1f4eec"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1login/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/description",
+          "before_sha256": "9c4a6641b0a717cca7677976621bf178530e7626e3a5374413832889791fe43f",
+          "after_sha256": "4bdaad8b88b9c0150dcd9b50a071b4a4b4a360fd885e85395674d147effa793a"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/parameters",
+          "before_sha256": null,
+          "after_sha256": "43360e9a6dedbcb288998888387957e44793652179c357b4c7bf9d1035f9c003"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/requestBody",
+          "before_sha256": null,
+          "after_sha256": "e3b3b092b7ca78c44a973151607efedf3b9cbfb80096a6a90765a9c4617f8ff4"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/responses/400",
+          "before_sha256": null,
+          "after_sha256": "c1f2785fba6bdef82720d860bebe1d6c89f34b73fb6baee089b7bac7deca4389"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/responses/422",
+          "before_sha256": null,
+          "after_sha256": "2a50e00dd83e58c27c56b6b56e2bbc580c91c6597aaf1f194e20f625cf1f4eec"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1logout/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1me/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/description",
+          "before_sha256": null,
+          "after_sha256": "7af1c9170d7994f9d418a1486162c1701450ca62209752ce31afb9e327fd150e"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/parameters",
+          "before_sha256": null,
+          "after_sha256": "43360e9a6dedbcb288998888387957e44793652179c357b4c7bf9d1035f9c003"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/responses/422",
+          "before_sha256": null,
+          "after_sha256": "2a50e00dd83e58c27c56b6b56e2bbc580c91c6597aaf1f194e20f625cf1f4eec"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1auth~1reauth/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/description",
+          "before_sha256": "374714fefe133457d4681af384ef6c9f4fec6950f411b2aef27ea7d5ef450a9a",
+          "after_sha256": "de308c164cd7f8881097528c8c1460c7cf087be965ccf2c67368d6da3fc50b37"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/responses/401",
+          "before_sha256": null,
+          "after_sha256": "0920ec8821a71dd5f211f197c75d127ad226371b823bffacd75bc590b4f1f16e"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/responses/413",
+          "before_sha256": null,
+          "after_sha256": "c6a2b008baca10e18e0a9cf356a73454b78ccf75397c79e054a5da695ecb931c"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1setup/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000004_identity.up.sql",
+      "before_sha256": null,
+      "after_sha256": "c4687d5db878efdf261fa544a663858e31e17465307f249b4d9b038e748e172b",
+      "changes": []
+    }
+  ],
+  "failures": []
+}
+> postgres-foundation-and-identity
+PASS: isolated_locked_postgres_with_separate_roles
+PASS: postgres_and_foundation_tests_executed
+Foundation report: G:\Projects\ProxyLoom\.cache\foundation\4b5ef6c7-5bb8-4a30-aa9b-920714e61300\report.json
+PASS: foundation integration and owned Docker resource cleanup.
+Quality evidence: .cache/quality/10f55cc4-ec3f-4b00-96fa-74eeb1db21a5/report.json
+PASS: quality source-and-postgres. No task or capability status was changed.

@@ -16,6 +16,10 @@ $steps = [Collections.Generic.List[object]]::new()
 $startedAt = [DateTime]::UtcNow.ToString('o')
 $completed = $false
 $ownsProject = $false
+$authSecrets = [Collections.Generic.List[string]]::new()
+Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
+$authSession = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+$authOrigin = "http://127.0.0.1:$Port"
 $platform = (& docker version --format '{{.Server.Os}}/{{.Server.Arch}}' 2>$null)
 if ($LASTEXITCODE -ne 0) { throw 'Docker Linux engine is unavailable.' }
 foreach ($kind in @('container', 'network', 'volume')) {
@@ -48,13 +52,29 @@ function Wait-Status([string]$Path, [int]$Expected) {
     return $false
 }
 function Assert-NoSecrets([string]$Content) {
-    foreach ($name in @('db_bootstrap_password','db_runtime_password','db_migration_password','database_dsn','migration_dsn','master_key','token_pepper','content_hmac_key')) {
+    foreach ($value in $authSecrets) {
+        if ($value -and $Content.Contains($value)) { throw 'An authentication secret was found in captured output. Raw output has not been printed.' }
+    }
+    foreach ($name in @('db_bootstrap_password','db_runtime_password','db_migration_password','database_dsn','migration_dsn','master_key','token_pepper','content_hmac_key','setup_token')) {
         $bytes = [IO.File]::ReadAllBytes((Join-Path $repoRoot "deploy/secrets/local/$name"))
         $representations = @([Text.Encoding]::UTF8.GetString($bytes), [Convert]::ToBase64String($bytes), [Convert]::ToHexString($bytes).ToLowerInvariant(), [Convert]::ToHexString($bytes))
         foreach ($value in $representations) {
             if ($value.Length -gt 8 -and $Content.Contains($value)) { throw 'A development secret was found in captured output. Raw output has not been printed.' }
         }
     }
+}
+function Invoke-SmokeAuth([string]$Path, [string]$Method = 'GET', [string]$Body = '', [string]$CSRF = '') {
+    $headers = @{Origin=$authOrigin}
+    if ($CSRF) { $headers['X-CSRF-Token'] = $CSRF }
+    $arguments = @{Uri="$authOrigin$Path"; Method=$Method; Headers=$headers; WebSession=$authSession; SkipHttpErrorCheck=$true; TimeoutSec=10; NoProxy=$true}
+    if ($Method -eq 'POST') { $arguments.ContentType='application/json'; $arguments.Body=$Body }
+    try { return Invoke-WebRequest @arguments } catch { throw 'Authentication smoke request failed; raw request and response suppressed.' }
+}
+function Read-AuthResult($Response) {
+    try { $body = $Response.Content | ConvertFrom-Json } catch { throw 'Authentication smoke JSON response invalid.' }
+    if ($body.data.csrf_token) { $authSecrets.Add([string]$body.data.csrf_token) }
+    foreach ($cookie in $authSession.Cookies.GetCookies([Uri]$authOrigin)) { if ($cookie.Name -eq 'proxyloom_session') { $authSecrets.Add($cookie.Value) } }
+    return $body
 }
 
 try {
@@ -66,6 +86,24 @@ try {
     Assert-Step 'api live' (Wait-Status '/healthz' 200)
     Assert-Step 'frontend served' (Wait-Status '/' 200)
     foreach ($path in @('/api/v1/nodes','/internal/v1/jobs','/s/EXAMPLE_ONLY/test')) { Assert-Step "reserved route $path returns 404" (Wait-Status $path 404) }
+
+    $anonymous = Invoke-SmokeAuth '/api/v1/auth/me'
+    Assert-Step 'management requires a session' ($anonymous.StatusCode -eq 401)
+    $smokePassword = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+    $authSecrets.Add($smokePassword)
+    $setupToken = [IO.File]::ReadAllText((Join-Path $repoRoot 'deploy/secrets/local/setup_token'))
+    $setupBody = @{setup_token=$setupToken; username='smokeadmin'; password=$smokePassword} | ConvertTo-Json -Compress
+    $initialized = Invoke-SmokeAuth '/api/v1/setup' 'POST' $setupBody
+    Assert-Step 'administrator initializes through Linux API' ($initialized.StatusCode -eq 201)
+    $currentAdmin = Read-AuthResult $initialized
+    Assert-Step 'administrator role matches the public contract' ($currentAdmin.data.role -eq 'administrator' -and $currentAdmin.data.csrf_token.Length -eq 43)
+    $duplicateSetup = Invoke-SmokeAuth '/api/v1/setup' 'POST' $setupBody
+    Assert-Step 'initialization cannot be reused' ($duplicateSetup.StatusCode -eq 409)
+    $noCSRF = Invoke-SmokeAuth '/api/v1/auth/reauth' 'POST' (@{password=$smokePassword} | ConvertTo-Json -Compress)
+    Assert-Step 'authenticated write requires CSRF' ($noCSRF.StatusCode -eq 403)
+    $reauth = Invoke-SmokeAuth '/api/v1/auth/reauth' 'POST' (@{password=$smokePassword} | ConvertTo-Json -Compress) $currentAdmin.data.csrf_token
+    Assert-Step 'explicit reauthentication succeeds' ($reauth.StatusCode -eq 200)
+    $currentAdmin = Read-AuthResult $reauth
 
     Invoke-Compose -Arguments @('run','--rm','--no-deps','migrate')
     Invoke-Compose -Arguments @('run','--rm','--no-deps','migrate','migrate','up')
@@ -115,10 +153,19 @@ try {
     Invoke-Compose -Arguments @('stop','postgres')
     Assert-Step 'database outage blocks readiness' (Wait-Status '/readyz' 503)
     Assert-Step 'database outage preserves liveness' (Wait-Status '/healthz' 200)
+    $unavailableAuth = Invoke-SmokeAuth '/api/v1/auth/me'
+    Assert-Step 'database outage rejects authenticated reads' ($unavailableAuth.StatusCode -eq 503)
     Invoke-Compose -Arguments @('start','postgres')
     Assert-Step 'database recovery restores readiness' (Wait-Status '/readyz' 200)
     Invoke-Compose -Arguments @('restart','api')
     Assert-Step 'api restart preserves migration state' (Wait-Status '/readyz' 200)
+    $restoredAuth = Invoke-SmokeAuth '/api/v1/auth/me'
+    Assert-Step 'API restart preserves the database session' ($restoredAuth.StatusCode -eq 200)
+    $currentAdmin = Read-AuthResult $restoredAuth
+    $logout = Invoke-SmokeAuth '/api/v1/auth/logout' 'POST' '{}' $currentAdmin.data.csrf_token
+    Assert-Step 'logout revokes the session' ($logout.StatusCode -eq 200)
+    $afterLogout = Invoke-SmokeAuth '/api/v1/auth/me'
+    Assert-Step 'logged out requests are unauthorized' ($afterLogout.StatusCode -eq 401)
 
     $runnerId = Invoke-Compose -Arguments @('ps','--quiet','runner') -Capture
     $runnerInspection = & docker inspect $runnerId | ConvertFrom-Json
@@ -140,8 +187,22 @@ try {
     if ($KeepRunning) { Invoke-Compose -Arguments @('start','api','runner') }
 } finally {
     $imageIDs = @(& docker image inspect --format '{{.Id}}' proxyloom-api:m0-dev proxyloom-runner:m0-dev 2>$null)
-    $report = @{started_at=$startedAt; ended_at=[DateTime]::UtcNow.ToString('o'); project=$ProjectName; platform=$platform; completed=$completed; image_ids=$imageIDs; checks=@($steps.ToArray()); scope='T-002 development smoke only; not G0 or production acceptance'}
+    $cleanupResult = 'not_owned'
+    $cleanupFailed = $false
+    if ($ownsProject -and (-not $KeepRunning -or -not $completed)) {
+        & docker compose --project-name $ProjectName --file $compose down --volumes --timeout 15 2>&1 | Out-Null
+        $cleanupFailed = $LASTEXITCODE -ne 0
+        foreach ($kind in @('container','network','volume')) {
+            $inventoryArgs = @($kind,'ls','--quiet','--filter',"label=com.docker.compose.project=$ProjectName")
+            if ($kind -eq 'container') { $inventoryArgs += '--all' }
+            $remaining = & docker @inventoryArgs 2>&1
+            if ($LASTEXITCODE -ne 0 -or ($remaining -join '').Trim()) { $cleanupFailed = $true }
+        }
+        $cleanupResult = if ($cleanupFailed) { 'fail' } else { 'pass' }
+    } elseif ($ownsProject) { $cleanupResult = 'retained_by_request' }
+    if ($cleanupFailed) { $completed = $false }
+    $report = @{started_at=$startedAt; ended_at=[DateTime]::UtcNow.ToString('o'); project=$ProjectName; platform=$platform; completed=$completed; cleanup=$cleanupResult; image_ids=$imageIDs; checks=@($steps.ToArray()); scope='T-002/T-006 development Linux API authentication smoke; not G0 or production acceptance'}
     [IO.File]::WriteAllText($reportPath, ($report | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
-    if ($ownsProject -and (-not $KeepRunning -or -not $completed)) { & docker compose --project-name $ProjectName --file $compose down --volumes --timeout 15 2>&1 | Out-Null }
     $env:PROXYLOOM_DEV_PORT = $oldPort
+    if ($cleanupFailed) { throw 'Owned smoke resources were not completely cleaned; inspect the smoke report.' }
 }

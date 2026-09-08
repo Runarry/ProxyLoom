@@ -1,0 +1,10 @@
+{
+  "request_id": "example-auth-response",
+  "data": {
+    "user_id": "20000000-0000-4000-8000-000000000001",
+    "username": "example-admin",
+    "role": "administrator",
+    "session_expires_at": "2026-09-08T16:00:00Z",
+    "csrf_token": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  }
+}

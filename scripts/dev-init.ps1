@@ -34,6 +34,26 @@ if ($IsWindows) {
     [IO.File]::SetUnixFileMode($secretDir, [IO.UnixFileMode]::UserRead -bor [IO.UnixFileMode]::UserWrite -bor [IO.UnixFileMode]::UserExecute)
 }
 
+function New-RandomBytes { return ,([Security.Cryptography.RandomNumberGenerator]::GetBytes(32)) }
+function Write-Secret([string]$Name, [byte[]]$Value) {
+    $path = Join-Path $secretDir $Name
+    $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+    try { $stream.Write($Value, 0, $Value.Length) } finally { $stream.Dispose() }
+    if (-not $IsWindows) {
+        [IO.File]::SetUnixFileMode($path, [IO.UnixFileMode]::UserRead -bor [IO.UnixFileMode]::GroupRead -bor [IO.UnixFileMode]::OtherRead)
+    }
+}
+function Ensure-SetupToken {
+    $path = Join-Path $secretDir 'setup_token'
+    if (Test-Path -LiteralPath $path) {
+        $token = [IO.File]::ReadAllText($path)
+        if ($token -cnotmatch '^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$') { throw 'Invalid development setup token. Existing credentials were not rotated.' }
+        return
+    }
+    $token = [Convert]::ToBase64String((New-RandomBytes)).TrimEnd('=').Replace('+','-').Replace('/','_')
+    Write-Secret 'setup_token' ([Text.UTF8Encoding]::new($false).GetBytes($token))
+}
+
 $names = @('db_bootstrap_password', 'db_runtime_password', 'db_migration_password', 'database_dsn', 'migration_dsn', 'master_key', 'token_pepper', 'content_hmac_key')
 $existing = @($names | Where-Object { Test-Path -LiteralPath (Join-Path $secretDir $_) })
 if ($existing.Count -ne 0 -and $existing.Count -ne $names.Count) {
@@ -45,19 +65,11 @@ if ($existing.Count -eq $names.Count) {
         if ($bytes.Length -eq 0) { throw "Empty development secret file: $name" }
         if ($name -in @('master_key', 'token_pepper', 'content_hmac_key') -and $bytes.Length -ne 32) { throw "Invalid development key length: $name" }
     }
+    Ensure-SetupToken
     Write-Output 'Existing development secret set preserved. No values were printed or rotated.'
     exit 0
 }
 
-function New-RandomBytes { return ,([Security.Cryptography.RandomNumberGenerator]::GetBytes(32)) }
-function Write-Secret([string]$Name, [byte[]]$Value) {
-    $path = Join-Path $secretDir $Name
-    $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
-    try { $stream.Write($Value, 0, $Value.Length) } finally { $stream.Dispose() }
-    if (-not $IsWindows) {
-        [IO.File]::SetUnixFileMode($path, [IO.UnixFileMode]::UserRead -bor [IO.UnixFileMode]::GroupRead -bor [IO.UnixFileMode]::OtherRead)
-    }
-}
 $utf8 = [Text.UTF8Encoding]::new($false)
 $bootstrapPassword = [Convert]::ToHexString((New-RandomBytes)).ToLowerInvariant()
 $runtimePassword = [Convert]::ToHexString((New-RandomBytes)).ToLowerInvariant()
@@ -68,4 +80,5 @@ Write-Secret 'db_migration_password' ($utf8.GetBytes($migrationPassword))
 Write-Secret 'database_dsn' ($utf8.GetBytes("postgres://proxyloom:${runtimePassword}@postgres:5432/proxyloom?sslmode=disable"))
 Write-Secret 'migration_dsn' ($utf8.GetBytes("postgres://proxyloom_migrator:${migrationPassword}@postgres:5432/proxyloom?sslmode=disable"))
 foreach ($name in @('master_key', 'token_pepper', 'content_hmac_key')) { Write-Secret $name (New-RandomBytes) }
+Ensure-SetupToken
 Write-Output 'Created development secret files with independent random values. No production credentials are used.'

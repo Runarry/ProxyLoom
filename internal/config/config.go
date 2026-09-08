@@ -2,9 +2,11 @@
 package config
 
 import (
+	"encoding/base64"
 	"errors"
 	"io"
 	"net"
+	"net/netip"
 	"net/url"
 	"os"
 	"strconv"
@@ -18,6 +20,7 @@ type API struct {
 	Development                                                         bool
 	DatabaseDSNFile, MasterKeyFile, TokenPepperFile, ContentHMACKeyFile string
 	MasterKeyID, OldMasterKeysFile                                      string
+	SetupTokenFile, TrustedProxyCIDRs                                   string
 }
 
 type Migration struct{ DSNFile string }
@@ -52,10 +55,53 @@ func LoadAPI(lookup Lookup) (API, error) {
 	c.OldMasterKeysFile = lookup("PROXYLOOM_OLD_MASTER_KEYS_FILE")
 	c.TokenPepperFile = lookup("PROXYLOOM_TOKEN_PEPPER_FILE")
 	c.ContentHMACKeyFile = lookup("PROXYLOOM_CONTENT_HMAC_KEY_FILE")
+	c.SetupTokenFile = lookup("PROXYLOOM_SETUP_TOKEN_FILE")
+	c.TrustedProxyCIDRs = lookup("PROXYLOOM_TRUSTED_PROXIES")
+	for _, cidr := range c.TrustedProxies() {
+		if prefix, err := netip.ParsePrefix(cidr); err != nil || prefix.Addr().Is4In6() {
+			return API{}, configError("PROXYLOOM_TRUSTED_PROXIES", "invalid_cidr")
+		}
+	}
+	setupToken, err := c.ReadSetupToken()
+	clear(setupToken)
+	if err != nil {
+		return API{}, err
+	}
 	if err = c.ValidateSecrets(); err != nil {
 		return API{}, err
 	}
 	return c, nil
+}
+
+// Empty setup configuration disables initialization; an initialized deployment
+// may remove its one-time file without disabling existing administrator access.
+func (c API) ReadSetupToken() ([]byte, error) {
+	if c.SetupTokenFile == "" {
+		return nil, nil
+	}
+	data, err := readFile(c.SetupTokenFile, "PROXYLOOM_SETUP_TOKEN_FILE", 128)
+	if err != nil {
+		return nil, err
+	}
+	defer clear(data)
+	token := strings.TrimSuffix(strings.TrimSuffix(string(data), "\n"), "\r")
+	decoded, err := base64.RawURLEncoding.Strict().DecodeString(token)
+	defer clear(decoded)
+	if err != nil || len(decoded) != 32 || len(token) != 43 {
+		return nil, configError("PROXYLOOM_SETUP_TOKEN_FILE", "invalid_token")
+	}
+	return []byte(token), nil
+}
+
+func (c API) TrustedProxies() []string {
+	if c.TrustedProxyCIDRs == "" {
+		return nil
+	}
+	values := strings.Split(c.TrustedProxyCIDRs, ",")
+	for i := range values {
+		values[i] = strings.TrimSpace(values[i])
+	}
+	return values
 }
 
 func HTTPAddress(lookup Lookup, defaultAddr string) (string, error) {

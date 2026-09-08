@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-08 用户批准限定 G0 并授权 M1 首窗及 PLAN 更新。11 项 M0 任务为 done；T-004、T-005、T-007 实现和自动验收通过、状态 in_review；其余 46 项 not_started。真实 PostgreSQL 9 组、Windows/Linux 工程与 race、API生成和前端构建、Compose 21 项通过。能力保持 unverified，未扩大后续平台/协议/生产验收。详见各任务 summary 与 docs/reviews/2026-09-08-g0-decision.md。",
+  "status_note": "2026-09-08 用户授权 T-006/T-008。T-004/005/007 工程评审收口后，累计14项 done；T-006/T-008 实现与本地自动验收完成、状态 in_review；其余44项 not_started。完整统一质量入口通过，20组真实 PostgreSQL 无跳过，Linux API Compose31项及清理通过，Windows/Linux工程与race、API/sqlc/前端和秘密/契约门槛通过。新工作树未提交推送，远端强制合并规则因401未核实。能力保持unverified，G1未关闭。详见T-006/T-008证据和docs/reviews/2026-09-08-m1-foundation-closeout.md。",
   "tasks": [
     {
       "id": "T-001",
@@ -72,8 +72,9 @@
         "T-003"
       ],
       "acceptance": "事务提交无无头资源；错 kind／跨 scope 引用被拒；并发更新不丢失；历史引用不会被级联删除。\nAC-06、AC-15、AC-17",
-      "status": "in_review",
-      "evidence_summary": "docs/evidence/T-004/summary.md"
+      "status": "done",
+      "evidence_summary": "docs/evidence/T-004/summary.md",
+      "review_record": "docs/reviews/2026-09-08-m1-foundation-closeout.md"
     },
     {
       "id": "T-005",
@@ -91,8 +92,9 @@
         "T-003"
       ],
       "acceptance": "错 key／篡改密文失败；缺密钥不生成替代值；普通日志和列表无秘密；重包不改变配置内容摘要。\nAC-23；加密专项",
-      "status": "in_review",
-      "evidence_summary": "docs/evidence/T-005/summary.md"
+      "status": "done",
+      "evidence_summary": "docs/evidence/T-005/summary.md",
+      "review_record": "docs/reviews/2026-09-08-m1-foundation-closeout.md"
     },
     {
       "id": "T-006",
@@ -110,7 +112,8 @@
         "T-005"
       ],
       "acceptance": "初始化不可复用；重置使会话失效；管理／订阅／Runner 凭证不能互用；敏感读取被审计。\nAC-01、AC-23",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-006/summary.md"
     },
     {
       "id": "T-007",
@@ -127,8 +130,9 @@
         "T-003"
       ],
       "acceptance": "未知字段拒绝；同键异请求冲突；412／428／409 区分；前端类型与契约无漂移。\nAC-06、AC-19；契约测试",
-      "status": "in_review",
-      "evidence_summary": "docs/evidence/T-007/summary.md"
+      "status": "done",
+      "evidence_summary": "docs/evidence/T-007/summary.md",
+      "review_record": "docs/reviews/2026-09-08-m1-foundation-closeout.md"
     },
     {
       "id": "T-008",
@@ -147,7 +151,8 @@
         "T-007"
       ],
       "acceptance": "失败测试阻止合并；生成文件可重建；无证据的任务不能自动标完成；高级流水线交由 T-059 汇总。\nNFR-12；CI 自检",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-008/summary.md"
     },
     {
       "id": "T-009",

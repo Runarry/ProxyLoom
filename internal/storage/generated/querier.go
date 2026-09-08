@@ -12,17 +12,33 @@ import (
 
 type Querier interface {
 	AdvanceCatalog(ctx context.Context, id pgtype.UUID) error
+	AppendIdentityAudit(ctx context.Context, arg AppendIdentityAuditParams) error
 	ClaimIdempotencyKey(ctx context.Context, arg ClaimIdempotencyKeyParams) (int64, error)
 	CompareAndSwapWrapping(ctx context.Context, arg CompareAndSwapWrappingParams) (int64, error)
+	ConsumeIdentitySetup(ctx context.Context) error
+	CountIdentityRateLimits(ctx context.Context) (int64, error)
+	CountIdentityUsers(ctx context.Context) (int64, error)
+	CreateIdentityRateLimit(ctx context.Context, arg CreateIdentityRateLimitParams) error
+	CreateIdentitySession(ctx context.Context, arg CreateIdentitySessionParams) (Session, error)
+	CreateIdentityUser(ctx context.Context, arg CreateIdentityUserParams) (User, error)
+	DeleteExpiredIdentitySessions(ctx context.Context, expiresAt pgtype.Timestamptz) error
+	DeleteIdentitySession(ctx context.Context, idHash []byte) error
+	DeleteIdentityUserSessions(ctx context.Context, userID pgtype.UUID) error
 	DeleteResourceTags(ctx context.Context, arg DeleteResourceTagsParams) error
 	EnsureScope(ctx context.Context, arg EnsureScopeParams) error
 	FinalizeIdempotencyReceipt(ctx context.Context, arg FinalizeIdempotencyReceiptParams) error
 	GetIdempotencyReceipt(ctx context.Context, arg GetIdempotencyReceiptParams) (GetIdempotencyReceiptRow, error)
+	GetIdentityRateLimit(ctx context.Context, keyHash []byte) (IdentityRateLimit, error)
+	GetIdentityScopeEpoch(ctx context.Context, id pgtype.UUID) (int64, error)
+	GetIdentitySession(ctx context.Context, arg GetIdentitySessionParams) (GetIdentitySessionRow, error)
+	GetIdentityUser(ctx context.Context, arg GetIdentityUserParams) (User, error)
 	GetResourceHead(ctx context.Context, arg GetResourceHeadParams) (GetResourceHeadRow, error)
 	GetResourceIndex(ctx context.Context, arg GetResourceIndexParams) (Resource, error)
 	GetResourceRevision(ctx context.Context, arg GetResourceRevisionParams) (GetResourceRevisionRow, error)
 	GetScope(ctx context.Context, id pgtype.UUID) (GetScopeRow, error)
 	GetWrappingVersion(ctx context.Context, arg GetWrappingVersionParams) (int64, error)
+	IdentityNow(ctx context.Context) (pgtype.Timestamptz, error)
+	IncrementIdentityRateLimit(ctx context.Context, keyHash []byte) error
 	InsertResource(ctx context.Context, arg InsertResourceParams) error
 	InsertResourceReference(ctx context.Context, arg InsertResourceReferenceParams) error
 	InsertResourceRevision(ctx context.Context, arg InsertResourceRevisionParams) error
@@ -31,8 +47,13 @@ type Querier interface {
 	ListResourceReferences(ctx context.Context, arg ListResourceReferencesParams) ([]ListResourceReferencesRow, error)
 	ListResourceTags(ctx context.Context, arg ListResourceTagsParams) ([]string, error)
 	ListResources(ctx context.Context, arg ListResourcesParams) ([]ListResourcesRow, error)
+	LockIdentityState(ctx context.Context) (pgtype.Timestamptz, error)
 	LockResources(ctx context.Context, arg LockResourcesParams) ([]pgtype.UUID, error)
 	LockScope(ctx context.Context, id pgtype.UUID) (LockScopeRow, error)
+	PruneIdentityRateLimits(ctx context.Context, dollar_1 pgtype.Timestamptz) error
+	ReauthenticateIdentitySession(ctx context.Context, arg ReauthenticateIdentitySessionParams) error
+	ResetIdentityPassword(ctx context.Context, arg ResetIdentityPasswordParams) error
+	TouchIdentitySession(ctx context.Context, arg TouchIdentitySessionParams) error
 	UpdateResourceHead(ctx context.Context, arg UpdateResourceHeadParams) error
 }
 

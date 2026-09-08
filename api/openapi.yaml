@@ -5,8 +5,8 @@ info:
   version: 1.0.0
   description: >-
     P0 contract for a single configured workspace and trusted administrators.
-    All operations are contract-only: declaring a response does not register a
-    handler or assert implementation, kernel capability, or verification.
+    Five administrator authentication operations are implemented. Other operations
+    remain contract-only; declarations do not assert kernel capability or verification.
     Management uses the session Cookie; internal operations exist exclusively on
     a separate mTLS listener; subscription retrieval uses its mandatory path token
     independently of either credential. Scope and resource IDs are server assigned.
@@ -42,7 +42,7 @@ components:
       type: "apiKey"
       in: "cookie"
       name: "proxyloom_session"
-      description: "Opaque server-side administrator session; Secure, HttpOnly, SameSite=Strict. State-changing management operations additionally enforce same-origin CSRF defenses. Never accepted as subscription or Runner authorization."
+      description: "Opaque server-side administrator session; Secure, HttpOnly, SameSite=Lax. State-changing management operations additionally enforce Origin and X-CSRF-Token. Setup/login require Origin and JSON but no session CSRF token. Secure may be omitted only for explicit development HTTP loopback PUBLIC_URL. Never accepted as subscription or Runner authorization."
     RunnerMTLS:
       type: "mutualTLS"
       description: "Registered client certificate verified only on the dedicated internal listener. Certificate identity and server registration determine eligible builds, task types and slots. No management Cookie or subscription token is accepted."
@@ -66,6 +66,12 @@ components:
         minimum: 1
         maximum: 86400
   parameters:
+    CSRFToken:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      description: Session-bound CSRF token returned by setup/login/me/reauth. Used together with an exact Origin check.
+      schema: {type: string, minLength: 43, maxLength: 43}
     ID:
       name: "id"
       in: "path"
@@ -534,12 +540,12 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/RunnerLeaseResponse" }
     SessionResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Authenticated current user and CSRF token; no-store. Session cookie is set on setup/login and refreshed without extending absolute expiry."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
         Set-Cookie:
-          description: "Set or rotate proxyloom_session with Secure; HttpOnly; SameSite=Strict. Session identifiers are never response-body fields."
+          description: "Set or rotate proxyloom_session with Secure; HttpOnly; SameSite=Lax. Session identifiers are never response-body fields."
           schema:
             type: "string"
             maxLength: 512
@@ -1803,39 +1809,69 @@ components:
           maxItems: 200
           items: { $ref: "#/components/schemas/ResourceReference" }
         page: { $ref: "#/components/schemas/PageInfo" }
+    AuthUsername:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: '^[a-z0-9._-]+$'
+      description: Exact lowercase ASCII identifier; no implicit trimming or case conversion.
+    AuthPassword:
+      type: string
+      minLength: 1
+      maxLength: 1024
+      x-sensitive: true
+      description: UTF-8 password, at most 1024 bytes. New passwords require at least 12 bytes; domain violations return 422. Passwords are never normalized.
+    SetupToken:
+      type: string
+      minLength: 43
+      maxLength: 43
+      pattern: '^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$'
+      x-sensitive: true
+      description: Canonical unpadded base64url encoding of 32 random bytes from the controlled host command.
     SetupRequest:
       type: "object"
       additionalProperties: false
       required: ["setup_token", "username", "password"]
       properties:
-        setup_token: { $ref: "#/components/schemas/Secret" }
-        username: { $ref: "#/components/schemas/ShortText" }
-        password: { $ref: "#/components/schemas/Secret" }
+        setup_token: { $ref: "#/components/schemas/SetupToken" }
+        username: { $ref: "#/components/schemas/AuthUsername" }
+        password: { $ref: "#/components/schemas/AuthPassword" }
     LoginRequest:
       type: "object"
       additionalProperties: false
       required: ["username", "password"]
       properties:
-        username: { $ref: "#/components/schemas/ShortText" }
-        password: { $ref: "#/components/schemas/Secret" }
+        username: { $ref: "#/components/schemas/AuthUsername" }
+        password: { $ref: "#/components/schemas/AuthPassword" }
+    LogoutRequest:
+      type: "object"
+      additionalProperties: false
+      maxProperties: 0
     ReauthenticationRequest:
       type: "object"
       additionalProperties: false
       required: ["password"]
       properties:
-        password: { $ref: "#/components/schemas/Secret" }
+        password: { $ref: "#/components/schemas/AuthPassword" }
     CurrentUser:
       type: "object"
       additionalProperties: false
-      required: ["user_id", "username", "role", "session_expires_at"]
+      required: ["user_id", "username", "role", "session_expires_at", "csrf_token"]
       properties:
         user_id: { $ref: "#/components/schemas/UUID" }
-        username: { $ref: "#/components/schemas/ShortText" }
+        username: { $ref: "#/components/schemas/AuthUsername" }
         role:
           type: "string"
           const: "administrator"
         session_expires_at: { $ref: "#/components/schemas/Timestamp" }
         recent_authentication_expires_at: { $ref: "#/components/schemas/Timestamp" }
+        csrf_token:
+          type: "string"
+          minLength: 43
+          maxLength: 43
+          pattern: "^[A-Za-z0-9_-]{43}$"
+          x-sensitive: true
+          description: "Session-bound token for X-CSRF-Token. Keep in memory only; never an authorization substitute."
     SessionResponse:
       type: "object"
       additionalProperties: false
@@ -4770,16 +4806,18 @@ paths:
   /api/v1/setup:
     post:
       operationId: setup
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       security: []
       summary: Initialize the administrator once while the system is empty
-      description: Requires the configured one-time setup credential. Never accepts a scope or resource revision.
+      description: Requires the configured one-time setup credential, exact Origin and JSON. Never accepts a scope or resource revision. Disabled after the first successful initialization.
       requestBody:
         required: true
         content:
           application/json:
             schema: {$ref: '#/components/schemas/SetupRequest'}
       responses:
+        '413': {$ref: '#/components/responses/TooLarge'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
         '201': {$ref: '#/components/responses/SessionResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
@@ -4790,15 +4828,19 @@ paths:
   /api/v1/auth/login:
     post:
       operationId: login
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       security: []
       summary: Authenticate and rotate the management session
+      description: Requires exact Origin and application/json; no existing session or CSRF token required. Login does not establish a recent reauthentication marker.
       requestBody:
         required: true
         content:
           application/json:
             schema: {$ref: '#/components/schemas/LoginRequest'}
       responses:
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+        '413': {$ref: '#/components/responses/TooLarge'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '200': {$ref: '#/components/responses/SessionResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
@@ -4807,10 +4849,19 @@ paths:
   /api/v1/auth/logout:
     post:
       operationId: logout
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Revoke the current management session
-      description: Authentication operations have no resource If-Match precondition.
+      description: Requires exact Origin, application/json and X-CSRF-Token. Authentication operations have no resource If-Match precondition.
+      parameters: [{$ref: '#/components/parameters/CSRFToken'}]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LogoutRequest'}
       responses:
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+        '413': {$ref: '#/components/responses/TooLarge'}
+        '400': {$ref: '#/components/responses/BadRequest'}
         '200': {$ref: '#/components/responses/Acknowledgement'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
@@ -4818,7 +4869,7 @@ paths:
   /api/v1/auth/me:
     get:
       operationId: getCurrentUser
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read the authenticated administrator and recent authentication status
       responses:
         '200': {$ref: '#/components/responses/SessionResponse'}
@@ -4827,14 +4878,18 @@ paths:
   /api/v1/auth/reauth:
     post:
       operationId: reauthenticate
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Establish a recent authentication marker on the current session
+      description: Requires exact Origin, application/json and X-CSRF-Token. The marker expires after five minutes.
+      parameters: [{$ref: '#/components/parameters/CSRFToken'}]
       requestBody:
         required: true
         content:
           application/json:
             schema: {$ref: '#/components/schemas/ReauthenticationRequest'}
       responses:
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+        '413': {$ref: '#/components/responses/TooLarge'}
         '200': {$ref: '#/components/responses/SessionResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}

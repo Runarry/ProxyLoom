@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "base_commit": "1ff4c094d9d268c8afae82a6987ba216892b2a46",
+  "verified_quality_run": "10f55cc4-ec3f-4b00-96fa-74eeb1db21a5",
+  "result": "pass",
+  "source_inventory_unchanged": true,
+  "application_and_tests_unchanged": true,
+  "post_validation_changes": [
+    {
+      "path": "README.md",
+      "tested_sha256": "9210bb482079dca6e3cf8a3cc0ce448b6651f3f3b0b3a4a25d613a220f970ef5",
+      "final_sha256": "4ec02e7024d8b72d36b3c0a5367bd0e9b23ef34eddd846e6fc61187be4520f4f"
+    },
+    {
+      "path": "docs/PLAN.md",
+      "tested_sha256": "ecdd8f17e2d543ace41e92f02291b1c406becc718d534792d2025513afc16adc",
+      "final_sha256": "e95b0955d89428a54d19a47e94db475d6a248db146fd4292a9d5737cf71ebbed"
+    },
+    {
+      "path": "docs/PLAN.tasks.json",
+      "tested_sha256": "1c1e14ab49193e01cf3205d0ff801b07e1033facd20d83fa47479ca48b33f270",
+      "final_sha256": "759b9ee0f483cd057803b1ec87657224420ea8c031bf80992003d5e2713fbaf2"
+    }
+  ],
+  "post_validation_checks": [
+    "PLAN metadata/dependencies pass",
+    "secret scan pass",
+    "exact contracts pass",
+    "git diff whitespace pass"
+  ],
+  "note": "Only README and PLAN status closeout changed after the full successful run. Evidence and explanatory docs were added. No application or test changes; no broad rerun required."
+}

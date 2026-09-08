@@ -7,6 +7,7 @@ import { resolve, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync, spawn } from 'node:child_process';
 import { summarizeGoFailure } from './foundation-report.mjs';
+import { assertSecretFree } from './quality-secrets.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 assert.ok(process.argv.slice(2).every((argument) => argument === '--storage-only'), 'foundation_unknown_argument');
@@ -25,7 +26,7 @@ let pendingError;
 
 function safe(content) {
   for (const value of sensitive) assert.ok(!content.includes(value), 'foundation_output_contains_secret');
-  return content;
+  return assertSecretFree(content, { path: 'foundation-output', secrets: sensitive });
 }
 function docker(args, phase) {
   const result = spawnSync('docker', args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024 });
@@ -124,7 +125,7 @@ try {
     PROXYLOOM_TEST_DATABASE_DSN_FILE: join(secrets, 'database_dsn'),
     PROXYLOOM_TEST_MIGRATION_DSN_FILE: join(secrets, 'migration_dsn'),
     PROXYLOOM_TEST_ADMIN_DSN_FILE: join(secrets, 'admin_dsn'), PROXYLOOM_REQUIRE_POSTGRES_TESTS: 'true' };
-  const packages = storageOnly ? ['./internal/catalog', './internal/storage', './internal/secretbox', './internal/config'] : ['./internal/catalog', './internal/storage', './internal/secretbox', './internal/apicontract', './api'];
+  const packages = storageOnly ? ['./internal/catalog', './internal/storage', './internal/secretbox', './internal/config'] : ['./internal/catalog', './internal/storage', './internal/secretbox', './internal/apicontract', './internal/identity', './internal/server', './internal/config', './proxyloom-server', './api'];
   const args = ['test', '-mod=readonly', '-json', '-count=1', '-timeout=180s', ...packages];
   report.mode = storageOnly ? 'storage' : 'full';
   report.command = `go ${args.join(' ')}`;
@@ -147,6 +148,7 @@ try {
   const events = output.stdout.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
   const integration = events.filter((event) => /^TestPostgres/.test(event.Test ?? '') && !event.Test.includes('/') && ['pass', 'fail', 'skip'].includes(event.Action));
   report.postgres_tests = integration.map(({ Test, Action }) => ({ name: Test, result: Action }));
+  report.identity_tests = integration.filter((event) => /^TestPostgresIdentity/.test(event.Test)).map(({ Test, Action }) => ({ name: Test, result: Action }));
   report.postgres_skipped_tests = events.filter((event) => /^TestPostgres/.test(event.Test ?? '') && event.Action === 'skip').map(({ Test }) => Test);
   report.failed_tests = events.filter((event) => event.Action === 'fail').map(({ Package, Test }) => ({ package: Package, test: Test ?? null }));
   if (output.code !== 0) {
@@ -155,6 +157,7 @@ try {
   assert.ok(manifest === JSON.stringify({ schema_version: 1, files: sourceManifest() }, null, 2) + '\n', 'foundation_source_changed_during_tests');
   assert.equal(output.code, 0, 'foundation_go_tests_failed_see_local_evidence');
   assert.ok(integration.length > 0 && integration.every((event) => event.Action === 'pass') && report.postgres_skipped_tests.length === 0, 'foundation_postgres_tests_missing_or_skipped');
+  assert.ok(report.identity_tests.length > 0 && report.identity_tests.every((event) => event.result === 'pass'), 'identity_postgres_tests_missing_or_failed');
   pass('postgres_and_foundation_tests_executed');
 } catch (error) {
   pendingError = error;
