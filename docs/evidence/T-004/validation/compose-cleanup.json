@@ -1,0 +1,18 @@
+{
+  "project": "proxyloom-smoke-4dd268860798",
+  "checks": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    },
+    {
+      "kind": "volume",
+      "result": "pass"
+    }
+  ],
+  "checked_at": "2026-09-08T06:26:08.3663673Z"
+}

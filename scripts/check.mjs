@@ -15,6 +15,7 @@ function run(command, args, capture = false) {
 run(process.execPath, ['scripts/check-locks.mjs']);
 run(process.execPath, ['scripts/check-plan.mjs']);
 run(process.execPath, ['scripts/check-boundaries.mjs']);
+run(process.execPath, ['scripts/check-sqlc.mjs']);
 run(process.execPath, ['scripts/verify-cores.mjs']);
 run(process.execPath, ['--test', 'scripts/isolation-compose.test.mjs']);
 function goFiles(directory) {

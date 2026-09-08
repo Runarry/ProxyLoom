@@ -1,0 +1,21 @@
+PASS api ready
+PASS api live
+PASS frontend served
+PASS reserved route /api/v1/nodes returns 404
+PASS reserved route /internal/v1/jobs returns 404
+PASS reserved route /s/EXAMPLE_ONLY/test returns 404
+PASS migrations repeat safely
+PASS concurrent migration process 53100
+PASS concurrent migration process 12464
+PASS runtime database privileges are restricted
+PASS missing key fails startup
+PASS runner offline does not block api readiness
+PASS database outage blocks readiness
+PASS database outage preserves liveness
+PASS database recovery restores readiness
+PASS api restart preserves migration state
+PASS runner excluded from database network
+PASS runner mounts no secrets
+PASS runner has no published ports
+PASS services exit gracefully
+PASS captured logs contain no development secrets

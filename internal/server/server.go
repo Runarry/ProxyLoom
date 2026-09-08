@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,8 +32,9 @@ type Dependencies struct {
 }
 
 type Handler struct {
-	router *gin.Engine
-	web    *os.Root
+	router   *gin.Engine
+	web      *os.Root
+	boundary http.Handler
 }
 
 func init() { gin.SetMode(gin.ReleaseMode) }
@@ -71,20 +73,21 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 	router.GET("/readyz", ready)
 	router.HEAD("/readyz", ready)
 	router.NoRoute(handler.static)
+	handler.boundary = apicontract.RequestIDs(router)
 	return handler, nil
 }
 
 func (h *Handler) Close() error { return h.web.Close() }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.router.ServeHTTP(w, r)
+	h.boundary.ServeHTTP(w, r)
 }
 
 func notFound(c *gin.Context) {
-	respond(c, http.StatusNotFound, gin.H{"error": gin.H{"code": "NOT_FOUND", "message": "Route not found"}})
+	respond(c, http.StatusNotFound, apicontract.NewError(apicontract.ResourceNotFound).Response(apicontract.RequestID(c.Request.Context())))
 }
 
-func respond(c *gin.Context, status int, body gin.H) {
+func respond(c *gin.Context, status int, body any) {
 	if c.Request.Method == http.MethodHead {
 		c.Header("Content-Type", "application/json; charset=utf-8")
 		c.Status(status)
@@ -167,7 +170,7 @@ func safeRecovery(logger *slog.Logger) gin.HandlerFunc {
 				// Panic values, request headers, and URLs can all contain secrets.
 				logger.Error("http_panic", "error_code", "INTERNAL_ERROR")
 				if !c.Writer.Written() {
-					respond(c, http.StatusInternalServerError, gin.H{"error": gin.H{"code": "INTERNAL_ERROR", "message": "Internal error"}})
+					respond(c, http.StatusInternalServerError, apicontract.NewError(apicontract.InternalError).Response(apicontract.RequestID(c.Request.Context())))
 				}
 				c.Abort()
 			}
@@ -193,7 +196,7 @@ func safeAccessLog(logger *slog.Logger) gin.HandlerFunc {
 		default:
 			method = "other"
 		}
-		logger.Info("http_request", "route", route, "method", method, "status", c.Writer.Status(), "duration_ms", time.Since(started).Milliseconds())
+		logger.Info("http_request", "request_id", apicontract.RequestID(c.Request.Context()), "route", route, "method", method, "status", c.Writer.Status(), "duration_ms", time.Since(started).Milliseconds())
 	}
 }
 

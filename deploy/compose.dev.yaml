@@ -64,6 +64,7 @@ services:
       PROXYLOOM_WEB_DIR: /app/web
       PROXYLOOM_DATABASE_DSN_FILE: /run/secrets/database_dsn
       PROXYLOOM_MASTER_KEY_FILE: /run/secrets/master_key
+      PROXYLOOM_MASTER_KEY_ID: dev-master-v1
       PROXYLOOM_TOKEN_PEPPER_FILE: /run/secrets/token_pepper
       PROXYLOOM_CONTENT_HMAC_KEY_FILE: /run/secrets/content_hmac_key
     secrets: [database_dsn, master_key, token_pepper, content_hmac_key]

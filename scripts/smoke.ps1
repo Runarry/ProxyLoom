@@ -73,7 +73,8 @@ try {
     Assert-NoSecrets $migrationStatus
     $statusLine = @($migrationStatus -split "`n" | Where-Object { $_ -match '^\{"applied":' }) | Select-Object -Last 1
     $statusObject = $statusLine | ConvertFrom-Json
-    Assert-Step 'migrations repeat safely' ($statusObject.current -eq $true -and $statusObject.applied -eq 1 -and $statusObject.pending -eq 0)
+    $expectedMigrations = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'migrations') -Filter '*.up.sql' -File).Count
+    Assert-Step 'migrations repeat safely' ($statusObject.current -eq $true -and $statusObject.applied -eq $expectedMigrations -and $statusObject.latest -eq $expectedMigrations -and $statusObject.pending -eq 0)
 
     # Two real migration processes contend on the same PostgreSQL transaction lock.
     $migrationProcesses = [Collections.Generic.List[Diagnostics.Process]]::new()

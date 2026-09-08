@@ -1,0 +1,153 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.check
+#1 transferring dockerfile: 477B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff
+#2 ...
+
+#3 [auth] library/golang:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [auth] library/node:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c
+#5 DONE 1.9s
+
+#2 [internal] load metadata for docker.io/library/node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff
+#2 DONE 1.9s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 203B done
+#6 DONE 0.0s
+
+#7 [node 1/1] FROM docker.io/library/node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff
+#7 resolve docker.io/library/node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff 0.1s done
+#7 DONE 0.1s
+
+#8 [stage-1 1/8] FROM docker.io/library/golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c
+#8 resolve docker.io/library/golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c 0.1s done
+#8 DONE 0.1s
+
+#9 [internal] load build context
+#9 transferring context: 1.10MB 0.1s done
+#9 DONE 0.1s
+
+#10 [stage-1 2/8] COPY --from=node /usr/local/bin/node /usr/local/bin/node
+#10 CACHED
+
+#11 [stage-1 3/8] WORKDIR /src
+#11 CACHED
+
+#12 [stage-1 4/8] COPY go.mod go.sum ./
+#12 CACHED
+
+#13 [stage-1 5/8] RUN go mod download && go mod verify
+#13 CACHED
+
+#14 [stage-1 6/8] COPY . .
+#14 DONE 0.1s
+
+#15 [stage-1 7/8] RUN node scripts/install-sqlc.mjs
+#15 2.552 PASS: locked sqlc 1.31.1 (linux_amd64).
+#15 DONE 2.6s
+
+#16 [stage-1 8/8] RUN node scripts/check.mjs
+#16 0.268 > /usr/local/bin/node scripts/check-locks.mjs
+#16 0.296 PASS: tool versions, direct dependencies, Docker base digests, Compose PostgreSQL and CI versions match tools.lock.json.
+#16 0.299 > /usr/local/bin/node scripts/check-plan.mjs
+#16 0.326 PASS: 60 unique sequential tasks match PLAN metadata and form an acyclic dependency graph.
+#16 0.329 > /usr/local/bin/node scripts/check-boundaries.mjs
+#16 1.562 PASS: IR and compiler exclude HTTP/database/exec; Runner dependency graph excludes database/identity/server; API and Runner exclude isolation fixtures.
+#16 1.568 > /usr/local/bin/node scripts/check-sqlc.mjs
+#16 2.751 PASS: sqlc generated queries match the locked generator.
+#16 2.761 > /usr/local/bin/node scripts/verify-cores.mjs
+#16 2.788 PASS: cores.lock.yaml pins six official linux builds with unverified P0 combinations and no latest/verified placeholders.
+#16 2.790 > /usr/local/bin/node --test scripts/isolation-compose.test.mjs
+#16 2.899 ✔ existing stopped container refuses all mutations (4.030045ms)
+#16 2.899 ✔ existing orphan container refuses all mutations (2.036859ms)
+#16 2.899 ✔ existing network refuses all mutations (0.707157ms)
+#16 2.900 ✔ existing volume refuses all mutations (0.767978ms)
+#16 2.900 ✔ container query failure fails closed (1.021634ms)
+#16 2.901 ✔ network query failure fails closed (0.748778ms)
+#16 2.902 ✔ volume query failure fails closed (0.696386ms)
+#16 2.902 ✔ all networks query failure fails closed (0.688196ms)
+#16 2.902 ✔ inspect query failure fails closed (0.82307ms)
+#16 2.902 ✔ occupied overlapping 172.30.0.0/16 does not change existing resources (1.308561ms)
+#16 2.903 ✔ occupied overlapping 172.30.252.0/23 does not change existing resources (0.601904ms)
+#16 2.903 ✔ occupied overlapping 172.30.253.128/25 does not change existing resources (0.599884ms)
+#16 2.903 ✔ occupied overlapping 172.30.253.0/24 does not change existing resources (0.586564ms)
+#16 2.904 ✔ CIDR overlap handles boundaries, host bits and IPv6 (3.495843ms)
+#16 2.905 ✔ partial up failure (exit code) cleans only this run (1.134487ms)
+#16 2.906 ✔ partial up failure (exception) cleans only this run (1.136577ms)
+#16 2.906 ✔ cleanup failure cannot publish a pass report or message (1.374423ms)
+#16 2.906 ✔ phase and cleanup exceptions preserve both failures without a pass (1.154858ms)
+#16 2.907 ✔ successful runs isolate project and output, publish only after cleanup (2.564011ms)
+#16 2.917 ℹ tests 19
+#16 2.917 ℹ suites 0
+#16 2.917 ℹ pass 19
+#16 2.917 ℹ fail 0
+#16 2.917 ℹ cancelled 0
+#16 2.917 ℹ skipped 0
+#16 2.917 ℹ todo 0
+#16 2.917 ℹ duration_ms 96.018521
+#16 2.926 > gofmt -l /src/api/schema.go /src/api/schema_test.go /src/compat/embed.go /src/internal/adapter/adapter.go /src/internal/adapter/adapter_test.go /src/internal/adapter/emit.go /src/internal/adapter/emit_test.go /src/internal/adapter/mihomo/emit.go /src/internal/adapter/mihomo/emit_test.go /src/internal/adapter/mihomo/mihomo.go /src/internal/adapter/mihomo/mihomo_test.go /src/internal/adapter/redact.go /src/internal/adapter/singbox/emit.go /src/internal/adapter/singbox/emit_test.go /src/internal/adapter/singbox/singbox.go /src/internal/adapter/singbox/singbox_test.go /src/internal/adapter/xray/emit.go /src/internal/adapter/xray/emit_test.go /src/internal/adapter/xray/xray.go /src/internal/adapter/xray/xray_test.go /src/internal/apicontract/contract_test.go /src/internal/apicontract/cursor.go /src/internal/apicontract/errors.go /src/internal/apicontract/http.go /src/internal/apicontract/idempotency.go /src/internal/apicontract/jobs.go /src/internal/apicontract/jobs_test.go /src/internal/apicontract/json.go /src/internal/apicontract/node.go /src/internal/apicontract/read.go /src/internal/capability/catalog.go /src/internal/capability/catalog_test.go /src/internal/capability/parse.go /src/internal/catalog/catalog.go /src/internal/catalog/redaction.go /src/internal/catalog/resource.go /src/internal/catalog/resource_test.go /src/internal/chainverify/core.go /src/internal/chainverify/freeze.go /src/internal/chainverify/freeze_test.go /src/internal/chainverify/lifecycle_test.go /src/internal/chainverify/live_helpers_test.go /src/internal/chainverify/live_test.go /src/internal/chainverify/report.go /src/internal/chainverify/socks.go /src/internal/chainverify/topo.go /src/internal/compiler/compile.go /src/internal/compiler/compile_test.go /src/internal/compiler/emit.go /src/internal/compiler/label.go
+#16 2.945 > gofmt -l /src/internal/compiler/label_test.go /src/internal/compiler/native_test.go /src/internal/compiler/plan.go /src/internal/compiler/prepare.go /src/internal/compiler/protocol.go /src/internal/config/config.go /src/internal/config/config_test.go /src/internal/config/keys.go /src/internal/config/keys_test.go /src/internal/ir/diagnostic.go /src/internal/ir/frozen.go /src/internal/ir/frozen_test.go /src/internal/ir/ir_test.go /src/internal/ir/json.go /src/internal/ir/node.go /src/internal/ir/redaction.go /src/internal/ir/resource.go /src/internal/ir/value_validation.go /src/internal/isolation/cert.go /src/internal/isolation/compose_smoke_test.go /src/internal/isolation/events.go /src/internal/isolation/isolation_test.go /src/internal/isolation/log.go /src/internal/isolation/target.go /src/internal/isolation/trojan.go /src/internal/isolation/trojan_payload_test.go /src/internal/runner/exec/env.go /src/internal/runner/exec/exec_linux_test.go /src/internal/runner/exec/exec_nolinux_test.go /src/internal/runner/exec/exec_test.go /src/internal/runner/exec/proc_linux.go /src/internal/runner/exec/proc_nolinux.go /src/internal/runner/exec/proc_unix.go /src/internal/runner/exec/proc_windows.go /src/internal/runner/exec/registry.go /src/internal/runner/exec/run.go /src/internal/runner/exec/signal_unix.go /src/internal/runner/exec/signal_windows.go /src/internal/runner/exec/workspace.go /src/internal/runner/runner.go /src/internal/runner/runner_test.go /src/internal/secretbox/redaction.go /src/internal/secretbox/secretbox.go /src/internal/secretbox/secretbox_test.go /src/internal/server/server.go /src/internal/server/server_test.go /src/internal/storage/catalog.go /src/internal/storage/catalog_constraints_postgres_test.go /src/internal/storage/catalog_postgres_test.go /src/internal/storage/catalog_reads.go
+#16 2.964 > gofmt -l /src/internal/storage/catalog_test.go /src/internal/storage/catalog_transactions_postgres_test.go /src/internal/storage/foundation_acceptance_test.go /src/internal/storage/generated/catalog.sql.go /src/internal/storage/generated/db.go /src/internal/storage/generated/idempotency.sql.go /src/internal/storage/generated/models.go /src/internal/storage/generated/querier.go /src/internal/storage/idempotency.go /src/internal/storage/migrations.go /src/internal/storage/migrations_test.go /src/internal/storage/postgres_test.go /src/internal/storage/storage.go /src/internal/storage/storage_test.go /src/migrations/migrations.go /src/migrations/migrations_test.go /src/proxyloom-fixtures/certs.go /src/proxyloom-fixtures/certs_unix_test.go /src/proxyloom-fixtures/config.go /src/proxyloom-fixtures/main.go /src/proxyloom-fixtures/main_test.go /src/proxyloom-runner/healthcheck.go /src/proxyloom-runner/main.go /src/proxyloom-runner/main_test.go /src/proxyloom-server/healthcheck.go /src/proxyloom-server/main.go /src/proxyloom-server/main_test.go /src/schemas/schema.go
+#16 2.973 > go mod verify
+#16 3.890 all modules verified
+#16 3.892 > go mod tidy -diff
+#16 3.920 go: downloading github.com/dlclark/regexp2 v1.11.0
+#16 3.921 go: downloading gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
+#16 3.921 go: downloading github.com/stretchr/testify v1.11.1
+#16 3.935 go: downloading github.com/google/go-cmp v0.7.0
+#16 3.939 go: downloading github.com/go-playground/assert/v2 v2.2.0
+#16 3.963 go: downloading github.com/davecgh/go-spew v1.1.1
+#16 5.638 go: downloading github.com/kr/pretty v0.3.0
+#16 5.638 go: downloading github.com/pmezard/go-difflib v1.0.0
+#16 6.001 > go vet -mod=readonly ./...
+#16 25.47 > go test -mod=readonly -race ./...
+#16 41.25 ok  	github.com/Runarry/ProxyLoom/api	3.000s
+#16 41.25 ?   	github.com/Runarry/ProxyLoom/compat	[no test files]
+#16 41.25 ok  	github.com/Runarry/ProxyLoom/internal/adapter	1.170s
+#16 41.25 ok  	github.com/Runarry/ProxyLoom/internal/adapter/mihomo	1.229s
+#16 41.25 ok  	github.com/Runarry/ProxyLoom/internal/adapter/singbox	1.201s
+#16 41.25 ok  	github.com/Runarry/ProxyLoom/internal/adapter/xray	1.229s
+#16 49.04 ok  	github.com/Runarry/ProxyLoom/internal/apicontract	2.919s
+#16 49.04 ok  	github.com/Runarry/ProxyLoom/internal/capability	1.368s
+#16 49.04 ok  	github.com/Runarry/ProxyLoom/internal/catalog	1.623s
+#16 55.37 ok  	github.com/Runarry/ProxyLoom/internal/chainverify	9.252s
+#16 55.37 ok  	github.com/Runarry/ProxyLoom/internal/compiler	5.568s
+#16 55.37 ok  	github.com/Runarry/ProxyLoom/internal/config	1.753s
+#16 55.37 ok  	github.com/Runarry/ProxyLoom/internal/ir	2.777s
+#16 55.37 ok  	github.com/Runarry/ProxyLoom/internal/isolation	2.525s
+#16 55.37 ok  	github.com/Runarry/ProxyLoom/internal/runner	1.038s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/internal/runner/exec	29.173s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/internal/secretbox	2.225s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/internal/server	3.105s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/internal/storage	1.054s
+#16 75.30 ?   	github.com/Runarry/ProxyLoom/internal/storage/generated	[no test files]
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/migrations	1.016s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/proxyloom-fixtures	1.881s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/proxyloom-runner	1.023s
+#16 75.30 ok  	github.com/Runarry/ProxyLoom/proxyloom-server	1.048s
+#16 75.30 ?   	github.com/Runarry/ProxyLoom/schemas	[no test files]
+#16 75.45 PASS: engineering checks. Frontend checks run separately in CI.
+#16 DONE 75.7s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 12.5s done
+#17 exporting manifest sha256:4d24dd4c80ea5b26f6a1b9164b1bbfeba6dd081d7aecb87e5888119059f988d5 0.0s done
+#17 exporting config sha256:89ad99dd007ce0bd6025287c4464311852302a15f0f4cccbebdfb5fddd5aed1a 0.0s done
+#17 exporting attestation manifest sha256:856b9e8010c0c59ae883eec653d2268e8d15d7829dd7887df4c1a5b99cfaaea0 0.0s done
+#17 exporting manifest list sha256:7112fdc34830d2aaed563952494b42c79be414db477def0fc1f7354a85f84d9d 0.0s done
+#17 naming to docker.io/library/proxyloom-check:m1-foundation-01a07f6e
+#17 naming to docker.io/library/proxyloom-check:m1-foundation-01a07f6e done
+#17 unpacking to docker.io/library/proxyloom-check:m1-foundation-01a07f6e
+#17 unpacking to docker.io/library/proxyloom-check:m1-foundation-01a07f6e 3.6s done
+#17 DONE 16.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/ni9x78to695s1ct9i7k1fw7nq

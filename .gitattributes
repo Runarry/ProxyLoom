@@ -5,6 +5,7 @@
 *.json text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
+proxyloom-web/src/api/schema.d.ts text eol=lf
 Dockerfile* text eol=lf
 # Frozen baseline hashes refer to exact input bytes on every checkout platform.
 docs/requirements_v1.0.md -text

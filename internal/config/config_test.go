@@ -23,6 +23,7 @@ func apiEnvironment(t *testing.T) map[string]string {
 		"PROXYLOOM_PUBLIC_URL":            "https://admin.example.test",
 		"PROXYLOOM_DATABASE_DSN_FILE":     secretFile(t, []byte("postgres://synthetic:fixture@db/proxyloom\n")),
 		"PROXYLOOM_MASTER_KEY_FILE":       secretFile(t, bytes.Repeat([]byte{1}, 32)),
+		"PROXYLOOM_MASTER_KEY_ID":         "test-master-v1",
 		"PROXYLOOM_TOKEN_PEPPER_FILE":     secretFile(t, bytes.Repeat([]byte{2}, 32)),
 		"PROXYLOOM_CONTENT_HMAC_KEY_FILE": secretFile(t, bytes.Repeat([]byte{3}, 32)),
 	}

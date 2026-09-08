@@ -6,4 +6,5 @@ ENV GOTOOLCHAIN=local
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 COPY . .
+RUN node scripts/install-sqlc.mjs
 RUN node scripts/check.mjs

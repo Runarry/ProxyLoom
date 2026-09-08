@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"log/slog"
@@ -13,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/Runarry/ProxyLoom/internal/apicontract"
 )
 
 func testHandler(t *testing.T, dependencies Dependencies, output io.Writer) (*Handler, string) {
@@ -139,6 +142,30 @@ func TestStaticRoutingDoesNotMaskServicePaths(t *testing.T) {
 	for _, target := range []string{"/", "/settings", "/assets/app.js", "/healthz", "/readyz", "/api/missing"} {
 		if response := request(handler, http.MethodHead, target, "text/html"); response.Body.Len() != 0 {
 			t.Errorf("HEAD %s returned a body", target)
+		}
+	}
+}
+
+func TestErrorRequestIDsAreServerOwnedAndMatchLogs(t *testing.T) {
+	var logs bytes.Buffer
+	handler, _ := testHandler(t, healthyDependencies(), &logs)
+	seen := map[string]bool{}
+	for range 2 {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/nodes", nil)
+		req.Header.Set("X-Request-ID", "EXAMPLE_CLIENT_SECRET_ID")
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, req)
+		var body apicontract.ErrorResponse
+		if response.Code != http.StatusNotFound || json.Unmarshal(response.Body.Bytes(), &body) != nil {
+			t.Fatal("unimplemented route did not return a structured error")
+		}
+		id := response.Header().Get("X-Request-ID")
+		if len(id) != 32 || body.RequestID != id || seen[id] || body.Error.Code != apicontract.ResourceNotFound {
+			t.Fatal("request identity or error contract is inconsistent")
+		}
+		seen[id] = true
+		if !strings.Contains(logs.String(), id) || strings.Contains(logs.String()+response.Body.String(), "EXAMPLE_CLIENT_SECRET_ID") {
+			t.Fatal("request ID was not correlated safely")
 		}
 	}
 }

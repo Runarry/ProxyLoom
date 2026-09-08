@@ -1,11 +1,16 @@
 {
   "schema_version": 1,
   "baseline_date": "2026-09-07",
-  "scope": "WP-01 M0 development baseline; not a production release or core compatibility lock",
+  "scope": "WP-01 M0 and M1 foundation tool baseline; not a production release or core compatibility lock",
   "go": "1.26.0",
   "node": "24.6.0",
   "pnpm": "10.33.2",
-  "observed_host": { "os": "windows", "arch": "amd64", "docker_engine": "29.7.2", "docker_compose": "5.5.0" },
+  "observed_host": {
+    "os": "windows",
+    "arch": "amd64",
+    "docker_engine": "29.7.2",
+    "docker_compose": "5.5.0"
+  },
   "go_direct_dependencies": {
     "github.com/gin-gonic/gin": "v1.11.0",
     "github.com/jackc/pgx/v5": "v5.7.6",
@@ -13,8 +18,14 @@
     "gopkg.in/yaml.v3": "v3.0.1"
   },
   "frontend_direct_dependencies": {
-    "vue": "3.5.42", "vue-router": "4.6.4", "pinia": "3.0.4",
-    "typescript": "5.9.3", "vite": "8.2.2", "@vitejs/plugin-vue": "6.0.8", "vue-tsc": "3.2.5"
+    "vue": "3.5.42",
+    "vue-router": "4.6.4",
+    "pinia": "3.0.4",
+    "typescript": "5.9.3",
+    "vite": "8.2.2",
+    "@vitejs/plugin-vue": "6.0.8",
+    "vue-tsc": "3.2.5",
+    "openapi-typescript": "7.9.1"
   },
   "images": {
     "go_builder": "golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c",
@@ -23,10 +34,38 @@
     "runtime": "debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171"
   },
   "verification": {
-    "dependency_sources": ["https://proxy.golang.org", "https://registry.npmjs.org"],
+    "dependency_sources": [
+      "https://proxy.golang.org",
+      "https://registry.npmjs.org"
+    ],
     "image_source": "https://registry-1.docker.io/v2/library/",
     "method": "Official module/npm metadata and docker buildx imagetools inspect; manifests resolved during implementation",
-    "integrity_files": ["go.sum", "proxyloom-web/pnpm-lock.yaml"],
+    "integrity_files": [
+      "go.sum",
+      "proxyloom-web/pnpm-lock.yaml"
+    ],
     "runtime_image_evidence": "docs/evidence/T-002/summary.md"
+  },
+  "codegen": {
+    "sqlc": {
+      "builds": {
+        "windows_amd64": {
+          "binary_sha256": "22ce316349ac153a4aacaa3912981f73980a6f84861f4c602ae6e3075ca326e4",
+          "archive_sha256": "352711fa7dcb05dcdfefca0ad71b2c9a74fd090f8d7fc609419de4cbc725429f",
+          "archive": "sqlc_1.31.1_windows_amd64.zip",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_windows_amd64.zip",
+          "executable": "sqlc.exe"
+        },
+        "linux_amd64": {
+          "binary_sha256": "0496fbc18f603e2fbd10c752942d1389a1fa9bc3d18de7243ec00cccd611575f",
+          "archive_sha256": "497ae4fcdfa64c5b0c311ffe4c2bd991e43991e82e5367792ed78bc2dca27354",
+          "archive": "sqlc_1.31.1_linux_amd64.tar.gz",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_amd64.tar.gz",
+          "executable": "sqlc"
+        }
+      },
+      "version": "1.31.1",
+      "source": "https://github.com/sqlc-dev/sqlc/releases/tag/v1.31.1"
+    }
   }
 }

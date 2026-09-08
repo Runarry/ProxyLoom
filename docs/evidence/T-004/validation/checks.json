@@ -1,0 +1,37 @@
+{
+  "linux_engineering": {
+    "result": "pass",
+    "image_manifest": "sha256:7112fdc34830d2aaed563952494b42c79be414db477def0fc1f7354a85f84d9d",
+    "command": "docker build -f deploy/Dockerfile.check -t proxyloom-check:m1-foundation-01a07f6e .",
+    "log": "linux-check.txt"
+  },
+  "windows_engineering": {
+    "result": "pass",
+    "command": "node scripts/check.mjs",
+    "log": "engineering.txt"
+  },
+  "recorded_at_utc": "2026-09-08T06:36:04.4813458Z",
+  "schema_version": 1,
+  "compose": {
+    "cleanup": "compose-cleanup.json",
+    "result": "pass",
+    "report": "compose-smoke-report.json",
+    "command": "pwsh -NoProfile -File scripts/smoke.ps1 -Build",
+    "checks": 21
+  },
+  "base_commit": "fdc7fc3956e6892ffc68d1873d2d7d2d70edaaf0",
+  "source_manifest_sha256": "21d8693b97fc05d50f98d3d63e2ac40ee0411c63e397e4629190e0789224376c",
+  "development_initialization": {
+    "resolution": "existing eight development secret files verified complete and unchanged; Compose passed with those files",
+    "result": "blocked_by_existing_windows_directory_acl",
+    "log": "dev-init.txt"
+  },
+  "scope": "T-004 T-005 T-007 foundation only; in_review; no full G1, new core compatibility, arm64 or new business handlers",
+  "postgres_report": "report.json",
+  "api_codegen": {
+    "openapi_sha256": "beb7051172c2eb33eb2ce9a8e37428909757e7c9951245afcd2406970d2d065f",
+    "result": "pass",
+    "typescript_sha256": "9c0905b77196d7b7c15560181aec47ec82a6852c252f0b34dc471ed72db4fc92",
+    "command": "node scripts/check-api.mjs"
+  }
+}

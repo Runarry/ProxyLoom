@@ -1,0 +1,98 @@
+{
+  "scope": "T-002 development smoke only; not G0 or production acceptance",
+  "project": "proxyloom-smoke-4dd268860798",
+  "completed": true,
+  "ended_at": "2026-09-08T06:22:12.7195392Z",
+  "image_ids": [
+    "sha256:25b25908b76c194ac977757cd25f736cfdcba5ec9474fb5fd92b962e391172d3",
+    "sha256:d217a298b104ca63901d9c2e49d39407a9462a4615436b39f64dbf7aff16f314"
+  ],
+  "platform": "linux/amd64",
+  "started_at": "2026-09-08T06:21:03.4217990Z",
+  "checks": [
+    {
+      "name": "api ready",
+      "result": "pass"
+    },
+    {
+      "name": "api live",
+      "result": "pass"
+    },
+    {
+      "name": "frontend served",
+      "result": "pass"
+    },
+    {
+      "name": "reserved route /api/v1/nodes returns 404",
+      "result": "pass"
+    },
+    {
+      "name": "reserved route /internal/v1/jobs returns 404",
+      "result": "pass"
+    },
+    {
+      "name": "reserved route /s/EXAMPLE_ONLY/test returns 404",
+      "result": "pass"
+    },
+    {
+      "name": "migrations repeat safely",
+      "result": "pass"
+    },
+    {
+      "name": "concurrent migration process 53100",
+      "result": "pass"
+    },
+    {
+      "name": "concurrent migration process 12464",
+      "result": "pass"
+    },
+    {
+      "name": "runtime database privileges are restricted",
+      "result": "pass"
+    },
+    {
+      "name": "missing key fails startup",
+      "result": "pass"
+    },
+    {
+      "name": "runner offline does not block api readiness",
+      "result": "pass"
+    },
+    {
+      "name": "database outage blocks readiness",
+      "result": "pass"
+    },
+    {
+      "name": "database outage preserves liveness",
+      "result": "pass"
+    },
+    {
+      "name": "database recovery restores readiness",
+      "result": "pass"
+    },
+    {
+      "name": "api restart preserves migration state",
+      "result": "pass"
+    },
+    {
+      "name": "runner excluded from database network",
+      "result": "pass"
+    },
+    {
+      "name": "runner mounts no secrets",
+      "result": "pass"
+    },
+    {
+      "name": "runner has no published ports",
+      "result": "pass"
+    },
+    {
+      "name": "services exit gracefully",
+      "result": "pass"
+    },
+    {
+      "name": "captured logs contain no development secrets",
+      "result": "pass"
+    }
+  ]
+}

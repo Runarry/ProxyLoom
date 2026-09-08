@@ -2,7 +2,6 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"io"
 	"net"
@@ -18,6 +17,7 @@ type API struct {
 	HTTPAddr, WebDir, PublicURL                                         string
 	Development                                                         bool
 	DatabaseDSNFile, MasterKeyFile, TokenPepperFile, ContentHMACKeyFile string
+	MasterKeyID, OldMasterKeysFile                                      string
 }
 
 type Migration struct{ DSNFile string }
@@ -48,6 +48,8 @@ func LoadAPI(lookup Lookup) (API, error) {
 	}
 	c.DatabaseDSNFile = lookup("PROXYLOOM_DATABASE_DSN_FILE")
 	c.MasterKeyFile = lookup("PROXYLOOM_MASTER_KEY_FILE")
+	c.MasterKeyID = lookup("PROXYLOOM_MASTER_KEY_ID")
+	c.OldMasterKeysFile = lookup("PROXYLOOM_OLD_MASTER_KEYS_FILE")
 	c.TokenPepperFile = lookup("PROXYLOOM_TOKEN_PEPPER_FILE")
 	c.ContentHMACKeyFile = lookup("PROXYLOOM_CONTENT_HMAC_KEY_FILE")
 	if err = c.ValidateSecrets(); err != nil {
@@ -144,32 +146,11 @@ func (c API) ValidateSecrets() error {
 	if _, err := c.ReadDatabaseDSN(); err != nil {
 		return err
 	}
-	files := []struct{ path, name string }{
-		{c.MasterKeyFile, "PROXYLOOM_MASTER_KEY_FILE"},
-		{c.TokenPepperFile, "PROXYLOOM_TOKEN_PEPPER_FILE"},
-		{c.ContentHMACKeyFile, "PROXYLOOM_CONTENT_HMAC_KEY_FILE"},
+	keys, err := c.ReadKeys()
+	if err != nil {
+		return err
 	}
-	var keys [][]byte
-	defer func() {
-		for _, key := range keys {
-			clear(key)
-		}
-	}()
-	for _, file := range files {
-		key, err := readFile(file.path, file.name, 32)
-		if err != nil {
-			return err
-		}
-		keys = append(keys, key)
-		if len(key) != 32 {
-			return configError(file.name, "invalid_key_size")
-		}
-		for _, previous := range keys[:len(keys)-1] {
-			if bytes.Equal(previous, key) {
-				return configError(file.name, "reused_key")
-			}
-		}
-	}
+	keys.Clear()
 	return nil
 }
 

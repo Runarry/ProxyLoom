@@ -21,7 +21,9 @@ jobs:
         with:
           node-version: '24.6.0'
       - name: PLAN, boundaries, formatting, dependencies, vet, race tests
-        run: node scripts/check.mjs
+        run: |
+          node scripts/install-sqlc.mjs
+          node scripts/check.mjs
       - name: Install pinned pnpm
         run: npm install --global pnpm@10.33.2
       - name: Frontend frozen install, type check and build
@@ -30,6 +32,10 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm typecheck
           pnpm build
+      - name: API generated types match the contract
+        run: node scripts/check-api.mjs
+      - name: PostgreSQL foundation integration
+        run: node scripts/verify-foundation.mjs
   development-smoke:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
