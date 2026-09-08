@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "task": "T-009",
+  "summary": "M1 node and local import management, durable jobs and mTLS configuration validation: clone endpoint, import expiration and 5000-item atomic commits, conditional network quota and newly mounted routes. Add only new immutable-history-aware migrations and generated query models. Optional TLS ALPN empty-array and fingerprint null clears retain complete-node validation; create/read constraints stay unchanged.",
+  "documents": [
+    "docs/adr/0009-m1-input-and-validation.md",
+    "docs/m1-input-contract.md"
+  ],
+  "fixtures": [
+    "fixtures/api/m1-input-validation-scenarios.json",
+    "fixtures/api/implemented-routes.json",
+    "fixtures/api/routes.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/models.go",
+    "internal/storage/generated/querier.go",
+    "internal/storage/generated/jobs.sql.go",
+    "internal/storage/generated/imports.sql.go",
+    "internal/storage/generated/nodes.sql.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "becc307d3d94f8d9142595597e5cd9e04d660e4a8676ae58002abca45e5aa287",
+      "after_sha256": "65913fa48303a0a49d0c8be9fe96820165f9c18431b1af1a2424cf566afb3151",
+      "changes": [
+        {
+          "pointer": "/components/parameters/NodeSearch",
+          "before_sha256": null,
+          "after_sha256": "33b045e57c988259c76bb38c238924fe7064029c6182777ed2cfd9e1295dc332"
+        },
+        {
+          "pointer": "/components/schemas/ALPNPatch",
+          "before_sha256": null,
+          "after_sha256": "21e14dafb578db7fef04cb5aade2008ce68700c9b6877f95c6e17a9adad74e35"
+        },
+        {
+          "pointer": "/components/schemas/FingerprintPatch",
+          "before_sha256": null,
+          "after_sha256": "a1346d37a65fe6bd219b6cde2f96f38fce0cadfba12044fe10becc354b7bfbac"
+        },
+        {
+          "pointer": "/components/schemas/ImportBatch/properties/expires_at",
+          "before_sha256": null,
+          "after_sha256": "b490f310604a525099bf0c2b675443251ba58169f69914dd23f3591ec06047b1"
+        },
+        {
+          "pointer": "/components/schemas/ImportBatch/properties/state/enum",
+          "before_sha256": "bd7a882b2f60c8a3352b12cce163620a51a0026b6caf860410cccfe1aef69b8b",
+          "after_sha256": "ccdc86cba1a57df139c718eb3739db717566550dc14f3f244910d59f08ff93a9"
+        },
+        {
+          "pointer": "/components/schemas/ImportBatch/required",
+          "before_sha256": "77c0520d224e924cb3895bdf3d8d8775ec908e5202a0f0056d9cabaf8a0932eb",
+          "after_sha256": "09f646052b94fd39385ba42eb4083ed5d48ed390617e43dadbc140dee850b923"
+        },
+        {
+          "pointer": "/components/schemas/ImportCommit/properties/items/maxItems",
+          "before_sha256": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf",
+          "after_sha256": "0f8eb4b72b6e0c9e88b388eb967b49e067ef1004bf07bffc22c3acb13b43580a"
+        },
+        {
+          "pointer": "/components/schemas/ImportCommitRequest/properties/decisions/maxItems",
+          "before_sha256": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf",
+          "after_sha256": "0f8eb4b72b6e0c9e88b388eb967b49e067ef1004bf07bffc22c3acb13b43580a"
+        },
+        {
+          "pointer": "/components/schemas/NodeCloneRequest",
+          "before_sha256": null,
+          "after_sha256": "27816f7f14ad311985ac909641716a14d6521ab1c0637086119f41b53ec37c6e"
+        },
+        {
+          "pointer": "/components/schemas/RealitySecurityPatch/properties/alpn/$ref",
+          "before_sha256": "f1b08503f6c5e5081f55563a04c57447ac484e1b5c61204ec0308f5777f0ffcd",
+          "after_sha256": "b34a0b5361ca0140410fa39beb92145622ad9eafaf25401fbaab00ad03fb168b"
+        },
+        {
+          "pointer": "/components/schemas/RealitySecurityPatch/properties/client_fingerprint/$ref",
+          "before_sha256": "723edad9f69d922958865bc3bc3c1e5a06ffdca988905bc45b7b871e64c12136",
+          "after_sha256": "225439869d0b8f8e19df5cc563b2132061aba24e5cdbf3ae1af9d251d77d9943"
+        },
+        {
+          "pointer": "/components/schemas/RunnerLease/allOf",
+          "before_sha256": "c683fa479238c4326db2613d398aa254cd50e27b26425040b5817726986128d4",
+          "after_sha256": "db3011cbf0199fe7701c412eee44645a1053cfa4d3e9109f90ca9faa58b65812"
+        },
+        {
+          "pointer": "/components/schemas/RunnerLease/required",
+          "before_sha256": "88d34f901488f8181895e008a83ae1c472f50e28a2ba7a17ae78dd6cb95762fe",
+          "after_sha256": "0503fdbb89727c492de1e7f91c70a02f5d6db02a933537cd2f081954de417d50"
+        },
+        {
+          "pointer": "/components/schemas/TLSSecurityPatch/properties/alpn/$ref",
+          "before_sha256": "f1b08503f6c5e5081f55563a04c57447ac484e1b5c61204ec0308f5777f0ffcd",
+          "after_sha256": "b34a0b5361ca0140410fa39beb92145622ad9eafaf25401fbaab00ad03fb168b"
+        },
+        {
+          "pointer": "/components/schemas/TLSSecurityPatch/properties/client_fingerprint/$ref",
+          "before_sha256": "723edad9f69d922958865bc3bc3c1e5a06ffdca988905bc45b7b871e64c12136",
+          "after_sha256": "225439869d0b8f8e19df5cc563b2132061aba24e5cdbf3ae1af9d251d77d9943"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1imports/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1imports~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1imports~1{id}~1commit/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1jobs/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1jobs~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1jobs~1{id}~1cancel/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1jobs~1{id}~1events/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes/get/parameters",
+          "before_sha256": "f58b2b2954873340cb92556fc54de7e0807859724e23b0e2b57aa66bb820e445",
+          "after_sha256": "bed30e052f8b5ce4ca89afa9970f9388dba18f180294dfe64f4e7ebca10014f7"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1batch/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}~1clone",
+          "before_sha256": null,
+          "after_sha256": "253f974a65b1e825b3ae665c01d348235fd95960838cf92daf0e0d6718afbbaf"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}~1references/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}~1reveal/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1nodes~1{id}~1revisions/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1internal~1v1~1jobs~1lease/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1internal~1v1~1jobs~1{id}~1events/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1internal~1v1~1jobs~1{id}~1heartbeat/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1internal~1v1~1jobs~1{id}~1result/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1internal~1v1~1runners~1heartbeat/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000005_jobs.up.sql",
+      "before_sha256": null,
+      "after_sha256": "841e570959b5732e28cb010d1c9bc8b861a1e5b7cf02f9d4eb692ae3c388cd87",
+      "changes": []
+    },
+    {
+      "path": "migrations/000006_imports.up.sql",
+      "before_sha256": null,
+      "after_sha256": "ad5a582a22ae05c4ba25f973f48b1c3afefce044f3e3b93b41183a4bec810808",
+      "changes": []
+    },
+    {
+      "path": "migrations/000007_node_audit.up.sql",
+      "before_sha256": null,
+      "after_sha256": "e01d7381d9d2387cb84ee6dbf74135f4b9a747791171be3bb145c3f80d4994eb",
+      "changes": []
+    }
+  ]
+}

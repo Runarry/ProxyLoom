@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "credential_policy": "Templates only. The Go tests generate synthetic credentials and Base64 payloads in memory; no executable authenticated link is stored here.",
+  "cases": [
+    {"id":"ss-sip002-ipv6","scheme":"ss","body":"{{ss64}}@[2001:db8::1]:8388#%E9%A6%99%E6%B8%AF%2B%E8%8A%82%E7%82%B9","status":"valid","protocol":"shadowsocks","host":"2001:db8::1","transport":"native_tcp","security":"none","name":"香港+节点"},
+    {"id":"ss-sip002-escaped","scheme":"ss","body":"aes-256-gcm:{{password_encoded}}@SS.Invalid:8388","status":"valid","protocol":"shadowsocks","host":"ss.invalid","transport":"native_tcp","security":"none"},
+    {"id":"vmess-v2-ws-tls","scheme":"vmess","body":"{{vmess_ws}}","status":"valid","protocol":"vmess","host":"2001:db8::2","transport":"websocket","security":"tls","name":"东京 + 节点"},
+    {"id":"vmess-v2-tcp-none","scheme":"vmess","body":"{{vmess_tcp}}","status":"valid","protocol":"vmess","host":"vmess.invalid","transport":"native_tcp","security":"none"},
+    {"id":"vless-ws-tls","scheme":"vless","body":"{{uuid}}@Edge.Invalid:443?type=ws&security=tls&encryption=none&path=%2Fa%252Fb&host=WS.Invalid&sni=TLS.Invalid#中文+名字","status":"valid","protocol":"vless","host":"edge.invalid","transport":"websocket","security":"tls","name":"中文+名字"},
+    {"id":"vless-reality","scheme":"vless","body":"{{uuid}}@[2001:db8::3]:443?security=reality&type=tcp&sni=front.invalid&pbk={{public_key}}&sid=0123AB&fp=chrome&flow=xtls-rprx-vision","status":"valid","protocol":"vless","host":"2001:db8::3","transport":"native_tcp","security":"reality"},
+    {"id":"vless-tcp-defaults","scheme":"vless","body":"{{uuid}}@vless.invalid:80","status":"valid","protocol":"vless","host":"vless.invalid","transport":"native_tcp","security":"none"},
+    {"id":"trojan-ws-idna","scheme":"trojan","body":"{{password_encoded}}@例子.invalid:443?type=ws&path=%2Fchat&sni=tls.invalid","status":"valid","protocol":"trojan","host":"xn--fsqu00a.invalid","transport":"websocket","security":"tls"},
+    {"id":"socks5-auth","scheme":"socks5","body":"{{username_encoded}}:{{password_encoded}}@[2001:db8::4]:1080","status":"valid","protocol":"socks5","host":"2001:db8::4","transport":"native_tcp","security":"none"},
+    {"id":"socks5-no-auth-tls","scheme":"socks5","body":"socks.invalid:1080?security=tls&sni=auth.invalid","status":"valid","protocol":"socks5","host":"socks.invalid","transport":"native_tcp","security":"tls"},
+    {"id":"http-connect-auth","scheme":"http","body":"{{username_encoded}}:{{password_encoded}}@http.invalid:3128","status":"valid","protocol":"http","host":"http.invalid","transport":"native_tcp","security":"none"},
+    {"id":"https-connect-standard-port","scheme":"https","body":"https.invalid","status":"valid","protocol":"http","host":"https.invalid","transport":"native_tcp","security":"tls"},
+    {"id":"http-connect-standard-port","scheme":"http","body":"http.invalid","status":"valid","protocol":"http","host":"http.invalid","transport":"native_tcp","security":"none"},
+    {"id":"unknown-metadata-isolated","scheme":"vless","body":"{{uuid}}@edge.invalid:443?security=tls&x-note=isolated%2525&group=demo","status":"valid","protocol":"vless","host":"edge.invalid","transport":"native_tcp","security":"tls","code":"IMPORT_UNKNOWN_METADATA"},
+    {"id":"ss-missing-password","scheme":"ss","body":"{{ss_empty64}}@edge.invalid:8388","status":"invalid","code":"IMPORT_REQUIRED_FIELD"},
+    {"id":"vmess-missing-uuid","scheme":"vmess","body":"{{vmess_missing_id}}","status":"invalid","code":"IMPORT_REQUIRED_FIELD"},
+    {"id":"vless-missing-uuid","scheme":"vless","body":"edge.invalid:443","status":"invalid","code":"IMPORT_REQUIRED_FIELD"},
+    {"id":"trojan-missing-password","scheme":"trojan","body":"edge.invalid:443","status":"invalid","code":"IMPORT_REQUIRED_FIELD"},
+    {"id":"socks5-partial-auth","scheme":"socks5","body":"{{username_encoded}}@edge.invalid:1080","status":"invalid","code":"IMPORT_REQUIRED_FIELD"},
+    {"id":"http-partial-auth","scheme":"http","body":"{{username_encoded}}:@edge.invalid:3128","status":"invalid","code":"IMPORT_REQUIRED_FIELD"},
+    {"id":"query-duplicate-decoded-key","scheme":"vless","body":"{{uuid}}@edge.invalid:443?security=tls&sni=a.invalid&%73ni=b.invalid","status":"invalid","code":"IMPORT_DUPLICATE_FIELD"},
+    {"id":"ss-plugin-never-executed","scheme":"ss","body":"{{ss64}}@edge.invalid:8388/?plugin=unsupported-plugin%3Bmode%3Dtls","status":"unsupported","code":"IMPORT_UNSUPPORTED_PARAMETER"},
+    {"id":"vless-unknown-critical","scheme":"vless","body":"{{uuid}}@edge.invalid:443?serviceName=rpc","status":"unsupported","code":"IMPORT_UNSUPPORTED_PARAMETER"},
+    {"id":"trojan-no-insecure-import","scheme":"trojan","body":"{{password_encoded}}@edge.invalid:443?allowInsecure=1","status":"invalid","code":"IMPORT_UNSAFE_TLS"},
+    {"id":"unsupported-scheme","scheme":"unsupported","body":"edge.invalid:443","status":"unsupported","code":"IMPORT_UNKNOWN_SCHEME"}
+  ]
+}

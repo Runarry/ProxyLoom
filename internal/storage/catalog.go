@@ -120,6 +120,7 @@ func recordContext(r dbgen.GetResourceRevisionRow) secretbox.Context {
 type catalogTx struct {
 	mu     sync.Mutex
 	store  *Catalog
+	tx     pgx.Tx
 	q      *dbgen.Queries
 	scope  ir.ID
 	active bool
@@ -138,6 +139,13 @@ func (c *Catalog) Transact(ctx context.Context, scope ir.ID, fn func(catalog.Tx)
 }
 
 func (c *Catalog) transact(ctx context.Context, scope ir.ID, fn func(*catalogTx) error) error {
+	return catalogError(c.transactRaw(ctx, scope, fn))
+}
+
+// transactRaw is the package-private bridge for atomic domain operations. It
+// preserves their safe errors while retaining scope serialization, the failed
+// mutation latch, and a single catalog epoch advance.
+func (c *Catalog) transactRaw(ctx context.Context, scope ir.ID, fn func(*catalogTx) error) error {
 	if scope.Validate() != nil {
 		return catalog.ErrInvalidInput
 	}
@@ -154,7 +162,7 @@ func (c *Catalog) transact(ctx context.Context, scope ir.ID, fn func(*catalogTx)
 	if _, err := q.LockScope(ctx, dbID(scope)); err != nil {
 		return catalogError(err)
 	}
-	t := &catalogTx{store: c, q: q, scope: scope, active: true}
+	t := &catalogTx{store: c, tx: tx, q: q, scope: scope, active: true}
 	defer t.close()
 	err = fn(t)
 	t.mu.Lock()
@@ -162,7 +170,7 @@ func (c *Catalog) transact(ctx context.Context, scope ir.ID, fn func(*catalogTx)
 	failed, dirty := t.failed, t.dirty
 	t.mu.Unlock()
 	if err != nil {
-		return catalogError(err)
+		return err
 	}
 	if failed != nil {
 		return failed

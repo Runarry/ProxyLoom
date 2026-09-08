@@ -1,59 +1,205 @@
 {
-  "/api/v1/setup": ["post"],
-  "/api/v1/auth/login": ["post"],
-  "/api/v1/auth/logout": ["post"],
-  "/api/v1/auth/me": ["get"],
-  "/api/v1/auth/reauth": ["post"],
-  "/api/v1/imports": ["post"],
-  "/api/v1/imports/{id}": ["get"],
-  "/api/v1/imports/{id}/commit": ["post"],
-  "/api/v1/sources": ["get", "post"],
-  "/api/v1/sources/{id}": ["get", "patch", "delete"],
-  "/api/v1/sources/{id}/refresh": ["post"],
-  "/api/v1/nodes": ["get", "post"],
-  "/api/v1/nodes/{id}": ["get", "patch", "delete"],
-  "/api/v1/nodes/batch": ["post"],
-  "/api/v1/nodes/{id}/revisions": ["get"],
-  "/api/v1/nodes/{id}/references": ["get"],
-  "/api/v1/nodes/{id}/reveal": ["post"],
-  "/api/v1/chains": ["get", "post"],
-  "/api/v1/chains/{id}": ["get", "patch", "delete"],
-  "/api/v1/policy-groups": ["get", "post"],
-  "/api/v1/policy-groups/{id}": ["get", "patch", "delete"],
-  "/api/v1/routing-profiles": ["get", "post"],
-  "/api/v1/routing-profiles/{id}": ["get", "patch", "delete"],
-  "/api/v1/dns-profiles": ["get", "post"],
-  "/api/v1/dns-profiles/{id}": ["get", "patch", "delete"],
-  "/api/v1/rule-sets": ["get", "post"],
-  "/api/v1/rule-sets/{id}": ["get", "patch", "delete"],
-  "/api/v1/client-presets": ["get"],
-  "/api/v1/capabilities": ["get"],
-  "/api/v1/subscriptions": ["get", "post"],
-  "/api/v1/subscriptions/{id}": ["get", "patch", "delete"],
-  "/api/v1/subscriptions/{id}/compile": ["post"],
-  "/api/v1/compile-batches/{id}": ["get"],
-  "/api/v1/subscriptions/{id}/publish": ["post"],
-  "/api/v1/subscriptions/{id}/rollback": ["post"],
-  "/api/v1/subscriptions/{id}/publications": ["get"],
-  "/api/v1/subscriptions/{id}/tokens": ["get", "post"],
-  "/api/v1/tokens/{id}/revoke": ["post"],
-  "/api/v1/exports": ["post"],
-  "/api/v1/test-targets": ["get", "post"],
-  "/api/v1/test-targets/{id}": ["get", "patch", "delete"],
-  "/api/v1/tests": ["post"],
-  "/api/v1/jobs": ["get"],
-  "/api/v1/jobs/{id}": ["get"],
-  "/api/v1/jobs/{id}/cancel": ["post"],
-  "/api/v1/jobs/{id}/events": ["get"],
-  "/api/v1/test-results": ["get"],
-  "/api/v1/cores": ["get"],
-  "/api/v1/cores/{id}/disable": ["post"],
-  "/api/v1/system/settings": ["get", "patch"],
-  "/api/v1/audit-events": ["get"],
-  "/internal/v1/runners/heartbeat": ["post"],
-  "/internal/v1/jobs/lease": ["post"],
-  "/internal/v1/jobs/{id}/heartbeat": ["post"],
-  "/internal/v1/jobs/{id}/events": ["post"],
-  "/internal/v1/jobs/{id}/result": ["post"],
-  "/s/{token}/{target_key}": ["get"]
+  "/api/v1/setup": [
+    "post"
+  ],
+  "/api/v1/auth/login": [
+    "post"
+  ],
+  "/api/v1/auth/logout": [
+    "post"
+  ],
+  "/api/v1/auth/me": [
+    "get"
+  ],
+  "/api/v1/auth/reauth": [
+    "post"
+  ],
+  "/api/v1/imports": [
+    "post"
+  ],
+  "/api/v1/imports/{id}": [
+    "get"
+  ],
+  "/api/v1/imports/{id}/commit": [
+    "post"
+  ],
+  "/api/v1/sources": [
+    "get",
+    "post"
+  ],
+  "/api/v1/sources/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/sources/{id}/refresh": [
+    "post"
+  ],
+  "/api/v1/nodes": [
+    "get",
+    "post"
+  ],
+  "/api/v1/nodes/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/nodes/batch": [
+    "post"
+  ],
+  "/api/v1/nodes/{id}/revisions": [
+    "get"
+  ],
+  "/api/v1/nodes/{id}/references": [
+    "get"
+  ],
+  "/api/v1/nodes/{id}/reveal": [
+    "post"
+  ],
+  "/api/v1/chains": [
+    "get",
+    "post"
+  ],
+  "/api/v1/chains/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/policy-groups": [
+    "get",
+    "post"
+  ],
+  "/api/v1/policy-groups/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/routing-profiles": [
+    "get",
+    "post"
+  ],
+  "/api/v1/routing-profiles/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/dns-profiles": [
+    "get",
+    "post"
+  ],
+  "/api/v1/dns-profiles/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/rule-sets": [
+    "get",
+    "post"
+  ],
+  "/api/v1/rule-sets/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/client-presets": [
+    "get"
+  ],
+  "/api/v1/capabilities": [
+    "get"
+  ],
+  "/api/v1/subscriptions": [
+    "get",
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/subscriptions/{id}/compile": [
+    "post"
+  ],
+  "/api/v1/compile-batches/{id}": [
+    "get"
+  ],
+  "/api/v1/subscriptions/{id}/publish": [
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}/rollback": [
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}/publications": [
+    "get"
+  ],
+  "/api/v1/subscriptions/{id}/tokens": [
+    "get",
+    "post"
+  ],
+  "/api/v1/tokens/{id}/revoke": [
+    "post"
+  ],
+  "/api/v1/exports": [
+    "post"
+  ],
+  "/api/v1/test-targets": [
+    "get",
+    "post"
+  ],
+  "/api/v1/test-targets/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/tests": [
+    "post"
+  ],
+  "/api/v1/jobs": [
+    "get"
+  ],
+  "/api/v1/jobs/{id}": [
+    "get"
+  ],
+  "/api/v1/jobs/{id}/cancel": [
+    "post"
+  ],
+  "/api/v1/jobs/{id}/events": [
+    "get"
+  ],
+  "/api/v1/test-results": [
+    "get"
+  ],
+  "/api/v1/cores": [
+    "get"
+  ],
+  "/api/v1/cores/{id}/disable": [
+    "post"
+  ],
+  "/api/v1/system/settings": [
+    "get",
+    "patch"
+  ],
+  "/api/v1/audit-events": [
+    "get"
+  ],
+  "/internal/v1/runners/heartbeat": [
+    "post"
+  ],
+  "/internal/v1/jobs/lease": [
+    "post"
+  ],
+  "/internal/v1/jobs/{id}/heartbeat": [
+    "post"
+  ],
+  "/internal/v1/jobs/{id}/events": [
+    "post"
+  ],
+  "/internal/v1/jobs/{id}/result": [
+    "post"
+  ],
+  "/s/{token}/{target_key}": [
+    "get"
+  ],
+  "/api/v1/nodes/{id}/clone": [
+    "post"
+  ]
 }

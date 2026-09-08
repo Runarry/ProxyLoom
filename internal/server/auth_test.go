@@ -524,6 +524,13 @@ func TestAuthRouteInventoryIsActualAndDoesNotMountFutureAPI(t *testing.T) {
 		return manifest
 	}
 	want := readManifest("implemented-routes.json")
+	// This fixture intentionally supplies only identity dependencies. Business
+	// and internal transport routes are exercised with their own dependencies.
+	for path := range want {
+		if path != "/api/v1/setup" && !strings.HasPrefix(path, "/api/v1/auth/") {
+			delete(want, path)
+		}
+	}
 	if len(want) != 5 || !reflect.DeepEqual(handler.Routes(), want) {
 		t.Fatalf("mounted routes = %#v", handler.Routes())
 	}

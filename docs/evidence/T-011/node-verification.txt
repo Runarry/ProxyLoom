@@ -1,0 +1,67 @@
+T-011 authenticated node API verification
+Date: 2026-09-08
+Toolchain: go version go1.26.0 windows/amd64
+Environment: isolated PostgreSQL acceptance databases, separate runtime/migrator/admin roles.
+PROXYLOOM_REQUIRE_POSTGRES_TESTS=true; DSNs supplied through private files, never recorded here.
+Go build, module and GOPATH caches were confined to the repository .cache directory.
+
+Command:
+go test -mod=readonly -count=1 ./internal/apicontract ./internal/storage -run 'TestNodeHistory|TestPostgresNode' -v
+
+Result:
+PASS TestNodeHistoryCursorsBindResourceAndTuple
+PASS TestPostgresNodeCRUDHistoryCloneAndReferences
+PASS TestPostgresNodeAuthenticationRevealConcurrencyAndAudit
+PASS TestPostgresNodeAuditLockOrderAndImmutability
+PASS TestPostgresNodeBatchAcceptsTwoHundredPreconditions
+Both packages passed; no selected tests skipped.
+
+Command:
+go test -race -mod=readonly -count=1 ./internal/apicontract ./internal/storage -run 'TestNodeHistory|TestPostgresNode' -v
+
+Observed output:
+=== RUN   TestNodeHistoryCursorsBindResourceAndTuple
+--- PASS: TestNodeHistoryCursorsBindResourceAndTuple (0.03s)
+PASS
+ok  github.com/Runarry/ProxyLoom/internal/apicontract 3.202s
+=== RUN   TestPostgresNodeCRUDHistoryCloneAndReferences
+--- PASS: TestPostgresNodeCRUDHistoryCloneAndReferences (1.87s)
+=== RUN   TestPostgresNodeAuthenticationRevealConcurrencyAndAudit
+--- PASS: TestPostgresNodeAuthenticationRevealConcurrencyAndAudit (1.01s)
+=== RUN   TestPostgresNodeAuditLockOrderAndImmutability
+--- PASS: TestPostgresNodeAuditLockOrderAndImmutability (0.51s)
+=== RUN   TestPostgresNodeBatchAcceptsTwoHundredPreconditions
+--- PASS: TestPostgresNodeBatchAcceptsTwoHundredPreconditions (1.09s)
+PASS
+ok  github.com/Runarry/ProxyLoom/internal/storage 6.507s
+
+Additional checks:
+go vet ./internal/server ./internal/apicontract ./internal/catalog ./internal/storage: passed, no diagnostics.
+gofmt -l on all node-owned Go files: empty output.
+git diff --check -- internal/catalog/catalog.go: passed.
+
+Coverage:
+- Real management session setup, cookie authentication, CSRF and Origin validation.
+- Foreign bearer credentials and cross-scope resource/history requests rejected.
+- List/search uses literal case-insensitive name substring, protocol, tag, enabled filters and signed pagination.
+- Typed create/get/patch/delete, immutable original metadata, encrypted credential preservation and rotation.
+- Missing/stale If-Match, strict duplicate/unknown fields and unchecked Source provenance rejected.
+- Clone creates a new ID at revision/epoch 1 under the source revision lock, preserves payload/tags/enabled, and needs no reveal.
+- Soft deletion preserves history and reverse references while advancing security epoch.
+- Batch add/remove tags and enable/disable, per-item 200/404/412/428, 200 complete revision preconditions.
+- Concurrent same-revision edits yield one success and one 412 with one committed mutation audit.
+- Recent authentication plus committed sensitive audit is required for typed secret reveal.
+- Mutation audit failure rolls back revisions; ignored audit errors still poison the transaction.
+- Audit actor is validated against immutable scoped users without a conflicting row lock; audit rows reject update/delete/truncate.
+- Database loss fails closed; normal responses omit synthetic credentials.
+- History/reference cursors preserve int64 precision, ordering tuples, scope and filter bindings; tampering is rejected.
+
+Found and fixed during verification:
+The original new audit actor foreign key inverted identity's user-then-scope locking against catalog's scope-then-user locking.
+It could make concurrent authenticated edits fail instead of returning the expected CAS outcome.
+Migration 000007 now uses a non-locking scoped actor membership trigger, valid because user IDs/scopes are immutable and hard deletion is forbidden.
+A deterministic acceptance test holds the identity administrator lock while the catalog transaction writes its audit.
+
+Scope limits:
+This is the node slice, not a claim that all concurrent T-009/T-010/frontend work has passed final combined acceptance.
+Protocol filtering decrypts bounded candidate chunks in a repeatable-read snapshot; sparse matches may scan many candidates.

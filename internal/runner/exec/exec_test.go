@@ -24,6 +24,9 @@ import (
 const helperFlag = "proxyloom-exec-helper"
 
 func TestMain(m *testing.M) {
+	if handled, code := SandboxEntrypoint(os.Args[1:]); handled {
+		os.Exit(code)
+	}
 	if len(os.Args) > 1 && os.Args[1] == helperFlag {
 		os.Exit(runHelper(os.Args[2:]))
 	}
@@ -50,6 +53,9 @@ func runCoreHelper(args []string) int {
 	if _, err := os.Stat(filename); err != nil {
 		fmt.Fprintln(os.Stderr, "missing config")
 		return 2
+	}
+	if code, handled := runSandboxProbe(filename); handled {
+		return code
 	}
 	fmt.Println("core_argv=" + strings.Join(args, " "))
 	wd, _ := os.Getwd()

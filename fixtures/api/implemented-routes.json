@@ -13,5 +13,65 @@
   ],
   "/api/v1/auth/reauth": [
     "post"
+  ],
+  "/api/v1/nodes": [
+    "get",
+    "post"
+  ],
+  "/api/v1/nodes/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/nodes/batch": [
+    "post"
+  ],
+  "/api/v1/nodes/{id}/clone": [
+    "post"
+  ],
+  "/api/v1/nodes/{id}/revisions": [
+    "get"
+  ],
+  "/api/v1/nodes/{id}/references": [
+    "get"
+  ],
+  "/api/v1/nodes/{id}/reveal": [
+    "post"
+  ],
+  "/api/v1/imports": [
+    "post"
+  ],
+  "/api/v1/imports/{id}": [
+    "get"
+  ],
+  "/api/v1/imports/{id}/commit": [
+    "post"
+  ],
+  "/api/v1/jobs": [
+    "get"
+  ],
+  "/api/v1/jobs/{id}": [
+    "get"
+  ],
+  "/api/v1/jobs/{id}/cancel": [
+    "post"
+  ],
+  "/api/v1/jobs/{id}/events": [
+    "get"
+  ],
+  "/internal/v1/runners/heartbeat": [
+    "post"
+  ],
+  "/internal/v1/jobs/lease": [
+    "post"
+  ],
+  "/internal/v1/jobs/{id}/heartbeat": [
+    "post"
+  ],
+  "/internal/v1/jobs/{id}/events": [
+    "post"
+  ],
+  "/internal/v1/jobs/{id}/result": [
+    "post"
   ]
 }

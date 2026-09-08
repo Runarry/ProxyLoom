@@ -5,6 +5,8 @@
 **/.pnpm-store
 **/dist
 **/coverage
+**/test-results
+**/playwright-report
 **/bin
 **/secrets
 **/.env*

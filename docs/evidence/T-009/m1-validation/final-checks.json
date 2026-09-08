@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "checked_at": "2026-09-08T15:59:10.3353432Z",
+  "source_reconciliation": "374 files compared; 372 unchanged; only PLAN.md and PLAN.tasks.json status documentation differs",
+  "plan": "60 tasks match; 21 done, 1 in_review, 1 in_progress, 37 not_started; acyclic dependencies",
+  "contracts": "PASS: explicit declaration covers baseline changes",
+  "boundaries": "PASS with workspace-local Go caches; initial attempt without cache environment was denied access to user cache and was rerun",
+  "whitespace": "git diff --check PASS",
+  "acceptance_database_cleanup": "PASS: owned container and network removed",
+  "application_changes_after_quality": false,
+  "new_worktree_remote_ci": "not_run",
+  "enforced_remote_checks": "unverified: branch protection query HTTP 401",
+  "real_arm64_execution": "not_run; cross-build only"
+}

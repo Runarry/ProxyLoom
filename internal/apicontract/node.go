@@ -64,6 +64,59 @@ func (s SecretPatch) apply(old ir.Secret) ir.Secret {
 func (SecretPatch) Format(state fmt.State, _ rune) { _, _ = fmt.Fprint(state, "[REDACTED]") }
 func (SecretPatch) LogValue() slog.Value           { return slog.StringValue("[REDACTED]") }
 
+// OptionalStringPatch distinguishes an omitted optional value from an explicit
+// null. Its JSON state survives typed import overrides and canonical requests.
+// Validation of the concrete string remains with the containing API schema.
+type OptionalStringPatch struct {
+	present bool
+	clear   bool
+	value   string
+}
+
+func ReplaceOptionalString(value string) OptionalStringPatch {
+	return OptionalStringPatch{present: true, value: value}
+}
+func ClearOptionalString() OptionalStringPatch {
+	return OptionalStringPatch{present: true, clear: true}
+}
+func (p OptionalStringPatch) IsZero() bool  { return !p.present }
+func (p OptionalStringPatch) Present() bool { return p.present }
+func (p OptionalStringPatch) IsNull() bool  { return p.present && p.clear }
+func (p OptionalStringPatch) MarshalJSON() ([]byte, error) {
+	if !p.present || p.clear {
+		return []byte("null"), nil
+	}
+	if !utf8.ValidString(p.value) {
+		return nil, NewError(MalformedRequest)
+	}
+	return json.Marshal(p.value)
+}
+func (p *OptionalStringPatch) UnmarshalJSON(data []byte) error {
+	value, err := parseJSON(data)
+	if err != nil {
+		return err
+	}
+	if value == nil {
+		*p = ClearOptionalString()
+		return nil
+	}
+	text, ok := value.(string)
+	if !ok {
+		return NewError(MalformedRequest)
+	}
+	*p = ReplaceOptionalString(text)
+	return nil
+}
+func (p OptionalStringPatch) apply(old *string) *string {
+	if !p.present {
+		return clonePointer(old)
+	}
+	if p.clear {
+		return nil
+	}
+	return clonePointer(&p.value)
+}
+
 // Request DTOs deliberately have concrete whitelisted fields. OpenAPI validates
 // discriminated branches before conversion into ir.Authentication/ir.Security.
 type AuthInput struct {
@@ -143,13 +196,13 @@ type AuthPatch struct {
 }
 
 type SecurityPatch struct {
-	Mode              ir.SecurityMode `json:"mode"`
-	ServerName        *string         `json:"server_name,omitempty"`
-	VerifyCertificate *bool           `json:"verify_certificate,omitempty"`
-	ALPN              *[]string       `json:"alpn,omitempty"`
-	ClientFingerprint *string         `json:"client_fingerprint,omitempty"`
-	PublicKey         SecretPatch     `json:"public_key,omitzero"`
-	ShortID           SecretPatch     `json:"short_id,omitzero"`
+	Mode              ir.SecurityMode     `json:"mode"`
+	ServerName        *string             `json:"server_name,omitempty"`
+	VerifyCertificate *bool               `json:"verify_certificate,omitempty"`
+	ALPN              *[]string           `json:"alpn,omitempty"`
+	ClientFingerprint OptionalStringPatch `json:"client_fingerprint,omitzero"`
+	PublicKey         SecretPatch         `json:"public_key,omitzero"`
+	ShortID           SecretPatch         `json:"short_id,omitzero"`
 }
 
 type NodePatch struct {
@@ -255,6 +308,9 @@ func (patch NodePatch) Apply(old ir.Node) (ir.Node, error) {
 		if patch.Security.Mode == ir.Reality && patch.Security.ShortID.IsNull() {
 			return ir.Node{}, NewError(ValidationFailed, Detail{FieldPath: "/security/short_id"})
 		}
+		if patch.Security.Mode == ir.Reality && patch.Security.ClientFingerprint.IsNull() {
+			return ir.Node{}, NewError(ValidationFailed, Detail{FieldPath: "/security/client_fingerprint"})
+		}
 		next.Security = patch.Security.apply(next.Security)
 	}
 	if patch.Features != nil {
@@ -335,9 +391,7 @@ func (patch SecurityPatch) apply(old ir.Security) ir.Security {
 		if patch.ALPN != nil {
 			next.ALPN = slices.Clone(*patch.ALPN)
 		}
-		if patch.ClientFingerprint != nil {
-			next.ClientFingerprint = clonePointer(patch.ClientFingerprint)
-		}
+		next.ClientFingerprint = patch.ClientFingerprint.apply(next.ClientFingerprint)
 		return &next
 	case ir.Reality:
 		next := ir.RealitySecurity{Mode: ir.Reality}
@@ -350,8 +404,10 @@ func (patch SecurityPatch) apply(old ir.Security) ir.Security {
 		if patch.ALPN != nil {
 			next.ALPN = slices.Clone(*patch.ALPN)
 		}
-		if patch.ClientFingerprint != nil {
-			next.ClientFingerprint = *patch.ClientFingerprint
+		if fingerprint := patch.ClientFingerprint.apply(&next.ClientFingerprint); fingerprint != nil {
+			next.ClientFingerprint = *fingerprint
+		} else {
+			next.ClientFingerprint = ""
 		}
 		next.PublicKey = patch.PublicKey.apply(next.PublicKey)
 		next.ShortID = patch.ShortID.apply(next.ShortID)

@@ -4,12 +4,17 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.2",
-  "engines": { "node": "24.6.0" },
+  "engines": {
+    "node": "24.6.0"
+  },
   "scripts": {
     "dev": "vite",
     "generate:api": "node ../scripts/generate-api.mjs",
     "check:api": "node ../scripts/check-api.mjs",
     "typecheck": "vue-tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/node-form.test.mjs",
+    "test:ui": "node tests/run-ui.mjs",
+    "test:e2e": "playwright test --config playwright.config.ts",
     "build": "pnpm typecheck && vite build",
     "preview": "vite preview --host 127.0.0.1"
   },
@@ -19,6 +24,7 @@
     "vue-router": "4.6.4"
   },
   "devDependencies": {
+    "@playwright/test": "1.58.2",
     "@vitejs/plugin-vue": "6.0.8",
     "openapi-typescript": "7.9.1",
     "typescript": "5.9.3",

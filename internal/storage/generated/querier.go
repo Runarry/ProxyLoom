@@ -32,6 +32,7 @@ type Querier interface {
 	GetIdentityScopeEpoch(ctx context.Context, id pgtype.UUID) (int64, error)
 	GetIdentitySession(ctx context.Context, arg GetIdentitySessionParams) (GetIdentitySessionRow, error)
 	GetIdentityUser(ctx context.Context, arg GetIdentityUserParams) (User, error)
+	GetJobMetadata(ctx context.Context, arg GetJobMetadataParams) (GetJobMetadataRow, error)
 	GetResourceHead(ctx context.Context, arg GetResourceHeadParams) (GetResourceHeadRow, error)
 	GetResourceIndex(ctx context.Context, arg GetResourceIndexParams) (Resource, error)
 	GetResourceRevision(ctx context.Context, arg GetResourceRevisionParams) (GetResourceRevisionRow, error)
@@ -40,17 +41,26 @@ type Querier interface {
 	IdentityNow(ctx context.Context) (pgtype.Timestamptz, error)
 	IncrementIdentityRateLimit(ctx context.Context, keyHash []byte) error
 	InsertResource(ctx context.Context, arg InsertResourceParams) error
+	InsertResourceAudit(ctx context.Context, arg InsertResourceAuditParams) error
 	InsertResourceReference(ctx context.Context, arg InsertResourceReferenceParams) error
 	InsertResourceRevision(ctx context.Context, arg InsertResourceRevisionParams) error
 	InsertResourceTag(ctx context.Context, arg InsertResourceTagParams) error
 	InsertResourceWrapping(ctx context.Context, arg InsertResourceWrappingParams) error
+	ListNodeCandidates(ctx context.Context, arg ListNodeCandidatesParams) ([]ListNodeCandidatesRow, error)
+	ListNodeReferences(ctx context.Context, arg ListNodeReferencesParams) ([]ListNodeReferencesRow, error)
+	ListNodeRevisions(ctx context.Context, arg ListNodeRevisionsParams) ([]ListNodeRevisionsRow, error)
 	ListResourceReferences(ctx context.Context, arg ListResourceReferencesParams) ([]ListResourceReferencesRow, error)
 	ListResourceTags(ctx context.Context, arg ListResourceTagsParams) ([]string, error)
 	ListResources(ctx context.Context, arg ListResourcesParams) ([]ListResourcesRow, error)
 	LockIdentityState(ctx context.Context) (pgtype.Timestamptz, error)
 	LockResources(ctx context.Context, arg LockResourcesParams) ([]pgtype.UUID, error)
 	LockScope(ctx context.Context, id pgtype.UUID) (LockScopeRow, error)
+	NodeExists(ctx context.Context, arg NodeExistsParams) (bool, error)
 	PruneIdentityRateLimits(ctx context.Context, dollar_1 pgtype.Timestamptz) error
+	ReadImportBatchMetadata(ctx context.Context, arg ReadImportBatchMetadataParams) (ReadImportBatchMetadataRow, error)
+	ReadImportCandidatePage(ctx context.Context, arg ReadImportCandidatePageParams) ([]ReadImportCandidatePageRow, error)
+	ReadImportCommitItems(ctx context.Context, batchID pgtype.UUID) ([]ReadImportCommitItemsRow, error)
+	ReadImportCommitMetadata(ctx context.Context, arg ReadImportCommitMetadataParams) (ImportCommit, error)
 	ReauthenticateIdentitySession(ctx context.Context, arg ReauthenticateIdentitySessionParams) error
 	ResetIdentityPassword(ctx context.Context, arg ResetIdentityPasswordParams) error
 	TouchIdentitySession(ctx context.Context, arg TouchIdentitySessionParams) error

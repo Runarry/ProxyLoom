@@ -18,6 +18,8 @@ import (
 
 	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/Runarry/ProxyLoom/internal/identity"
+	"github.com/Runarry/ProxyLoom/internal/imports"
+	"github.com/Runarry/ProxyLoom/internal/jobs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,6 +38,10 @@ type Dependencies struct {
 	PublicURL      string
 	Development    bool
 	TrustedProxies []string
+	Nodes          *NodeDependencies
+	Imports        imports.Repository
+	Jobs           jobs.ManagementRepository
+	JobCursor      *apicontract.CursorCodec
 }
 
 type Handler struct {
@@ -75,7 +81,7 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 	router.RedirectFixedPath = false
 	_ = router.SetTrustedProxies(nil)
 	handler := &Handler{router: router, web: root}
-	router.Use(safeAccessLog(logger), safeRecovery(logger), securityHeaders())
+	router.Use(safeAccessLog(logger), safeRecovery(logger), securityHeaders(), managementDeadline())
 	live := func(c *gin.Context) { respond(c, http.StatusOK, gin.H{"status": "ok"}) }
 	ready := func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), ReadinessTimeout)
@@ -92,6 +98,29 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 	router.HEAD("/readyz", ready)
 	if authentication != nil {
 		authentication.mount(router)
+	}
+	if dependencies.Nodes != nil {
+		if err := mountNodes(router, authentication, *dependencies.Nodes); err != nil {
+			root.Close()
+			return nil, err
+		}
+	}
+	if dependencies.Imports != nil || dependencies.Jobs != nil {
+		if authentication == nil {
+			root.Close()
+			return nil, errors.New("business_authentication_required")
+		}
+		mountImports(router, authentication, dependencies.Imports)
+	}
+	if dependencies.Jobs != nil {
+		if dependencies.JobCursor == nil {
+			root.Close()
+			return nil, errors.New("job_cursor_required")
+		}
+		if err := mountJobs(router, authentication, dependencies.Jobs, dependencies.JobCursor); err != nil {
+			root.Close()
+			return nil, err
+		}
 	}
 	router.NoRoute(handler.static)
 	handler.boundary = apicontract.RequestIDs(router)
@@ -113,7 +142,14 @@ func (h *Handler) Routes() map[string][]string {
 		if route.Path == "/healthz" || route.Path == "/readyz" {
 			continue
 		}
-		routes[route.Path] = append(routes[route.Path], strings.ToLower(route.Method))
+		segments := strings.Split(route.Path, "/")
+		for index, segment := range segments {
+			if strings.HasPrefix(segment, ":") {
+				segments[index] = "{" + strings.TrimPrefix(segment, ":") + "}"
+			}
+		}
+		contractPath := strings.Join(segments, "/")
+		routes[contractPath] = append(routes[contractPath], strings.ToLower(route.Method))
 	}
 	for _, methods := range routes {
 		slices.Sort(methods)
@@ -256,7 +292,7 @@ func Serve(ctx context.Context, addr string, handler http.Handler, logger *slog.
 	}
 	server := &http.Server{
 		Handler: handler, ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second,
+		ReadTimeout: 30 * time.Second, WriteTimeout: 130 * time.Second,
 		IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16 << 10,
 		ErrorLog: log.New(io.Discard, "", 0),
 	}

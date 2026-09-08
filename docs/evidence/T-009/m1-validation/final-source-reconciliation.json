@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "generated_at": "2026-09-08T15:59:11.649Z",
+  "base_commit": "ae456a293985eb34da78c3bd97fc54ef386bcd82",
+  "quality_run_id": "e7415a05-c637-4e30-9897-3758ad2da03f",
+  "files_compared": 374,
+  "unchanged_files": 372,
+  "allowed_documentation_changes": [
+    {
+      "path": "docs/PLAN.md",
+      "before_sha256": "e0b3a17b5c80c97aaf1dbd8b91a6e2967b73d459a1d96d2b2683d63324b59c67",
+      "after_sha256": "72204661501e36e09474b5ce28690091d6897c565d607bb5c1e15a5dd2356218"
+    },
+    {
+      "path": "docs/PLAN.tasks.json",
+      "before_sha256": "504825c30bfc33ec7e326f5e378663386b6b8ff49e7be3c7d43aa817630c9c40",
+      "after_sha256": "5b12dc32f22155a6da5e5e392e83720b3496ff7d43529da5c1b5b022e3927ec3"
+    }
+  ],
+  "application_contract_migration_and_verifier_changes": [],
+  "runner_report_key_files_match": true,
+  "evidence_documents_outside_source_inventory": true
+}

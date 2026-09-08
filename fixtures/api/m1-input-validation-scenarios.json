@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "scope": "T-009 T-010 T-011 T-039 T-041 T-047 T-048-local",
+  "import_limits": { "decoded_bytes": 10485760, "entries": 5000, "uri_bytes": 16384, "base64_layers": 2, "page_size": 200, "commit_items": 5000 },
+  "import_states": ["queued", "parsing", "ready", "failed", "committed", "expired"],
+  "scenarios": [
+    "Preview changes no formal nodes; selected valid candidates commit atomically.",
+    "Selections cross candidate pages; stale versions never partially write.",
+    "Clone checks source revision and creates a different stable ID without revealing secrets.",
+    "Late heartbeat or result cannot mutate a reissued lease.",
+    "Configuration validation has no network quota reservation and settles zero bytes.",
+    "Network task contracts continue to require a quota reservation.",
+    "Scope, certificate, build digest and execution isolation failures reject execution."
+  ]
+}

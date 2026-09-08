@@ -1,0 +1,35 @@
+# Optional development overlay. Prepare the dedicated identity with
+# scripts/dev-runner-init.ps1 and pass --env-file deploy/secrets/local/runner.env.
+# Only the control network is available to Runner; no database/master key mounts.
+services:
+  api:
+    environment:
+      PROXYLOOM_RUNNER_LISTEN_ADDR: ':9091'
+      PROXYLOOM_RUNNER_CA_FILE: /run/secrets/runner_ca
+      PROXYLOOM_RUNNER_CERT_FILE: /run/secrets/runner_server_cert
+      PROXYLOOM_RUNNER_KEY_FILE: /run/secrets/runner_server_key
+      PROXYLOOM_RUNNER_REGISTRY_FILE: /run/secrets/runner_registry
+    secrets: [runner_ca, runner_server_cert, runner_server_key, runner_registry]
+  runner:
+    environment:
+      PROXYLOOM_RUNNER_API_URL: 'https://api:9091'
+      PROXYLOOM_RUNNER_ID: '${PROXYLOOM_RUNNER_ID:?Run scripts/dev-runner-init.ps1 and pass its runner.env file}'
+      PROXYLOOM_RUNNER_CA_FILE: /run/secrets/runner_ca
+      PROXYLOOM_RUNNER_CERT_FILE: /run/secrets/runner_client_cert
+      PROXYLOOM_RUNNER_KEY_FILE: /run/secrets/runner_client_key
+      PROXYLOOM_RUNNER_CORE_ROOT: /cores
+    secrets: [runner_ca, runner_client_cert, runner_client_key]
+    volumes:
+      - type: bind
+        source: ../.cache/cores
+        target: /cores
+        read_only: true
+    depends_on:
+      api: {condition: service_healthy}
+secrets:
+  runner_ca: {file: ./secrets/local/runner_ca}
+  runner_server_cert: {file: ./secrets/local/runner_server_cert}
+  runner_server_key: {file: ./secrets/local/runner_server_key}
+  runner_client_cert: {file: ./secrets/local/runner_client_cert}
+  runner_client_key: {file: ./secrets/local/runner_client_key}
+  runner_registry: {file: ./secrets/local/runner_registry}

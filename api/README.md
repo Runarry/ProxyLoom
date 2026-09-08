@@ -1,8 +1,9 @@
 # HTTP contract boundary
 
-`openapi.yaml` is the full P0 OpenAPI 3.1 contract. Five authentication operations are implemented; the remaining operations on the
-57 paths remain `contract-only`. `fixtures/api/implemented-routes.json` is checked
-against the live HTTP route table. API implementation does not assert kernel capability.
+`openapi.yaml` is the full P0 OpenAPI 3.1 contract. Authentication, node management,
+local imports, durable jobs and the separate Runner mTLS transport are implemented.
+Other operations remain `contract-only`. `fixtures/api/implemented-routes.json`
+records mounted routes. API implementation does not assert kernel capability.
 
 Management uses its session Cookie. Runner operations belong to a separate mTLS
 listener. Subscription retrieval requires its independent path token, live

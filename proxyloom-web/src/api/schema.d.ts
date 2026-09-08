@@ -479,6 +479,25 @@ export interface paths {
         patch: operations["updateNode"];
         trace?: never;
     };
+    "/api/v1/nodes/{id}/clone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clone the matched node revision with a new stable ID */
+        post: operations["cloneNode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/{id}/references": {
         parameters: {
             query?: never;
@@ -1167,6 +1186,8 @@ export interface components {
             request_id: components["schemas"]["RequestID"];
         };
         ALPN: components["schemas"]["ShortText"][];
+        /** @description An empty patch array clears optional ALPN; omission preserves the current value. */
+        ALPNPatch: components["schemas"]["ShortText"][];
         /** @enum {string} */
         APIWorkerJobType: "source_refresh" | "import_parse" | "compile";
         /** @enum {string} */
@@ -1571,6 +1592,8 @@ export interface components {
         };
         FieldConstraint: components["schemas"]["EnumFieldConstraint"] | components["schemas"]["IntegerFieldConstraint"] | components["schemas"]["BooleanFieldConstraint"];
         Fingerprint: string;
+        /** @description Omitted preserves, string replaces, null clears optional TLS fingerprint. Clearing required REALITY fingerprint fails final node validation. */
+        FingerprintPatch: components["schemas"]["Fingerprint"] | null;
         FrozenTestSubject: {
             id: components["schemas"]["UUID"];
             /** @enum {string} */
@@ -1647,12 +1670,13 @@ export interface components {
             candidates: components["schemas"]["ImportCandidate"][];
             created_at: components["schemas"]["Timestamp"];
             diagnostics: components["schemas"]["Diagnostics"];
+            expires_at: components["schemas"]["Timestamp"];
             job_id: components["schemas"]["UUID"];
             revision: components["schemas"]["Revision"];
             source_id?: components["schemas"]["UUID"];
             source_revision?: components["schemas"]["Revision"];
             /** @enum {string} */
-            state: "queued" | "parsing" | "ready" | "failed" | "committed";
+            state: "queued" | "parsing" | "ready" | "failed" | "committed" | "expired";
         };
         ImportCandidate: {
             candidate_id: components["schemas"]["UUID"];
@@ -1863,6 +1887,10 @@ export interface components {
         NodeBatchResponse: {
             data: components["schemas"]["NodeBatchItem"][];
             request_id: components["schemas"]["RequestID"];
+        };
+        /** @description Clone the If-Match source revision on the server with a new stable ID and revision 1; secrets never pass through a read response. */
+        NodeCloneRequest: {
+            name: components["schemas"]["Name"];
         };
         /** @description Management creation DTO for typed IR v1. Optional features/extensions default to empty objects at the validated domain boundary. Structural acceptance never certifies a kernel combination. */
         NodeCreate: {
@@ -2155,8 +2183,8 @@ export interface components {
             short_id: components["schemas"]["RealityShortID"];
         };
         RealitySecurityPatch: {
-            alpn?: components["schemas"]["ALPN"];
-            client_fingerprint?: components["schemas"]["Fingerprint"];
+            alpn?: components["schemas"]["ALPNPatch"];
+            client_fingerprint?: components["schemas"]["FingerprintPatch"];
             /** @constant */
             mode: "reality";
             public_key?: components["schemas"]["SecretPatch"];
@@ -2463,7 +2491,7 @@ export interface components {
             lease_seq: components["schemas"]["Revision"];
             limits: components["schemas"]["TestLimits"];
             payload_sha256: components["schemas"]["SHA256"];
-            quota_reservation_id: components["schemas"]["UUID"];
+            quota_reservation_id?: components["schemas"]["UUID"];
             schema_version: components["schemas"]["SchemaVersion"];
             subject?: components["schemas"]["FrozenTestSubject"];
             test_target?: components["schemas"]["FrozenTestTarget"];
@@ -2884,8 +2912,8 @@ export interface components {
             verify_certificate: boolean;
         };
         TLSSecurityPatch: {
-            alpn?: components["schemas"]["ALPN"];
-            client_fingerprint?: components["schemas"]["Fingerprint"];
+            alpn?: components["schemas"]["ALPNPatch"];
+            client_fingerprint?: components["schemas"]["FingerprintPatch"];
             /** @constant */
             mode: "tls";
             server_name?: components["schemas"]["Host"];
@@ -3761,6 +3789,8 @@ export interface components {
         LastEventID: components["schemas"]["Counter"];
         /** @description Bounded page size. Stable ascending (created_at, id) order unless a collection documents its immutable equivalent. */
         Limit: number;
+        /** @description Case-insensitive node name search; secrets are never searched or echoed. */
+        NodeSearch: string;
         Protocol: components["schemas"]["Protocol"];
         Tag: components["schemas"]["Tag"];
         /** @description Exclusive UTC time boundary; must follow from when both are supplied. */
@@ -4464,6 +4494,8 @@ export interface operations {
                 /** @description Bounded page size. Stable ascending (created_at, id) order unless a collection documents its immutable equivalent. */
                 limit?: components["parameters"]["Limit"];
                 protocol?: components["parameters"]["Protocol"];
+                /** @description Case-insensitive node name search; secrets are never searched or echoed. */
+                q?: components["parameters"]["NodeSearch"];
                 tag?: components["parameters"]["Tag"];
             };
             header?: never;
@@ -4563,6 +4595,36 @@ export interface operations {
         };
         responses: {
             200: components["responses"]["NodeResponse"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            412: components["responses"]["PreconditionFailed"];
+            422: components["responses"]["UnprocessableEntity"];
+            428: components["responses"]["PreconditionRequired"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    cloneNode: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Exactly one strong tag "r<N>" for the resource being changed. Missing => 428; malformed, weak, wildcard, multi-tag or overflow => 400; valid stale revision => 412. Business/generation/lease/idempotency conflicts => 409. Creates and authentication operations have no resource precondition. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NodeCloneRequest"];
+            };
+        };
+        responses: {
+            201: components["responses"]["NodeResponse"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];

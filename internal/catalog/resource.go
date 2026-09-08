@@ -46,7 +46,15 @@ func Apply(old ir.Resource, input UpdateInput) (ir.Resource, error) {
 	}
 	authChanged := false
 	if previous, ok := old.Payload.(*ir.Node); ok {
-		authChanged = !reflect.DeepEqual(previous.Auth, next.Payload.(*ir.Node).Auth)
+		current := next.Payload.(*ir.Node)
+		authChanged = !reflect.DeepEqual(previous.Auth, current.Auth)
+		previousReality, hadReality := previous.Security.(*ir.RealitySecurity)
+		currentReality, hasReality := current.Security.(*ir.RealitySecurity)
+		// REALITY authentication is stored in the security union rather than
+		// Auth. Rotating it must revoke old published credentials as well.
+		if hadReality != hasReality || (hadReality && (previousReality.PublicKey != currentReality.PublicKey || previousReality.ShortID != currentReality.ShortID)) {
+			authChanged = true
+		}
 	}
 	if authChanged || (old.Metadata.Enabled && !input.Enabled) {
 		if next.Metadata.SecurityEpoch == math.MaxInt64 {

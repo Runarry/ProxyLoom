@@ -145,6 +145,7 @@ type TagPage struct {
 }
 type Reference struct {
 	SourceID       ir.ID
+	SourceKind     ir.ResourceKind
 	SourceRevision int64
 	TargetID       ir.ID
 	TargetRevision *int64

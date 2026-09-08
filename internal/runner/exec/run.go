@@ -30,12 +30,14 @@ const (
 var (
 	ErrProcessCleanupTimeout = errors.New("runner process group did not exit after TERM and KILL grace periods")
 	ErrLogDrainTimeout       = errors.New("runner log pipe did not reach EOF before cleanup deadline")
+	ErrWorkspaceCleanup      = errors.New("runner_workspace_cleanup_failed")
 )
 
 type Options struct {
 	Timeout  time.Duration
 	LogLimit int
 	Redact   func([]byte) []byte
+	Sandbox  *SandboxPolicy
 }
 
 type Result struct {
@@ -59,6 +61,10 @@ func execute(ctx context.Context, registry Registry, buildID ir.ID, config []byt
 }
 
 func executeWithCleanup(ctx context.Context, registry Registry, buildID ir.ID, config []byte, start bool, closeWorkspace func(Workspace) error) (result Result, err error) {
+	return executeConfigured(ctx, registry, buildID, config, start, Options{}, closeWorkspace)
+}
+
+func executeConfigured(ctx context.Context, registry Registry, buildID ir.ID, config []byte, start bool, opts Options, closeWorkspace func(Workspace) error) (result Result, err error) {
 	if registry == nil {
 		return Result{}, ErrUnknownExecutable
 	}
@@ -83,7 +89,7 @@ func executeWithCleanup(ctx context.Context, registry Registry, buildID ir.ID, c
 	}
 	defer func() {
 		if closeErr := closeWorkspace(workspace); closeErr != nil {
-			err = errors.Join(err, fmt.Errorf("clean runner workspace: %w", closeErr))
+			err = errors.Join(err, ErrWorkspaceCleanup, fmt.Errorf("clean runner workspace: %w", closeErr))
 		}
 	}()
 	core, err := familyAdapter(build.Family, buildID)
@@ -99,7 +105,8 @@ func executeWithCleanup(ctx context.Context, registry Registry, buildID ir.ID, c
 	if err != nil {
 		return Result{}, err
 	}
-	return Run(ctx, registry, spec, workspace, Options{Redact: core.RedactLog})
+	opts.Redact = core.RedactLog
+	return Run(ctx, registry, spec, workspace, opts)
 }
 
 func familyAdapter(family ir.CoreFamily, id ir.ID) (adapter.RunnerAdapter, error) {
@@ -131,7 +138,7 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 	if opts.Redact == nil {
 		opts.Redact = adapter.RedactLogLine
 	}
-	path, _, err := registry.Executable(spec.ExecutableID)
+	path, build, err := registry.Executable(spec.ExecutableID)
 	if err != nil {
 		return Result{}, err
 	}
@@ -161,6 +168,14 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 	cmd.Dir = workspace.Directory
 	cmd.Env = cleanEnv(workspace.Directory)
 	cmd.SysProcAttr = sysProcAttr()
+	if opts.Sandbox != nil {
+		var closeRequest func()
+		cmd, closeRequest, err = sandboxCommand(abs, spec.Args, workspace.Directory, cmd.Env, *opts.Sandbox, build.BinarySHA256)
+		if err != nil {
+			return Result{}, err
+		}
+		defer closeRequest()
+	}
 	if err := prepareReaper(); err != nil {
 		return Result{}, err
 	}
@@ -192,6 +207,16 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 	output, truncated := limit.snapshot()
 	result.Truncated = result.Truncated || truncated
 	result.Output = opts.Redact(output)
+	if opts.Sandbox != nil && result.ExitCode == sandboxFailureExit {
+		return result, errors.Join(err, ErrSandboxUnavailable)
+	}
+	// These pinned Go cores use exit 2 for fatal runtime startup/allocator
+	// failures, including fakecgo pthread_create(EAGAIN). Signals also indicate
+	// infrastructure failure. A normal negative config check uses its ordinary
+	// family exit status; no stderr content is used to decide a successful check.
+	if opts.Sandbox != nil && !result.Canceled && !result.TimedOut && (result.ExitCode == 2 || result.ExitCode < 0) {
+		return result, errors.Join(err, ErrResourceLimit)
+	}
 	return result, err
 }
 

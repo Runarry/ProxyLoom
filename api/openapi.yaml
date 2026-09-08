@@ -123,6 +123,13 @@ components:
       name: "protocol"
       in: "query"
       schema: { $ref: "#/components/schemas/Protocol" }
+    NodeSearch:
+      name: "q"
+      in: "query"
+      schema:
+        type: "string"
+        maxLength: 256
+      description: "Case-insensitive node name search; secrets are never searched or echoed."
     CoreFamily:
       name: "core_family"
       in: "query"
@@ -1199,6 +1206,17 @@ components:
       minItems: 1
       maxItems: 16
       items: { $ref: "#/components/schemas/ShortText" }
+    ALPNPatch:
+      type: "array"
+      minItems: 0
+      maxItems: 16
+      items: { $ref: "#/components/schemas/ShortText" }
+      description: "An empty patch array clears optional ALPN; omission preserves the current value."
+    FingerprintPatch:
+      anyOf:
+        - { $ref: "#/components/schemas/Fingerprint" }
+        - { type: "null" }
+      description: "Omitted preserves, string replaces, null clears optional TLS fingerprint. Clearing required REALITY fingerprint fails final node validation."
     Fingerprint:
       type: "string"
       pattern: "^[a-z][a-z0-9_-]{0,63}$"
@@ -1260,8 +1278,8 @@ components:
         server_name: { $ref: "#/components/schemas/Host" }
         verify_certificate:
           type: "boolean"
-        alpn: { $ref: "#/components/schemas/ALPN" }
-        client_fingerprint: { $ref: "#/components/schemas/Fingerprint" }
+        alpn: { $ref: "#/components/schemas/ALPNPatch" }
+        client_fingerprint: { $ref: "#/components/schemas/FingerprintPatch" }
     RealitySecurityPatch:
       type: "object"
       additionalProperties: false
@@ -1273,8 +1291,8 @@ components:
         server_name: { $ref: "#/components/schemas/Host" }
         public_key: { $ref: "#/components/schemas/SecretPatch" }
         short_id: { $ref: "#/components/schemas/SecretPatch" }
-        client_fingerprint: { $ref: "#/components/schemas/Fingerprint" }
-        alpn: { $ref: "#/components/schemas/ALPN" }
+        client_fingerprint: { $ref: "#/components/schemas/FingerprintPatch" }
+        alpn: { $ref: "#/components/schemas/ALPNPatch" }
     NodeSecurityPatch:
       oneOf:
         - { $ref: "#/components/schemas/NoSecurity" }
@@ -1552,6 +1570,13 @@ components:
                 properties:
                   mode:
                     enum: ["tls", "reality"]
+    NodeCloneRequest:
+      type: "object"
+      additionalProperties: false
+      required: ["name"]
+      properties:
+        name: { $ref: "#/components/schemas/Name" }
+      description: "Clone the If-Match source revision on the server with a new stable ID and revision 1; secrets never pass through a read response."
     NodeCreateRequest:
       type: "object"
       additionalProperties: false
@@ -1954,17 +1979,18 @@ components:
     ImportBatch:
       type: "object"
       additionalProperties: false
-      required: ["batch_id", "revision", "job_id", "state", "candidate_count", "candidates", "created_at", "diagnostics"]
+      required: ["batch_id", "revision", "job_id", "state", "candidate_count", "candidates", "created_at", "expires_at", "diagnostics"]
       properties:
         batch_id: { $ref: "#/components/schemas/UUID" }
         revision: { $ref: "#/components/schemas/Revision" }
         job_id: { $ref: "#/components/schemas/UUID" }
         state:
           type: "string"
-          enum: ["queued", "parsing", "ready", "failed", "committed"]
+          enum: ["queued", "parsing", "ready", "failed", "committed", "expired"]
         source_id: { $ref: "#/components/schemas/UUID" }
         source_revision: { $ref: "#/components/schemas/Revision" }
         binding_revision: { $ref: "#/components/schemas/Revision" }
+        expires_at: { $ref: "#/components/schemas/Timestamp" }
         candidate_count:
           type: "integer"
           minimum: 0
@@ -2024,7 +2050,7 @@ components:
         decisions:
           type: "array"
           minItems: 1
-          maxItems: 200
+          maxItems: 5000
           items: { $ref: "#/components/schemas/ImportDecision" }
         source_revision: { $ref: "#/components/schemas/Revision" }
         binding_revision: { $ref: "#/components/schemas/Revision" }
@@ -2050,7 +2076,7 @@ components:
         items:
           type: "array"
           minItems: 1
-          maxItems: 200
+          maxItems: 5000
           items: { $ref: "#/components/schemas/ImportCommitItem" }
     ImportCommitResponse:
       type: "object"
@@ -4405,7 +4431,7 @@ components:
     RunnerLease:
       type: "object"
       additionalProperties: false
-      required: ["job_id", "attempt", "lease_seq", "lease_expires_at", "schema_version", "type", "core", "artifact", "limits", "execution_policy", "payload_sha256", "quota_reservation_id"]
+      required: ["job_id", "attempt", "lease_seq", "lease_expires_at", "schema_version", "type", "core", "artifact", "limits", "execution_policy", "payload_sha256"]
       properties:
         job_id: { $ref: "#/components/schemas/UUID" }
         attempt:
@@ -4431,7 +4457,7 @@ components:
               type:
                 enum: ["connectivity", "download_throughput"]
           then:
-            required: ["subject", "test_target"]
+            required: ["subject", "test_target", "quota_reservation_id"]
             properties:
               execution_policy:
                 properties:
@@ -4899,7 +4925,7 @@ paths:
   /api/v1/imports:
     post:
       operationId: createImport
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a bounded import preview job on the API Worker
       parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
       requestBody:
@@ -4923,7 +4949,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getImport
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read redacted import candidates and per-entry diagnostics
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}]
       responses:
@@ -4936,7 +4962,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: commitImport
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Commit selected candidates transactionally against the preview revision
       parameters: [{$ref: '#/components/parameters/IfMatch'}, {$ref: '#/components/parameters/IdempotencyKey'}]
       requestBody:
@@ -5053,9 +5079,9 @@ paths:
   /api/v1/nodes:
     get:
       operationId: listNodes
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List nodes using management-only redacted DTOs
-      parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}, {$ref: '#/components/parameters/Protocol'}]
+      parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}, {$ref: '#/components/parameters/Protocol'}, {$ref: '#/components/parameters/NodeSearch'}]
       responses:
         '200': {$ref: '#/components/responses/NodeListResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
@@ -5063,7 +5089,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createNode
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a typed node at revision 1
       description: Generates ID, scope, revision and epoch on the server. No If-Match is required for creation.
       requestBody:
@@ -5084,7 +5110,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getNode
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read a node without returning auth or REALITY secrets
       responses:
         '200': {$ref: '#/components/responses/NodeResponse'}
@@ -5094,7 +5120,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateNode
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Apply a typed node patch and create a new immutable revision
       description: >-
         An absent secret preserves its previous value, null clears it, and a
@@ -5121,7 +5147,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteNode
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete a node and immediately revoke dependent publication access
       description: Preserves immutable history and references; advances revision and security epoch.
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
@@ -5138,7 +5164,7 @@ paths:
   /api/v1/nodes/batch:
     post:
       operationId: updateNodesBatch
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Apply a bounded metadata operation with individual revision preconditions
       description: Each node has its own precondition and result. A missing item precondition is 428 and a stale one is 412 in that item's result; the batch has no synthetic shared ETag.
       requestBody:
@@ -5158,7 +5184,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: listNodeRevisions
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List immutable redacted revisions with their original metadata
       description: Historical name, tags, enabled and epoch are taken from that revision, never from the current head. History cannot authorize publication of old secrets.
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}]
@@ -5172,7 +5198,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: listNodeReferences
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List current active and historical reverse references
       parameters:
         - {$ref: '#/components/parameters/Limit'}
@@ -5975,7 +6001,7 @@ paths:
   /api/v1/jobs:
     get:
       operationId: listJobs
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List persistent jobs with execution state distinct from verdict
       parameters:
         - {$ref: '#/components/parameters/Limit'}
@@ -6001,7 +6027,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getJob
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read a child job or parent test-batch snapshot
       description: Passing a batch_id returns TestBatchResponse with aggregate progress and all bounded child summaries. Passing a child job_id returns JobResponse. Successful execution with a failing tested node is state=succeeded and verdict=fail.
       responses:
@@ -6014,7 +6040,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: cancelJob
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Persist cancellation of a child job or all unfinished children of a batch
       description: id may be a job_id or batch_id. Returns the updated snapshot; acknowledgement means cancellation requested, not that a running process has already exited. Budget settlement still applies to canceled attempts.
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
@@ -6037,7 +6063,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: streamJobEvents
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Replay bounded safe job events over SSE
       description: >-
         Each job has stable strictly increasing seq values; SSE id is that decimal
@@ -6183,7 +6209,7 @@ paths:
     servers: [{url: 'https://runner-api.proxyloom.invalid', description: Dedicated internal mTLS listener; replace with the configured internal origin.}]
     post:
       operationId: heartbeatRunner
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       x-authentication-surface: runner-mtls
       security: [{RunnerMTLS: []}]
       summary: Report registered build digests and available slots from a certificate-bound Runner
@@ -6205,7 +6231,7 @@ paths:
     servers: [{url: 'https://runner-api.proxyloom.invalid', description: Dedicated internal mTLS listener.}]
     post:
       operationId: leaseRunnerJob
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       x-authentication-surface: runner-mtls
       security: [{RunnerMTLS: []}]
       summary: Let the server assign an eligible Runner task and frozen payload
@@ -6235,7 +6261,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: heartbeatRunnerJob
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       x-authentication-surface: runner-mtls
       security: [{RunnerMTLS: []}]
       summary: Renew the current attempt and fenced lease and read cancellation state
@@ -6258,7 +6284,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: submitRunnerJobEvent
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       x-authentication-surface: runner-mtls
       security: [{RunnerMTLS: []}]
       summary: Submit a bounded typed event under the current fenced lease
@@ -6284,7 +6310,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: submitRunnerJobResult
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       x-authentication-surface: runner-mtls
       security: [{RunnerMTLS: []}]
       summary: Atomically finalize the current attempt and settle its budget once
@@ -6362,7 +6388,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: revealNodeSecrets
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Reveal typed secrets once after recent authentication with an audit record
       description: Requires the matched node revision and server-verified recent authentication. This dedicated response must never be cached, logged or stored for idempotent replay.
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
@@ -6375,4 +6401,27 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
         '429': {$ref: '#/components/responses/RateLimited'}
+        '503': {$ref: '#/components/responses/Unavailable'}
+  /api/v1/nodes/{id}/clone:
+    parameters: [{$ref: '#/components/parameters/ID'}]
+    post:
+      operationId: cloneNode
+      x-implementation-status: implemented
+      summary: Clone the matched node revision with a new stable ID
+      parameters: [{$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/NodeCloneRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/NodeResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '412': {$ref: '#/components/responses/PreconditionFailed'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+        '428': {$ref: '#/components/responses/PreconditionRequired'}
         '503': {$ref: '#/components/responses/Unavailable'}

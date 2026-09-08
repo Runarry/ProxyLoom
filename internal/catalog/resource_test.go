@@ -178,6 +178,29 @@ func TestEpochLifecycleAndOverflow(t *testing.T) {
 	}
 }
 
+func TestRealityCredentialRotationRevokesPriorEpoch(t *testing.T) {
+	old := resource(t, node(t, "vless-reality"))
+	changed := node(t, "vless-reality")
+	security := changed.Security.(*ir.RealitySecurity)
+	if security.ShortID == "abcd" {
+		security.ShortID = "dcba"
+	} else {
+		security.ShortID = "abcd"
+	}
+	input := update(old)
+	input.Payload = changed
+	next, err := catalog.Apply(old, input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next.Metadata.SecurityEpoch != old.Metadata.SecurityEpoch+1 || !next.Metadata.Enabled {
+		t.Fatal("REALITY credential rotation must invalidate prior epoch without disabling the new revision")
+	}
+	if old.Payload.(*ir.Node).Security.(*ir.RealitySecurity).ShortID == security.ShortID {
+		t.Fatal("credential rotation changed historical input")
+	}
+}
+
 func TestCanonicalSetsAndOrderedFields(t *testing.T) {
 	r := resource(t, node(t, "trojan-a"))
 	r.Metadata.Tags = []string{"z", "a"}

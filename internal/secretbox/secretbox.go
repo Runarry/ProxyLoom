@@ -26,10 +26,12 @@ const (
 	PayloadVersion    = 1
 	WrappingVersion   = 1
 
-	PurposeResourceContent = "resource_content"
-	PurposeIdempotency     = "idempotency"
-	PurposeCursor          = "cursor"
-	PurposeNodeIdentity    = "node_identity"
+	PurposeResourceContent  = "resource_content"
+	PurposeIdempotency      = "idempotency"
+	PurposeCursor           = "cursor"
+	PurposeNodeIdentity     = "node_identity"
+	PurposeImportConnection = "import_connection"
+	PurposeImportCommit     = "import_commit"
 
 	TableResourceRevisions     = "resource_revisions"
 	TableSourceSnapshots       = "source_snapshots"
@@ -37,6 +39,7 @@ const (
 	TableNodeBindings          = "node_bindings"
 	TableImportBatches         = "import_batches"
 	TableImportItems           = "import_items"
+	TableImportCandidates      = "import_candidates"
 	TableSystemSettings        = "system_settings"
 	TableTestTargets           = "test_targets"
 	TableCompatibilityEvidence = "compatibility_evidence"
@@ -279,7 +282,7 @@ func validContext(ctx Context) bool {
 	}
 	switch ctx.Table {
 	case TableResourceRevisions, TableSourceSnapshots, TableSourceItems, TableNodeBindings,
-		TableImportBatches, TableImportItems, TableSystemSettings, TableTestTargets,
+		TableImportBatches, TableImportItems, TableImportCandidates, TableSystemSettings, TableTestTargets,
 		TableCompatibilityEvidence, TableCompileBatches, TableCompileOutputs, TableJobs:
 	default:
 		return false
@@ -289,7 +292,7 @@ func validContext(ctx Context) bool {
 
 func validPurpose(purpose string) bool {
 	switch purpose {
-	case PurposeResourceContent, PurposeIdempotency, PurposeCursor, PurposeNodeIdentity:
+	case PurposeResourceContent, PurposeIdempotency, PurposeCursor, PurposeNodeIdentity, PurposeImportConnection, PurposeImportCommit:
 		return true
 	default:
 		return false

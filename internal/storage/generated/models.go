@@ -46,6 +46,127 @@ type IdentityState struct {
 	SetupConsumedAt pgtype.Timestamptz
 }
 
+type ImportBatch struct {
+	ID             pgtype.UUID
+	ScopeID        pgtype.UUID
+	ActorID        pgtype.UUID
+	JobID          pgtype.UUID
+	Revision       int64
+	State          string
+	Format         string
+	RawEnvelope    []byte
+	RawWrapping    []byte
+	CandidateCount int32
+	Diagnostics    []byte
+	CreatedAt      pgtype.Timestamptz
+	ExpiresAt      pgtype.Timestamptz
+}
+
+type ImportCandidate struct {
+	ID       pgtype.UUID
+	ScopeID  pgtype.UUID
+	BatchID  pgtype.UUID
+	Ordinal  int32
+	Envelope []byte
+	Wrapping []byte
+}
+
+type ImportCommit struct {
+	ScopeID         pgtype.UUID
+	BatchID         pgtype.UUID
+	ActorID         pgtype.UUID
+	RequestHmac     []byte
+	PreviewRevision int64
+	Revision        int64
+	CreatedAt       pgtype.Timestamptz
+}
+
+type ImportCommitItem struct {
+	BatchID     pgtype.UUID
+	Ordinal     int32
+	CandidateID pgtype.UUID
+	Status      string
+	ResourceID  pgtype.UUID
+	Revision    pgtype.Int8
+}
+
+type ImportRequestKey struct {
+	ActorID     pgtype.UUID
+	Route       string
+	Key         string
+	ScopeID     pgtype.UUID
+	RequestHmac []byte
+	BatchID     pgtype.UUID
+	CreatedAt   pgtype.Timestamptz
+}
+
+type Job struct {
+	ID                pgtype.UUID
+	ScopeID           pgtype.UUID
+	BatchID           pgtype.UUID
+	Executor          string
+	Type              string
+	State             string
+	Revision          int64
+	Attempt           int32
+	LeaseSeq          int64
+	WorkerID          pgtype.UUID
+	LeaseUntil        pgtype.Timestamptz
+	CoreBuildID       pgtype.UUID
+	CancelRequestedAt pgtype.Timestamptz
+	Verdict           pgtype.Text
+	SafeError         []byte
+	EventSeq          int64
+	CreatedAt         pgtype.Timestamptz
+	StartedAt         pgtype.Timestamptz
+	FinishedAt        pgtype.Timestamptz
+}
+
+type JobBatch struct {
+	ID                pgtype.UUID
+	ScopeID           pgtype.UUID
+	Revision          int64
+	EffectiveLimits   []byte
+	CancelRequestedAt pgtype.Timestamptz
+	CreatedAt         pgtype.Timestamptz
+}
+
+type JobEvent struct {
+	JobID     pgtype.UUID
+	Seq       int64
+	Attempt   int32
+	LeaseSeq  int64
+	EventID   pgtype.UUID
+	EventHash string
+	Event     []byte
+	CreatedAt pgtype.Timestamptz
+}
+
+type JobPayload struct {
+	ScopeID  pgtype.UUID
+	JobID    pgtype.UUID
+	Envelope []byte
+}
+
+type JobPayloadWrapping struct {
+	ScopeID     pgtype.UUID
+	JobID       pgtype.UUID
+	Wrapping    []byte
+	WrapVersion int64
+}
+
+type JobResult struct {
+	ResultID     pgtype.UUID
+	JobID        pgtype.UUID
+	WorkerID     pgtype.UUID
+	Attempt      int32
+	LeaseSeq     int64
+	ResultHash   string
+	Result       []byte
+	SettledBytes int64
+	CreatedAt    pgtype.Timestamptz
+}
+
 type ProxyloomSchemaMigration struct {
 	Version   int64
 	Name      string
@@ -63,6 +184,18 @@ type Resource struct {
 	SecurityEpoch int64
 	CreatedAt     pgtype.Timestamptz
 	DeletedAt     pgtype.Timestamptz
+}
+
+type ResourceAuditEvent struct {
+	ID        pgtype.UUID
+	ScopeID   pgtype.UUID
+	ActorID   pgtype.UUID
+	ObjectID  pgtype.UUID
+	Revision  int64
+	Action    string
+	Outcome   string
+	RequestID string
+	CreatedAt pgtype.Timestamptz
 }
 
 type ResourceRef struct {

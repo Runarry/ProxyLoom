@@ -34,5 +34,8 @@ for (let i = 0; i < files.length; i += 50) {
 run('go', ['mod', 'verify']);
 run('go', ['mod', 'tidy', '-diff']);
 run('go', ['vet', '-mod=readonly', './...']);
-run('go', ['test', '-mod=readonly', '-race', './...']);
+// Windows process-tree cleanup invokes the OS taskkill utility. Avoid running
+// several process-heavy package fixtures against its short cleanup budget at
+// once; assertions and race detection remain identical.
+run('go', ['test', '-mod=readonly', '-race', ...(process.platform === 'win32' ? ['-p', '1'] : []), './...']);
 console.log('PASS: engineering checks. Frontend checks run separately in CI.');

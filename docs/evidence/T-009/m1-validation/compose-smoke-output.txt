@@ -1,0 +1,32 @@
+PASS api ready
+PASS api live
+PASS frontend served
+PASS node API requires authentication
+PASS reserved route /api/v1/subscriptions returns 404
+PASS reserved route /internal/v1/jobs returns 404
+PASS reserved route /s/EXAMPLE_ONLY/test returns 404
+PASS management requires a session
+PASS administrator initializes through Linux API
+PASS administrator role matches the public contract
+PASS initialization cannot be reused
+PASS authenticated write requires CSRF
+PASS explicit reauthentication succeeds
+PASS migrations repeat safely
+PASS concurrent migration process 57292
+PASS concurrent migration process 58056
+PASS runtime database privileges are restricted
+PASS missing key fails startup
+PASS runner offline does not block api readiness
+PASS database outage blocks readiness
+PASS database outage preserves liveness
+PASS database outage rejects authenticated reads
+PASS database recovery restores readiness
+PASS api restart preserves migration state
+PASS API restart preserves the database session
+PASS logout revokes the session
+PASS logged out requests are unauthorized
+PASS runner excluded from database network
+PASS runner mounts no secrets
+PASS runner has no published ports
+PASS services exit gracefully
+PASS captured logs contain no development secrets

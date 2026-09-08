@@ -1,5 +1,6 @@
-// Package runner is an idle lifecycle shell. Task transport, mTLS, and core
-// execution belong to later tasks and are deliberately not exposed here.
+// Package runner owns the control client and the loopback health listener.
+// Serve remains the explicit unconfigured development mode; ServeClient runs
+// the registered mTLS consumer with enforced offline configuration validation.
 package runner
 
 import (

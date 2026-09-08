@@ -11,8 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/Runarry/ProxyLoom/internal/config"
 	"github.com/Runarry/ProxyLoom/internal/identity"
+	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/runnercontrol"
+	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	"github.com/Runarry/ProxyLoom/internal/server"
 	"github.com/Runarry/ProxyLoom/internal/storage"
 )
@@ -74,6 +78,51 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		return err
 	}
 	defer keys.Clear()
+	box, err := secretbox.New(keys.ActiveKeyID, keys.MasterKeys, keys.ContentHMACKey)
+	if err != nil {
+		return errors.New("catalog_key_configuration_invalid")
+	}
+	catalogStore, err := storage.NewCatalog(pool, box)
+	if err != nil {
+		return errors.New("catalog_configuration_invalid")
+	}
+	jobStore, err := storage.NewJobs(pool, box)
+	if err != nil {
+		return errors.New("job_configuration_invalid")
+	}
+	importStore, err := storage.NewImports(catalogStore, jobStore)
+	if err != nil {
+		return errors.New("import_configuration_invalid")
+	}
+	cursor, err := apicontract.NewCursorCodec(jobStore)
+	if err != nil {
+		return errors.New("cursor_configuration_invalid")
+	}
+	worker, err := jobs.NewWorker(jobStore, jobs.WorkerConfig{
+		WorkerID: jobs.NewID(), Handlers: map[jobs.Type]jobs.Handler{jobs.ImportParse: importStore.HandleParse},
+	})
+	if err != nil {
+		return errors.New("worker_configuration_invalid")
+	}
+	internalConfig, err := config.LoadRunnerListener(lookup)
+	if err != nil {
+		return err
+	}
+	var internalListener *runnercontrol.Server
+	if internalConfig.Address != "" {
+		registered, err := runnercontrol.ReadRegistry(internalConfig.RegistryFile)
+		if err != nil {
+			return errors.New("runner_registration_invalid")
+		}
+		tlsConfig, err := internalConfig.TLS()
+		if err != nil {
+			return errors.New("runner_tls_invalid")
+		}
+		internalListener, err = runnercontrol.New(runnercontrol.Config{TLS: tlsConfig, Registrations: registered, Jobs: jobStore})
+		if err != nil {
+			return errors.New("runner_listener_configuration_invalid")
+		}
+	}
 	identities, err := storage.NewIdentity(pool, identity.Options{
 		ScopeID: identity.DefaultScopeID, SetupToken: setupToken, TokenPepper: keys.TokenPepper,
 	})
@@ -85,6 +134,8 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		Secrets:  cfg.ValidateSecrets,
 		Identity: identities, PublicURL: cfg.PublicURL, Development: cfg.Development,
 		TrustedProxies: cfg.TrustedProxies(),
+		Nodes:          &server.NodeDependencies{Repository: catalogStore, Cursor: cursor},
+		Imports:        importStore, Jobs: jobStore, JobCursor: cursor,
 	}, logger)
 	if err != nil {
 		return err
@@ -93,7 +144,32 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	if cfg.Development {
 		logger.Info("development_mode", "http_loopback_public_url", true, "management_api", true)
 	}
-	return server.Serve(ctx, cfg.HTTPAddr, handler, logger)
+	runCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	finished := make(chan error, 4)
+	count := 3
+	go func() { finished <- server.Serve(runCtx, cfg.HTTPAddr, handler, logger) }()
+	go func() { finished <- worker.Run(runCtx) }()
+	go func() { finished <- expireImports(runCtx, importStore, logger) }()
+	if internalListener != nil {
+		count++
+		go func() { finished <- internalListener.Serve(runCtx, internalConfig.Address, logger) }()
+	}
+	err = <-finished
+	cancel()
+	for remaining := count - 1; remaining > 0; remaining-- {
+		other := <-finished
+		if err == nil || errors.Is(err, context.Canceled) {
+			err = other
+		}
+	}
+	if ctx.Err() != nil || errors.Is(err, context.Canceled) {
+		return nil
+	}
+	if err != nil {
+		return errors.New("api_background_service_failed")
+	}
+	return nil
 }
 
 func migrate(ctx context.Context, command string, lookup config.Lookup, output io.Writer) error {

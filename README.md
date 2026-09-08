@@ -1,8 +1,8 @@
 # ProxyLoom · 织流
 
-自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。M0 限定原型已完成 G0 评审，T-004／005／007 基座工程评审已关闭。本窗已实现 **T-006 管理员认证、T-008 持续质量检查**，本地自动验收通过、状态 `in_review`：五个认证 API、持久会话、CSRF／Origin、主机密码重置及质量门槛。验收状态与限制见 `docs/PLAN.md` 和 `docs/evidence/T-006/`、`T-008/`。
+自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。本窗口接入六类节点管理、本地 URI／文本／Base64 导入、登录与管理界面、持久任务及独立 mTLS Runner 配置校验。逐项验收状态与限制见 `docs/PLAN.md` 和 `docs/evidence/`，实现存在不代表所有阶段门槛完成。
 
-前端当前仍为起始页；登录页面、节点 CRUD、来源刷新、订阅发布和持久 Runner 调度由后续任务提供。三内核能力保持 `unverified`，已有 linux/amd64 Trojan TCP/TLS 原型证据不扩大为其他协议、架构或客户端支持。
+来源刷新、链／策略编排、订阅发布及网络测速仍由后续任务提供。六类节点可解析／保存与内核兼容分别展示；三内核能力保持 `unverified`，已有原型证据不扩大为所有协议、架构或客户端支持。决策见 `docs/adr/0009-m1-input-and-validation.md`。
 
 基座提交 `1ff4c09` 的远端运行 [34201742618](https://github.com/Runarry/ProxyLoom/actions/runs/34201742618) 已通过；基座收口见 `docs/reviews/2026-09-08-m1-foundation-closeout.md`。该运行不代表本窗新增代码已在远端执行。
 
@@ -25,7 +25,7 @@ docker compose -f deploy/compose.dev.yaml up --build -d --wait
 
 ## 管理员初始化与认证
 
-本窗通过 API 使用认证，前端登录页留在 T-047。开发环境用秘密文件中的 setup_token 向 `POST /api/v1/setup` 提交初始化凭证、用户名和密码，请求必须带与 PUBLIC_URL 相同的 Origin 及 `Content-Type: application/json`。不要把真实凭证放入示例脚本、终端历史或日志。
+首次启动可在前端初始化页面输入秘密文件中的 setup_token、用户名和密码；完成后使用登录页面进入节点管理。API 初始化仍为 `POST /api/v1/setup`，必须带与 PUBLIC_URL 相同的 Origin 及 `Content-Type: application/json`。不要把真实凭证放入示例脚本、终端历史或日志。
 
 登录接口为 `/api/v1/auth/login`；客户端使用 HttpOnly Cookie 并将返回的 csrf_token 仅存内存。后续写请求携带 `X-CSRF-Token` 和 Origin。`/auth/me` 可恢复用户状态，`/auth/reauth` 提供五分钟敏感操作认证，`/auth/logout` 吊销会话。
 
@@ -84,6 +84,6 @@ Windows 未安装 CGO 编译器时，使用 `docker build -f deploy/Dockerfile.c
 - 编译：`internal/compiler` 复用 `Prepare` 后由三家族 Emit 输出完整原生配置。当前只映射 Trojan／native_tcp／TLS；`node scripts/verify-compile-exec.mjs` 用锁定 linux/amd64 内核检查生成字节。
 - 隔离夹具：`internal/isolation` 与 `deploy/compose.isolation.yaml` 仅用于测试，不随开发 Compose 启动。容器烟测：`node scripts/verify-isolation-compose.mjs`。
 - 真实链路（T-028）：`node scripts/verify-live-chain.mjs` 在临时 Linux 容器中冻结夹具地址、Compile、校验并经回环入口探测。不关闭 TLS 校验。限定 G0 已获用户批准，其他架构和组合仍需后续验收。
-- 管理认证 API 已挂载五个接口，具体清单见 `fixtures/api/implemented-routes.json`；Runner mTLS/队列、节点与发布仍由后续任务提供。未知 `/api`、`/internal`、`/s` 路径不会返回前端成功页面。
+- 管理认证、节点、导入及任务接口已接入，内部 Runner 使用单独 mTLS 监听器；具体清单见 `fixtures/api/implemented-routes.json`。未知 `/api`、`/internal`、`/s` 路径不会返回前端成功页面。
 
 需求依据、范围与 ADR 见 `docs/baseline/README.md`。机器任务清单为 `docs/PLAN.tasks.json`，执行主入口为 `docs/PLAN.md`。逐任务证据在 `docs/evidence/`，首轮完成不代表 G0 或三内核兼容验证通过。

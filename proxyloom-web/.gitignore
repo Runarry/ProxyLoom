@@ -4,3 +4,5 @@ dist/
 .pnpm-store/
 .pnpm-cache/
 .pnpm-state/
+test-results/
+playwright-report/

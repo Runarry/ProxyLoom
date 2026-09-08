@@ -1,0 +1,143 @@
+{
+  "image_ids": [
+    "sha256:8c805217b8ef496bbb2f2923fe3d7f379aaae0b8e9a3610d47df8e025ce5ec7c",
+    "sha256:16450bdb75e2b6a50a6f4af9f1bc274a8d2e2d97a7b21467f006f4fc49b19f11"
+  ],
+  "checks": [
+    {
+      "name": "api ready",
+      "result": "pass"
+    },
+    {
+      "name": "api live",
+      "result": "pass"
+    },
+    {
+      "name": "frontend served",
+      "result": "pass"
+    },
+    {
+      "name": "node API requires authentication",
+      "result": "pass"
+    },
+    {
+      "name": "reserved route /api/v1/subscriptions returns 404",
+      "result": "pass"
+    },
+    {
+      "name": "reserved route /internal/v1/jobs returns 404",
+      "result": "pass"
+    },
+    {
+      "name": "reserved route /s/EXAMPLE_ONLY/test returns 404",
+      "result": "pass"
+    },
+    {
+      "name": "management requires a session",
+      "result": "pass"
+    },
+    {
+      "name": "administrator initializes through Linux API",
+      "result": "pass"
+    },
+    {
+      "name": "administrator role matches the public contract",
+      "result": "pass"
+    },
+    {
+      "name": "initialization cannot be reused",
+      "result": "pass"
+    },
+    {
+      "name": "authenticated write requires CSRF",
+      "result": "pass"
+    },
+    {
+      "name": "explicit reauthentication succeeds",
+      "result": "pass"
+    },
+    {
+      "name": "migrations repeat safely",
+      "result": "pass"
+    },
+    {
+      "name": "concurrent migration process 57292",
+      "result": "pass"
+    },
+    {
+      "name": "concurrent migration process 58056",
+      "result": "pass"
+    },
+    {
+      "name": "runtime database privileges are restricted",
+      "result": "pass"
+    },
+    {
+      "name": "missing key fails startup",
+      "result": "pass"
+    },
+    {
+      "name": "runner offline does not block api readiness",
+      "result": "pass"
+    },
+    {
+      "name": "database outage blocks readiness",
+      "result": "pass"
+    },
+    {
+      "name": "database outage preserves liveness",
+      "result": "pass"
+    },
+    {
+      "name": "database outage rejects authenticated reads",
+      "result": "pass"
+    },
+    {
+      "name": "database recovery restores readiness",
+      "result": "pass"
+    },
+    {
+      "name": "api restart preserves migration state",
+      "result": "pass"
+    },
+    {
+      "name": "API restart preserves the database session",
+      "result": "pass"
+    },
+    {
+      "name": "logout revokes the session",
+      "result": "pass"
+    },
+    {
+      "name": "logged out requests are unauthorized",
+      "result": "pass"
+    },
+    {
+      "name": "runner excluded from database network",
+      "result": "pass"
+    },
+    {
+      "name": "runner mounts no secrets",
+      "result": "pass"
+    },
+    {
+      "name": "runner has no published ports",
+      "result": "pass"
+    },
+    {
+      "name": "services exit gracefully",
+      "result": "pass"
+    },
+    {
+      "name": "captured logs contain no development secrets",
+      "result": "pass"
+    }
+  ],
+  "platform": "linux/amd64",
+  "cleanup": "pass",
+  "completed": true,
+  "ended_at": "2026-09-08T15:55:05.3426659Z",
+  "started_at": "2026-09-08T15:53:24.0710319Z",
+  "scope": "T-002/T-006 development Linux API authentication smoke; not G0 or production acceptance",
+  "project": "proxyloom-smoke-9dcd2d277b51"
+}

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-08 用户授权 T-006/T-008。T-004/005/007 工程评审收口后，累计14项 done；T-006/T-008 实现与本地自动验收完成、状态 in_review；其余44项 not_started。完整统一质量入口通过，20组真实 PostgreSQL 无跳过，Linux API Compose31项及清理通过，Windows/Linux工程与race、API/sqlc/前端和秘密/契约门槛通过。新工作树未提交推送，远端强制合并规则因401未核实。能力保持unverified，G1未关闭。详见T-006/T-008证据和docs/reviews/2026-09-08-m1-foundation-closeout.md。",
+  "status_note": "2026-09-08 M1输入窗口工程验收收口，累计21项done；T008仍in_review（基点远端CI通过，强制规则401未核实），T048节点／本地导入切片通过但整项in_progress，其余37项not_started。统一质量、35项实库、Linux race、32项Compose、真实三内核mTLS及浏览器证据已归档。G1未关闭，能力unverified；本工作树未提交，实际人日未采集。",
   "tasks": [
     {
       "id": "T-001",
@@ -112,8 +112,9 @@
         "T-005"
       ],
       "acceptance": "初始化不可复用；重置使会话失效；管理／订阅／Runner 凭证不能互用；敏感读取被审计。\nAC-01、AC-23",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-006/summary.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-006/summary.md",
+      "review_record": "docs/reviews/2026-09-08-m1-input-entry.md"
     },
     {
       "id": "T-007",
@@ -169,7 +170,8 @@
         "T-003"
       ],
       "acceptance": "中文、IPv6、转义正例与缺认证／重复键负例通过；不伪造默认值，不自动执行插件。\nAC-02、AC-03",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md"
     },
     {
       "id": "T-010",
@@ -186,10 +188,13 @@
         "T-004",
         "T-005",
         "T-007",
-        "T-009"
+        "T-009",
+        "T-011",
+        "T-039"
       ],
       "acceptance": "预览不改正式库；混合失败不阻断合法项预览；只提交选中有效项；同幂等键不重复落库。\nAC-02、AC-03",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md"
     },
     {
       "id": "T-011",
@@ -209,7 +214,8 @@
         "T-007"
       ],
       "acceptance": "遮罩不当密码保存；过期修订返回 412；克隆生成新 ID；安全停用及认证变化递增 epoch。\nAC-06、AC-17、AC-23",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md"
     },
     {
       "id": "T-012",
@@ -740,7 +746,8 @@
         "T-007"
       ],
       "acceptance": "能力过滤进入领取事务；重启可恢复；迟到租约不能覆盖结果；配置错误不重试；父批次汇总一致。\nAC-19（调度层）；租约专项",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md"
     },
     {
       "id": "T-040",
@@ -778,7 +785,8 @@
         "T-040"
       ],
       "acceptance": "Runner 无 DB 和主密钥；只接获准类型；实际构建不符拒绝；最终配置字节摘要一致；日志双层脱敏。\nAC-18、AC-19 的校验子集",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md"
     },
     {
       "id": "T-042",
@@ -893,7 +901,8 @@
         "T-007"
       ],
       "acceptance": "前后端类型一致；不持久化秘密到 localStorage；键盘操作、长名称和错误文本可用。\nAC-01、AC-23；可用性专项",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md"
     },
     {
       "id": "T-048",
@@ -915,7 +924,9 @@
         "T-047"
       ],
       "acceptance": "隐藏旧字段不误提交；遮罩不回写；412 保留草稿；导入确认前不改库；秘密复制须明确授权。\nAC-02～AC-06、AC-23",
-      "status": "not_started"
+      "status": "in_progress",
+      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md",
+      "progress_note": "节点／本地导入切片通过真实API与浏览器验收；来源刷新、覆盖和冲突合并等待T014/T015，整项不标done。"
     },
     {
       "id": "T-049",

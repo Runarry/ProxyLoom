@@ -16,7 +16,9 @@
     "github.com/jackc/pgx/v5": "v5.7.6",
     "github.com/santhosh-tekuri/jsonschema/v6": "v6.0.2",
     "gopkg.in/yaml.v3": "v3.0.1",
-    "golang.org/x/crypto": "v0.40.0"
+    "golang.org/x/crypto": "v0.40.0",
+    "golang.org/x/net": "v0.42.0",
+    "golang.org/x/sys": "v0.35.0"
   },
   "frontend_direct_dependencies": {
     "vue": "3.5.42",
@@ -26,7 +28,8 @@
     "vite": "8.2.2",
     "@vitejs/plugin-vue": "6.0.8",
     "vue-tsc": "3.2.5",
-    "openapi-typescript": "7.9.1"
+    "openapi-typescript": "7.9.1",
+    "@playwright/test": "1.58.2"
   },
   "images": {
     "go_builder": "golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c",

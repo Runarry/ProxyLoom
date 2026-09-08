@@ -1,0 +1,19 @@
+=== RUN   TestConfigSandboxEnforcesNetworkFilesystemProcessAndMemory
+--- PASS: TestConfigSandboxEnforcesNetworkFilesystemProcessAndMemory (0.18s)
+=== RUN   TestConfigSandboxCancellationCleansBeforeReturn
+--- PASS: TestConfigSandboxCancellationCleansBeforeReturn (0.27s)
+=== RUN   TestConfigSandboxRejectsInvalidBounds
+--- PASS: TestConfigSandboxRejectsInvalidBounds (0.00s)
+=== RUN   TestConfigSandboxClassifiesFatalRuntimeExit
+--- PASS: TestConfigSandboxClassifiesFatalRuntimeExit (0.15s)
+=== RUN   TestSealedExecutableSurvivesReplacement
+--- PASS: TestSealedExecutableSurvivesReplacement (0.00s)
+=== RUN   TestRealConfigSandbox
+=== RUN   TestRealConfigSandbox/xray
+=== RUN   TestRealConfigSandbox/sing-box
+=== RUN   TestRealConfigSandbox/mihomo
+--- PASS: TestRealConfigSandbox (9.33s)
+    --- PASS: TestRealConfigSandbox/xray (2.04s)
+    --- PASS: TestRealConfigSandbox/sing-box (4.52s)
+    --- PASS: TestRealConfigSandbox/mihomo (2.77s)
+PASS

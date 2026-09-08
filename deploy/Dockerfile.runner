@@ -9,6 +9,9 @@ RUN CGO_ENABLED=0 go build -mod=readonly -trimpath -buildvcs=false -o /out/proxy
 FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /out/proxyloom-runner /app/proxyloom-runner
+# Locked cores are supplied through a read-only /cores mount. No download or
+# mutable tag is resolved by this image or its entry point. The checker uses
+# unprivileged Landlock (ABI >= 3), seccomp and rlimits; unsupported hosts fail.
 USER 10002:10002
 ENTRYPOINT ["/app/proxyloom-runner"]
 CMD ["serve"]
