@@ -1,0 +1,19 @@
+✔ summarizes failed tests and source diagnostics, omitting successful test output (1.674253ms)
+✔ retains compile stderr even when Go emitted no test failure event (1.032005ms)
+✔ redacts registered secrets and DSNs plus common credential forms (0.403918ms)
+✔ neutralizes workflow commands, terminal controls and line injections (0.709181ms)
+✔ bounds UTF-8 bytes and total lines (2.235947ms)
+✔ successful runs and empty input produce no failure summary (0.244551ms)
+✔ unreadable-runtime fails before invoking psql (7.729406ms)
+✔ unreadable-migration fails before invoking psql (5.337153ms)
+✔ empty-runtime fails before invoking psql (4.811114ms)
+✔ empty-migration fails before invoking psql (4.050907ms)
+✔ valid credentials are exported to psql (8.457381ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 88.950839

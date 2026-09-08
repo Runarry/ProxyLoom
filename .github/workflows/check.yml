@@ -22,6 +22,7 @@ jobs:
           node-version: '24.6.0'
       - name: PLAN, boundaries, formatting, dependencies, vet, race tests
         run: |
+          node --test scripts/foundation-report.test.mjs scripts/postgres-init.test.mjs
           node scripts/install-sqlc.mjs
           node scripts/check.mjs
       - name: Install pinned pnpm
@@ -36,6 +37,21 @@ jobs:
         run: node scripts/check-api.mjs
       - name: PostgreSQL foundation integration
         run: node scripts/verify-foundation.mjs
+      - name: Retain foundation diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: foundation-evidence-${{ github.run_attempt }}
+          # Only these evidence files; never upload the credentials directory.
+          # The verifier rejects registered generated secrets before saving Go output.
+          path: |
+            .cache/foundation/*/report.json
+            .cache/foundation/*/source-manifest.json
+            .cache/foundation/*/go-test.jsonl
+            .cache/foundation/*/go-stderr.txt
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
   development-smoke:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

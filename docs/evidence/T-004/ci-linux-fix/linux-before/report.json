@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "run_id": "a71877ae-df43-4451-b15c-b16ca2ac52e1",
+  "started_at": "2026-09-08T07:49:19.852Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "fail",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "linux/x64",
+  "mode": "full",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s ./internal/catalog ./internal/storage ./internal/secretbox ./internal/apicontract ./api",
+  "source_manifest_sha256": "9e13b3139e2a92cadb016c67b6a3e8a98e4fc67055c29bbf6b77894a05314003",
+  "go_version": "go version go1.26.0 linux/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresMigrationFreshPrefixRepeatAndRollback",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogDatabaseConstraintsAndPrivileges",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogReferenceScopeKindAndFixedRevision",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogLifecycle",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogConcurrentTransactions",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogIdempotencyConcurrentReplayConflictAndRollback",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogRewrapCASPreservesImmutableState",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresCatalogScopedPagination",
+      "result": "fail"
+    },
+    {
+      "name": "TestPostgresFoundationAPITransactionBoundary",
+      "result": "fail"
+    }
+  ],
+  "postgres_skipped_tests": [],
+  "failed_tests": [
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresMigrationFreshPrefixRepeatAndRollback/fresh"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresMigrationFreshPrefixRepeatAndRollback/bootstrap_prefix"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresMigrationFreshPrefixRepeatAndRollback/failed_append_rolls_back_all_new_objects"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresMigrationFreshPrefixRepeatAndRollback/runtime_cannot_create_schema"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresMigrationFreshPrefixRepeatAndRollback"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogDatabaseConstraintsAndPrivileges"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogReferenceScopeKindAndFixedRevision"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogLifecycle"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogConcurrentTransactions"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogIdempotencyConcurrentReplayConflictAndRollback"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogRewrapCASPreservesImmutableState"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresCatalogScopedPagination"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": "TestPostgresFoundationAPITransactionBoundary"
+    },
+    {
+      "package": "github.com/Runarry/ProxyLoom/internal/storage",
+      "test": null
+    }
+  ],
+  "error": "foundation_go_tests_failed_see_local_evidence\n\n1 !== 0\n",
+  "ended_at": "2026-09-08T07:49:24.438Z",
+  "source_commit": ""
+}

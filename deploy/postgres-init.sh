@@ -1,8 +1,11 @@
 #!/bin/sh
 # Only called on an empty development PostgreSQL volume. Never print credentials.
 set -eu
-export PROXYLOOM_DB_RUNTIME_PASSWORD="$(cat /run/secrets/db_runtime_password)"
-export PROXYLOOM_DB_MIGRATION_PASSWORD="$(cat /run/secrets/db_migration_password)"
+PROXYLOOM_DB_RUNTIME_PASSWORD="$(cat /run/secrets/db_runtime_password)"
+PROXYLOOM_DB_MIGRATION_PASSWORD="$(cat /run/secrets/db_migration_password)"
+: "${PROXYLOOM_DB_RUNTIME_PASSWORD:?runtime password is empty}"
+: "${PROXYLOOM_DB_MIGRATION_PASSWORD:?migration password is empty}"
+export PROXYLOOM_DB_RUNTIME_PASSWORD PROXYLOOM_DB_MIGRATION_PASSWORD
 psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --no-psqlrc --quiet --set ON_ERROR_STOP=1 <<'SQL'
 SET log_statement = 'none';
 SET log_min_error_statement = 'panic';

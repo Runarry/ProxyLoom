@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "run_id": "a6541e8c-7e4a-40e5-b305-ad22ec568e14",
+  "started_at": "2026-09-08T07:50:05.671Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "full",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s ./internal/catalog ./internal/storage ./internal/secretbox ./internal/apicontract ./api",
+  "source_manifest_sha256": "3f45b24a4dcc2960af4a3db2a203f8fd98c29802c95ed39b776ff59de0815cf1",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresMigrationFreshPrefixRepeatAndRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogDatabaseConstraintsAndPrivileges",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogReferenceScopeKindAndFixedRevision",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogLifecycle",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogConcurrentTransactions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogIdempotencyConcurrentReplayConflictAndRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogRewrapCASPreservesImmutableState",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogScopedPagination",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresFoundationAPITransactionBoundary",
+      "result": "pass"
+    }
+  ],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-08T07:50:14.636Z",
+  "source_commit": "6385d43b01e0c5befd5894e141d728dd1c471bc4"
+}

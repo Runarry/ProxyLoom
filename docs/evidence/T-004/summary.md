@@ -34,6 +34,8 @@ Linux 检查镜像摘要：`sha256:7112fdc34830d2aaed563952494b42c79be414db477de
 
 ## 保留的过程问题与边界
 
+- 2026-09-08 CI 暴露 Linux 秘密挂载权限与 shell 错误传播缺陷，已修复并完成 Linux 实库前后对比、Windows 回归及 11 项脚本测试；详见 [CI 修复证据](ci-linux-fix/summary.md)。远端 CI 尚未重跑，任务仍为 `in_review`。
+
 - 初轮 Docker Desktop internal 网络未分配宿主回环端口，脚本失败并清理。随后使用独立 bridge，并强制核验发布地址为 127.0.0.1；[原失败](validation/initial-port-failure.json)。该测试网络不代表生产 Runner 的出站隔离。
 - 契约尚未落齐时跨模块用例失败，四组基础数据库测试已通过；待契约完整后重新验收全部通过，[原记录](validation/initial-contract-incomplete.json)。修复测试 helper 的环境变量名称，并在 harness 中强制验证数据库用例实际执行。
 - bytea 扫描从 JSON 的十六进制显示改为读取原始字节，改进后完整重跑通过；未把不足的扫描作为最终秘密验收依据。

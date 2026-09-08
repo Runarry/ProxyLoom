@@ -88,6 +88,7 @@ try {
   if (cached.error || cached.status !== 0) docker(['pull', lock.images.postgres], 'pull_postgres');
   docker(['network', 'create', '--label', `${label}=${runID}`, name], 'create_network');
   owned.network = true;
+  docker(['network', 'connect', name, process.env.REPRO_CLIENT], 'connect_repro_client');
   docker(['create', '--name', name, '--label', `${label}=${runID}`, '--network', name,
     '--publish', '127.0.0.1::5432', '--memory', '512m', '--cpus', '1', '--pids-limit', '128',
     '--tmpfs', '/var/lib/postgresql/data:rw,size=268435456',
@@ -116,9 +117,9 @@ try {
   const port = bindings['5432/tcp']?.[0]?.HostPort;
   assert.equal(bindings['5432/tcp']?.[0]?.HostIp, '127.0.0.1', 'foundation_postgres_must_be_loopback');
   assert.ok(/^\d+$/.test(port ?? ''), 'foundation_postgres_port_invalid');
-  credential('admin_dsn', `postgres://proxyloom_bootstrap:${bootstrapPassword}@127.0.0.1:${port}/proxyloom?sslmode=disable`);
-  credential('database_dsn', `postgres://proxyloom:${runtimePassword}@127.0.0.1:${port}/proxyloom?sslmode=disable`);
-  credential('migration_dsn', `postgres://proxyloom_migrator:${migrationPassword}@127.0.0.1:${port}/proxyloom?sslmode=disable`);
+  credential('admin_dsn', `postgres://proxyloom_bootstrap:${bootstrapPassword}@${name}:5432/proxyloom?sslmode=disable`);
+  credential('database_dsn', `postgres://proxyloom:${runtimePassword}@${name}:5432/proxyloom?sslmode=disable`);
+  credential('migration_dsn', `postgres://proxyloom_migrator:${migrationPassword}@${name}:5432/proxyloom?sslmode=disable`);
   pass('isolated_locked_postgres_with_separate_roles');
   const env = { ...process.env, GOPATH: join(root, '.cache/gopath'), GOMODCACHE: join(root, '.cache/gomod'), GOCACHE: join(root, '.cache/go-build'),
     PROXYLOOM_TEST_DATABASE_DSN_FILE: join(secrets, 'database_dsn'),
@@ -160,6 +161,7 @@ try {
   pendingError = error;
   report.error = safe(error.message);
 } finally {
+  if (owned.network) docker(['network', 'disconnect', name, process.env.REPRO_CLIENT], 'disconnect_repro_client');
   for (const kind of ['container', 'network']) {
     if (!owned[kind]) continue;
     try {
