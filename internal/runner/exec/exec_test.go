@@ -3,6 +3,7 @@ package exec
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -78,6 +79,23 @@ func runHelper(args []string) int {
 		chunk := bytes.Repeat([]byte("x"), 1024)
 		for i := 0; i < 128; i++ {
 			_, _ = os.Stdout.Write(chunk)
+			_, _ = os.Stderr.Write(chunk)
+		}
+		fmt.Println("stdout-finished")
+		fmt.Fprintln(os.Stderr, "stderr-finished")
+		return 0
+	case "nonzero":
+		return 23
+	case "both-logs":
+		fmt.Println("stdout-finished")
+		fmt.Fprintln(os.Stderr, "stderr-finished")
+		return 0
+	case "closed-logs":
+		_ = os.Stdout.Close()
+		_ = os.Stderr.Close()
+		time.Sleep(300 * time.Millisecond)
+		if err := os.WriteFile("finished", []byte("finished"), 0o600); err != nil {
+			return 1
 		}
 		return 0
 	case "spawn-child":
@@ -95,7 +113,7 @@ func runHelper(args []string) int {
 		fmt.Println(strings.Join(args[1:], "\n"))
 		return 0
 	default:
-		return 2
+		return runPlatformHelper(args)
 	}
 }
 
@@ -287,8 +305,58 @@ func TestLogLimitTruncatesWithoutBlocking(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !result.Truncated || len(result.Output) > 4096 {
+	if !result.Truncated || len(result.Output) != 4096 || result.ExitCode != 0 || result.TimedOut || result.Canceled {
 		t.Fatalf("limit %+v len=%d", result, len(result.Output))
+	}
+}
+
+func TestRunPreservesExitStatusAndBothLogStreams(t *testing.T) {
+	id, registry, workspace := helperSetup(t)
+	defer workspace.Close()
+	for _, mode := range []string{"both-logs", "nonzero"} {
+		spec := adapter.CommandSpec{ExecutableID: id, Args: []string{helperFlag, mode}, WorkingDir: workspace.Directory}
+		result, err := Run(context.Background(), registry, spec, workspace, Options{Timeout: 5 * time.Second})
+		if err != nil || result.TimedOut || result.Canceled || result.Truncated {
+			t.Fatalf("%s: %v %+v", mode, err, result)
+		}
+		if mode == "nonzero" {
+			if result.ExitCode != 23 {
+				t.Fatalf("nonzero exit status: %+v", result)
+			}
+		} else if result.ExitCode != 0 || !bytes.Contains(result.Output, []byte("stdout-finished")) || !bytes.Contains(result.Output, []byte("stderr-finished")) {
+			t.Fatalf("combined logs: %+v", result)
+		}
+	}
+}
+
+func TestRunWaitsForRootAfterLogEOF(t *testing.T) {
+	id, registry, workspace := helperSetup(t)
+	defer workspace.Close()
+	spec := adapter.CommandSpec{ExecutableID: id, Args: []string{helperFlag, "closed-logs"}, WorkingDir: workspace.Directory}
+	result, err := Run(context.Background(), registry, spec, workspace, Options{Timeout: 5 * time.Second})
+	if err != nil || result.ExitCode != 0 || result.Canceled || result.TimedOut {
+		t.Fatalf("closed log streams ended root early: %v %+v", err, result)
+	}
+	if _, err := os.Stat(filepath.Join(workspace.Directory, "finished")); err != nil {
+		t.Fatalf("root did not finish work after closing its logs: %v", err)
+	}
+}
+
+func TestExecutePropagatesWorkspaceCleanupFailure(t *testing.T) {
+	id, registry := coreRegistry(t, ir.Xray)
+	cleanupErr := errors.New("injected workspace cleanup failure")
+	for _, canceled := range []bool{false, true} {
+		ctx, cancel := context.WithCancel(context.Background())
+		if canceled {
+			cancel()
+		}
+		result, err := executeWithCleanup(ctx, registry, id, []byte(`{}`), canceled, func(workspace Workspace) error {
+			return errors.Join(workspace.Close(), cleanupErr)
+		})
+		cancel()
+		if !errors.Is(err, cleanupErr) || result.Canceled != canceled || (!canceled && result.ExitCode != 0) {
+			t.Fatalf("canceled=%t: cleanup failure not propagated: %v %+v", canceled, err, result)
+		}
 	}
 }
 

@@ -3,6 +3,7 @@ package chainverify
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/adapter"
@@ -24,10 +26,11 @@ import (
 )
 
 type Family struct {
-	Key     string
-	Family  ir.CoreFamily
-	Listen  string
-	BuildID ir.ID
+	Key         string
+	Family      ir.CoreFamily
+	Listen      string
+	BuildID     ir.ID
+	BuildSHA256 string
 }
 
 type coreSession struct {
@@ -36,6 +39,8 @@ type coreSession struct {
 	workspace runnerexec.Workspace
 	cancel    context.CancelFunc
 	done      <-chan runResult
+	stopOnce  sync.Once
+	stopped   runResult
 }
 
 type runResult struct {
@@ -61,7 +66,7 @@ func liveFamilies(catalog *capability.Catalog) ([]Family, error) {
 		default:
 			return nil, fmt.Errorf("unknown family %s", target.CoreFamily)
 		}
-		out = append(out, Family{Key: target.Key, Family: target.CoreFamily, Listen: listen, BuildID: target.CoreBuildID})
+		out = append(out, Family{Key: target.Key, Family: target.CoreFamily, Listen: listen, BuildID: target.CoreBuildID, BuildSHA256: target.CoreBuildSHA256})
 	}
 	return out, nil
 }
@@ -176,12 +181,10 @@ func startCore(registry runnerexec.Registry, fam Family, config []byte) (*coreSe
 	}
 	spec, err := runner.RunSpec(ws.Job())
 	if err != nil {
-		_ = ws.Close()
-		return nil, err
+		return nil, errors.Join(err, ws.Close())
 	}
 	if err := waitPortClosed(fam.Listen, 5*time.Second); err != nil {
-		_ = ws.Close()
-		return nil, fmt.Errorf("inbound %s still occupied before start: %w", fam.Listen, err)
+		return nil, errors.Join(fmt.Errorf("inbound %s still occupied before start: %w", fam.Listen, err), ws.Close())
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan runResult, 1)
@@ -196,20 +199,19 @@ func startCore(registry runnerexec.Registry, fam Family, config []byte) (*coreSe
 	early, err := waitListen(waitCtx, fam.Listen, done)
 	if early != nil {
 		cancel()
-		_ = ws.Close()
-		return nil, fmt.Errorf("core exited before listen %s: err=%v exit=%d output=%s", fam.Listen, early.err, early.result.ExitCode, truncate(early.result.Output, 800))
+		res := finishCore(*early, ws, fam.Listen)
+		return nil, errors.Join(err, res.err)
 	}
 	if err != nil {
 		cancel()
-		res := <-done
-		_ = ws.Close()
-		return nil, fmt.Errorf("%v; core output: %s", err, truncate(res.result.Output, 800))
+		res := finishCore(<-done, ws, fam.Listen)
+		return nil, errors.Join(fmt.Errorf("%w; core output: %s", err, truncate(res.result.Output, 800)), res.err)
 	}
 	select {
 	case res := <-done:
 		cancel()
-		_ = ws.Close()
-		return nil, fmt.Errorf("core exited after listen %s: err=%v exit=%d output=%s", fam.Listen, res.err, res.result.ExitCode, truncate(res.result.Output, 800))
+		res = finishCore(res, ws, fam.Listen)
+		return nil, errors.Join(fmt.Errorf("core exited after listen %s: exit=%d output=%s", fam.Listen, res.result.ExitCode, truncate(res.result.Output, 800)), res.err)
 	default:
 	}
 	return &coreSession{bytes: payload, listen: fam.Listen, workspace: ws, cancel: cancel, done: done}, nil
@@ -252,11 +254,19 @@ func (s *coreSession) stop() runResult {
 	if s == nil {
 		return runResult{}
 	}
-	s.cancel()
-	res := <-s.done
-	_ = s.workspace.Close()
-	if err := waitPortClosed(s.listen, 5*time.Second); err != nil && res.err == nil {
-		res.err = err
+	s.stopOnce.Do(func() {
+		s.cancel()
+		s.stopped = finishCore(<-s.done, s.workspace, s.listen)
+	})
+	return s.stopped
+}
+
+func finishCore(res runResult, workspace runnerexec.Workspace, listen string) runResult {
+	if err := workspace.Close(); err != nil {
+		res.err = errors.Join(res.err, fmt.Errorf("close core workspace: %w", err))
+	}
+	if err := waitPortClosed(listen, 5*time.Second); err != nil {
+		res.err = errors.Join(res.err, fmt.Errorf("close core inbound: %w", err))
 	}
 	return res
 }

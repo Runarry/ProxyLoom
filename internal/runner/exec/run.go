@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,6 +25,11 @@ const (
 	DefaultLogLimit = 64 << 10
 	DefaultTimeout  = 15 * time.Second
 	killGrace       = 2 * time.Second
+)
+
+var (
+	ErrProcessCleanupTimeout = errors.New("runner process group did not exit after TERM and KILL grace periods")
+	ErrLogDrainTimeout       = errors.New("runner log pipe did not reach EOF before cleanup deadline")
 )
 
 type Options struct {
@@ -48,6 +55,10 @@ func Start(ctx context.Context, registry Registry, buildID ir.ID, config []byte)
 }
 
 func execute(ctx context.Context, registry Registry, buildID ir.ID, config []byte, start bool) (Result, error) {
+	return executeWithCleanup(ctx, registry, buildID, config, start, Workspace.Close)
+}
+
+func executeWithCleanup(ctx context.Context, registry Registry, buildID ir.ID, config []byte, start bool, closeWorkspace func(Workspace) error) (result Result, err error) {
 	if registry == nil {
 		return Result{}, ErrUnknownExecutable
 	}
@@ -70,7 +81,11 @@ func execute(ctx context.Context, registry Registry, buildID ir.ID, config []byt
 	if err != nil {
 		return Result{}, err
 	}
-	defer workspace.Close()
+	defer func() {
+		if closeErr := closeWorkspace(workspace); closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("clean runner workspace: %w", closeErr))
+		}
+	}()
 	core, err := familyAdapter(build.Family, buildID)
 	if err != nil {
 		return Result{}, err
@@ -146,59 +161,126 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 	cmd.Dir = workspace.Directory
 	cmd.Env = cleanEnv(workspace.Directory)
 	cmd.SysProcAttr = sysProcAttr()
-	limit := &limitBuffer{limit: opts.LogLimit}
-	cmd.Stdout = limit
-	cmd.Stderr = limit
-	prepareReaper()
-	liveMu.Lock()
-	inFlight++
-	err = cmd.Start()
-	if err != nil {
-		inFlight--
-		liveMu.Unlock()
+	if err := prepareReaper(); err != nil {
 		return Result{}, err
 	}
-	pid := cmd.Process.Pid
-	if pid > 0 {
-		livePids[pid] = struct{}{}
+	logReader, logWriter, err := os.Pipe()
+	if err != nil {
+		return Result{}, fmt.Errorf("create runner log pipe: %w", err)
 	}
-	liveMu.Unlock()
-	defer func() {
-		liveMu.Lock()
-		delete(livePids, pid)
-		if inFlight > 0 {
-			inFlight--
-		}
-		liveMu.Unlock()
-		reapOrphans()
-	}()
+	defer logReader.Close()
+	// Files bypass os/exec's copying goroutines, so cmd.Wait only waits for the
+	// root process even when a descendant keeps an inherited log handle open.
+	cmd.Stdout = logWriter
+	cmd.Stderr = logWriter
+	limit := &limitBuffer{limit: opts.LogLimit}
+	if err := cmd.Start(); err != nil {
+		return Result{}, errors.Join(err, logWriter.Close())
+	}
+	var pipeErr error
+	if err := logWriter.Close(); err != nil {
+		pipeErr = fmt.Errorf("close parent runner log writer: %w", err)
+	}
 	done := make(chan error, 1)
 	go func() { done <- cmd.Wait() }()
-	result := Result{}
-	select {
-	case err := <-done:
+	logsDone := make(chan error, 1)
+	go func() {
+		_, err := io.Copy(limit, logReader)
+		logsDone <- err
+	}()
+	result, err := supervise(ctx, runCtx, cmd, logReader, done, logsDone, pipeErr)
+	output, truncated := limit.snapshot()
+	result.Truncated = result.Truncated || truncated
+	result.Output = opts.Redact(output)
+	return result, err
+}
+
+func supervise(ctx, runCtx context.Context, cmd *ose.Cmd, logReader *os.File, done, logsDone <-chan error, pipeErr error) (Result, error) {
+	result := Result{ExitCode: -1}
+	var waitErr, logErr, reapErr, termErr, killErr error
+	waited, drained, groupGone := false, false, false
+	recordWait := func(err error) {
+		waited, done = true, nil
 		result.ExitCode = exitCode(err)
-	case <-runCtx.Done():
-		result.Canceled = errors.Is(ctx.Err(), context.Canceled)
-		result.TimedOut = errors.Is(runCtx.Err(), context.DeadlineExceeded) && !result.Canceled
-		terminate(cmd)
+		var exitErr *ose.ExitError
+		if err != nil && !errors.As(err, &exitErr) {
+			waitErr = fmt.Errorf("wait for runner root: %w", err)
+		}
+	}
+	recordLogs := func(err error) {
+		drained, logsDone = true, nil
+		if err != nil {
+			logErr = fmt.Errorf("read runner logs: %w", err)
+		}
+	}
+	running := pipeErr == nil
+	for running {
 		select {
 		case err := <-done:
-			if result.ExitCode == 0 {
-				result.ExitCode = exitCode(err)
-			}
-		case <-time.After(killGrace):
-			killProcess(cmd)
-			reapOrphans()
-			err := <-done
-			if result.ExitCode == 0 {
-				result.ExitCode = exitCode(err)
+			recordWait(err)
+			running = false
+		case err := <-logsDone:
+			recordLogs(err)
+			running = err == nil
+		case <-runCtx.Done():
+			result.Canceled = errors.Is(ctx.Err(), context.Canceled)
+			result.TimedOut = errors.Is(runCtx.Err(), context.DeadlineExceeded) && !result.Canceled
+			running = false
+		}
+	}
+
+	// Both normal root exit and cancellation start the same bounded cleanup.
+	// Only cmd.Wait owns the root; group reaping starts after it has finished.
+	pollGroup := func() {
+		if waited && !groupGone {
+			gone, err := processGroupDone(cmd)
+			groupGone = gone
+			if err != nil && reapErr == nil {
+				reapErr = fmt.Errorf("reap runner process group: %w", err)
 			}
 		}
 	}
-	result.Truncated = limit.truncated
-	result.Output = opts.Redact(limit.Bytes())
-	return result, nil
+	pollGroup()
+	stage := time.NewTimer(killGrace)
+	defer stage.Stop()
+	if !groupGone {
+		termErr = terminate(cmd)
+	}
+	poll := time.NewTicker(10 * time.Millisecond)
+	defer poll.Stop()
+	killing := false
+	for {
+		pollGroup()
+		if waited && groupGone && drained {
+			return result, errors.Join(pipeErr, waitErr, logErr, reapErr, termErr, killErr)
+		}
+		select {
+		case err := <-done:
+			recordWait(err)
+		case err := <-logsDone:
+			recordLogs(err)
+		case <-poll.C:
+		case <-stage.C:
+			if !killing {
+				killing = true
+				stage.Reset(killGrace)
+				if !groupGone {
+					killErr = killProcess(cmd)
+				}
+				continue
+			}
+			if !waited || !groupGone {
+				pipeErr = errors.Join(pipeErr, ErrProcessCleanupTimeout)
+			}
+			if !drained {
+				// Closing the pipe interrupts its reader even if a process outside
+				// this group's ownership retains a writer. Never wait without a bound.
+				result.Truncated = true
+				pipeErr = errors.Join(pipeErr, ErrLogDrainTimeout, logReader.Close())
+			}
+			return result, errors.Join(pipeErr, waitErr, logErr, reapErr, termErr, killErr)
+		}
+	}
 }
 
 func validateArgs(args []string) error {
@@ -243,12 +325,15 @@ func exitCode(err error) int {
 }
 
 type limitBuffer struct {
+	mu        sync.Mutex
 	buf       bytes.Buffer
 	limit     int
 	truncated bool
 }
 
 func (l *limitBuffer) Write(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	remain := l.limit - l.buf.Len()
 	if remain <= 0 {
 		l.truncated = true
@@ -262,17 +347,8 @@ func (l *limitBuffer) Write(p []byte) (int, error) {
 	return l.buf.Write(p)
 }
 
-func (l *limitBuffer) Bytes() []byte {
-	return append([]byte(nil), l.buf.Bytes()...)
-}
-
-var (
-	liveMu   sync.Mutex
-	livePids = map[int]struct{}{}
-	inFlight int
-)
-
-func isLivePidLocked(pid int) bool {
-	_, ok := livePids[pid]
-	return ok
+func (l *limitBuffer) snapshot() ([]byte, bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return append([]byte(nil), l.buf.Bytes()...), l.truncated
 }

@@ -1,5 +1,7 @@
 # T-028 场景矩阵
 
+2026-09-08 修复后，同一 24 场景在新增清理断言下重跑通过。51 个 session 清理均通过，9 个故障阶段目标 accept/ok 增量为 0；实际来源、请求关联、构建及测试配置摘要见 [新版原始报告](remediation-2026-09-08/live-chain-report.json)。下方保留第五窗口的场景定义及历史执行说明。
+
 入口：`node scripts/verify-live-chain.mjs`（进程内夹具 + 锁定 linux/amd64 内核）与 `node scripts/verify-isolation-compose.mjs`（容器来源限制）。能力状态仍为 `unverified`。未测 arm64、其它协议、客户端导入。
 
 | 场景 | 预期 | xray | sing-box | mihomo | 观察 |

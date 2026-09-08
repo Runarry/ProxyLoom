@@ -2,6 +2,8 @@
 
 自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。当前实现 **M0 第五窗口（T-001～003 基座，T-023 内核锁，T-024 编译骨架，T-025～027 Trojan TCP/TLS 原生 Emit，T-040 最小执行器，T-053 隔离夹具，T-028 linux/amd64 夹具链路）**：可以运行空 API、中文工程页、空 Runner 和 PostgreSQL 迁移入口；已锁定三内核官方 linux 候选，并能把同一份冻结 Node/Chain IR 编译成 Xray／sing-box／Mihomo 完整配置，在隔离夹具中经锁定内核检查并走 A→B 探测。还没有登录、节点 CRUD、订阅发布或 G0 人工验收。全部内核能力为 `unverified`。
 
+2026-09-08 M0 修复与补验窗口处理执行器进程归属、能力目录副本、清理错误验收及烟测资源保护。方案见 `docs/adr/0006-m0-review-remediation.md`，实测与剩余评审见 `docs/evidence/T-028/remediation-2026-09-08.md`；任务保持 `in_review`，不代表 G0 正式通过。
+
 ## 启动开发环境
 
 需要 Docker Compose、PowerShell 7。镜像基线和工具版本锁在 `deploy/tools.lock.json`；Go 1.26.0、Node 24.6.0、pnpm 10.33.2 用于本机开发。

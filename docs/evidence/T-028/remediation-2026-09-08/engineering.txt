@@ -1,0 +1,64 @@
+> C:\Program Files\nodejs\node.exe scripts/check-locks.mjs
+PASS: tool versions, direct dependencies, Docker base digests, Compose PostgreSQL and CI versions match tools.lock.json.
+> C:\Program Files\nodejs\node.exe scripts/check-plan.mjs
+PASS: 60 unique sequential tasks match PLAN metadata and form an acyclic dependency graph.
+> C:\Program Files\nodejs\node.exe scripts/check-boundaries.mjs
+PASS: IR and compiler exclude HTTP/database/exec; Runner dependency graph excludes database/identity/server; API and Runner exclude isolation fixtures.
+> C:\Program Files\nodejs\node.exe scripts/verify-cores.mjs
+PASS: cores.lock.yaml pins six official linux builds with unverified P0 combinations and no latest/verified placeholders.
+> C:\Program Files\nodejs\node.exe --test scripts/isolation-compose.test.mjs
+✔ existing stopped container refuses all mutations (4.6286ms)
+✔ existing orphan container refuses all mutations (1.3828ms)
+✔ existing network refuses all mutations (1.1069ms)
+✔ existing volume refuses all mutations (1.3921ms)
+✔ container query failure fails closed (1.2264ms)
+✔ network query failure fails closed (1.0366ms)
+✔ volume query failure fails closed (1.2313ms)
+✔ all networks query failure fails closed (1.2088ms)
+✔ inspect query failure fails closed (1.1928ms)
+✔ occupied overlapping 172.30.0.0/16 does not change existing resources (1.9104ms)
+✔ occupied overlapping 172.30.252.0/23 does not change existing resources (1.3382ms)
+✔ occupied overlapping 172.30.253.128/25 does not change existing resources (1.0096ms)
+✔ occupied overlapping 172.30.253.0/24 does not change existing resources (0.9849ms)
+✔ CIDR overlap handles boundaries, host bits and IPv6 (4.6378ms)
+✔ partial up failure (exit code) cleans only this run (2.5568ms)
+✔ partial up failure (exception) cleans only this run (2.1026ms)
+✔ cleanup failure cannot publish a pass report or message (4.7313ms)
+✔ phase and cleanup exceptions preserve both failures without a pass (2.1087ms)
+✔ successful runs isolate project and output, publish only after cleanup (12.5285ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 185.6767
+> gofmt -l G:\Projects\ProxyLoom\compat\embed.go G:\Projects\ProxyLoom\internal\adapter\adapter.go G:\Projects\ProxyLoom\internal\adapter\adapter_test.go G:\Projects\ProxyLoom\internal\adapter\emit.go G:\Projects\ProxyLoom\internal\adapter\emit_test.go G:\Projects\ProxyLoom\internal\adapter\mihomo\emit.go G:\Projects\ProxyLoom\internal\adapter\mihomo\emit_test.go G:\Projects\ProxyLoom\internal\adapter\mihomo\mihomo.go G:\Projects\ProxyLoom\internal\adapter\mihomo\mihomo_test.go G:\Projects\ProxyLoom\internal\adapter\redact.go G:\Projects\ProxyLoom\internal\adapter\singbox\emit.go G:\Projects\ProxyLoom\internal\adapter\singbox\emit_test.go G:\Projects\ProxyLoom\internal\adapter\singbox\singbox.go G:\Projects\ProxyLoom\internal\adapter\singbox\singbox_test.go G:\Projects\ProxyLoom\internal\adapter\xray\emit.go G:\Projects\ProxyLoom\internal\adapter\xray\emit_test.go G:\Projects\ProxyLoom\internal\adapter\xray\xray.go G:\Projects\ProxyLoom\internal\adapter\xray\xray_test.go G:\Projects\ProxyLoom\internal\capability\catalog.go G:\Projects\ProxyLoom\internal\capability\catalog_test.go G:\Projects\ProxyLoom\internal\capability\parse.go G:\Projects\ProxyLoom\internal\chainverify\core.go G:\Projects\ProxyLoom\internal\chainverify\freeze.go G:\Projects\ProxyLoom\internal\chainverify\freeze_test.go G:\Projects\ProxyLoom\internal\chainverify\lifecycle_test.go G:\Projects\ProxyLoom\internal\chainverify\live_helpers_test.go G:\Projects\ProxyLoom\internal\chainverify\live_test.go G:\Projects\ProxyLoom\internal\chainverify\report.go G:\Projects\ProxyLoom\internal\chainverify\socks.go G:\Projects\ProxyLoom\internal\chainverify\topo.go G:\Projects\ProxyLoom\internal\compiler\compile.go G:\Projects\ProxyLoom\internal\compiler\compile_test.go G:\Projects\ProxyLoom\internal\compiler\emit.go G:\Projects\ProxyLoom\internal\compiler\label.go G:\Projects\ProxyLoom\internal\compiler\label_test.go G:\Projects\ProxyLoom\internal\compiler\native_test.go G:\Projects\ProxyLoom\internal\compiler\plan.go G:\Projects\ProxyLoom\internal\compiler\prepare.go G:\Projects\ProxyLoom\internal\compiler\protocol.go G:\Projects\ProxyLoom\internal\config\config.go G:\Projects\ProxyLoom\internal\config\config_test.go G:\Projects\ProxyLoom\internal\ir\diagnostic.go G:\Projects\ProxyLoom\internal\ir\frozen.go G:\Projects\ProxyLoom\internal\ir\frozen_test.go G:\Projects\ProxyLoom\internal\ir\ir_test.go G:\Projects\ProxyLoom\internal\ir\json.go G:\Projects\ProxyLoom\internal\ir\node.go G:\Projects\ProxyLoom\internal\ir\redaction.go G:\Projects\ProxyLoom\internal\ir\resource.go G:\Projects\ProxyLoom\internal\ir\value_validation.go
+> gofmt -l G:\Projects\ProxyLoom\internal\isolation\cert.go G:\Projects\ProxyLoom\internal\isolation\compose_smoke_test.go G:\Projects\ProxyLoom\internal\isolation\events.go G:\Projects\ProxyLoom\internal\isolation\isolation_test.go G:\Projects\ProxyLoom\internal\isolation\log.go G:\Projects\ProxyLoom\internal\isolation\target.go G:\Projects\ProxyLoom\internal\isolation\trojan.go G:\Projects\ProxyLoom\internal\isolation\trojan_payload_test.go G:\Projects\ProxyLoom\internal\runner\exec\env.go G:\Projects\ProxyLoom\internal\runner\exec\exec_linux_test.go G:\Projects\ProxyLoom\internal\runner\exec\exec_nolinux_test.go G:\Projects\ProxyLoom\internal\runner\exec\exec_test.go G:\Projects\ProxyLoom\internal\runner\exec\proc_linux.go G:\Projects\ProxyLoom\internal\runner\exec\proc_nolinux.go G:\Projects\ProxyLoom\internal\runner\exec\proc_unix.go G:\Projects\ProxyLoom\internal\runner\exec\proc_windows.go G:\Projects\ProxyLoom\internal\runner\exec\registry.go G:\Projects\ProxyLoom\internal\runner\exec\run.go G:\Projects\ProxyLoom\internal\runner\exec\signal_unix.go G:\Projects\ProxyLoom\internal\runner\exec\signal_windows.go G:\Projects\ProxyLoom\internal\runner\exec\workspace.go G:\Projects\ProxyLoom\internal\runner\runner.go G:\Projects\ProxyLoom\internal\runner\runner_test.go G:\Projects\ProxyLoom\internal\server\server.go G:\Projects\ProxyLoom\internal\server\server_test.go G:\Projects\ProxyLoom\internal\storage\migrations.go G:\Projects\ProxyLoom\internal\storage\migrations_test.go G:\Projects\ProxyLoom\internal\storage\storage.go G:\Projects\ProxyLoom\internal\storage\storage_test.go G:\Projects\ProxyLoom\migrations\migrations.go G:\Projects\ProxyLoom\migrations\migrations_test.go G:\Projects\ProxyLoom\proxyloom-fixtures\certs.go G:\Projects\ProxyLoom\proxyloom-fixtures\certs_unix_test.go G:\Projects\ProxyLoom\proxyloom-fixtures\config.go G:\Projects\ProxyLoom\proxyloom-fixtures\main.go G:\Projects\ProxyLoom\proxyloom-fixtures\main_test.go G:\Projects\ProxyLoom\proxyloom-runner\healthcheck.go G:\Projects\ProxyLoom\proxyloom-runner\main.go G:\Projects\ProxyLoom\proxyloom-runner\main_test.go G:\Projects\ProxyLoom\proxyloom-server\healthcheck.go G:\Projects\ProxyLoom\proxyloom-server\main.go G:\Projects\ProxyLoom\proxyloom-server\main_test.go G:\Projects\ProxyLoom\schemas\schema.go
+> go mod verify
+all modules verified
+> go mod tidy -diff
+> go vet -mod=readonly ./...
+> go test -mod=readonly -race ./...
+?   	github.com/Runarry/ProxyLoom/compat	[no test files]
+ok  	github.com/Runarry/ProxyLoom/internal/adapter	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/mihomo	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/singbox	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/xray	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/capability	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/chainverify	21.987s
+ok  	github.com/Runarry/ProxyLoom/internal/compiler	12.401s
+ok  	github.com/Runarry/ProxyLoom/internal/config	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/ir	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/isolation	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/runner	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/runner/exec	19.702s
+ok  	github.com/Runarry/ProxyLoom/internal/server	(cached)
+ok  	github.com/Runarry/ProxyLoom/internal/storage	(cached)
+ok  	github.com/Runarry/ProxyLoom/migrations	(cached)
+ok  	github.com/Runarry/ProxyLoom/proxyloom-fixtures	(cached)
+ok  	github.com/Runarry/ProxyLoom/proxyloom-runner	(cached)
+ok  	github.com/Runarry/ProxyLoom/proxyloom-server	(cached)
+?   	github.com/Runarry/ProxyLoom/schemas	[no test files]
+PASS: engineering checks. Frontend checks run separately in CI.

@@ -2,4 +2,4 @@
 
 package exec
 
-func enableChildSubreaper() {}
+func prepareReaper() error { return nil }

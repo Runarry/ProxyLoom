@@ -1,0 +1,20 @@
+?   	github.com/Runarry/ProxyLoom/compat	[no test files]
+ok  	github.com/Runarry/ProxyLoom/internal/adapter	1.143s
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/mihomo	1.163s
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/singbox	1.124s
+ok  	github.com/Runarry/ProxyLoom/internal/adapter/xray	1.166s
+ok  	github.com/Runarry/ProxyLoom/internal/capability	1.232s
+ok  	github.com/Runarry/ProxyLoom/internal/chainverify	8.791s
+ok  	github.com/Runarry/ProxyLoom/internal/compiler	3.958s
+ok  	github.com/Runarry/ProxyLoom/internal/config	1.166s
+ok  	github.com/Runarry/ProxyLoom/internal/ir	1.922s
+ok  	github.com/Runarry/ProxyLoom/internal/isolation	1.912s
+ok  	github.com/Runarry/ProxyLoom/internal/runner	1.028s
+ok  	github.com/Runarry/ProxyLoom/internal/runner/exec	28.676s
+ok  	github.com/Runarry/ProxyLoom/internal/server	3.064s
+ok  	github.com/Runarry/ProxyLoom/internal/storage	1.020s
+ok  	github.com/Runarry/ProxyLoom/migrations	1.016s
+ok  	github.com/Runarry/ProxyLoom/proxyloom-fixtures	1.542s
+ok  	github.com/Runarry/ProxyLoom/proxyloom-runner	1.023s
+ok  	github.com/Runarry/ProxyLoom/proxyloom-server	1.027s
+?   	github.com/Runarry/ProxyLoom/schemas	[no test files]

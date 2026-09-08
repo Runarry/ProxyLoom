@@ -38,7 +38,9 @@ go test -mod=readonly -count=1 ./internal/isolation ./internal/capability ./prox
 
 Go regressions cover a single TLS write containing the Trojan header and application payload, fragmented writes, a payload larger than the read buffer, the existing chain/no-bypass checks, strict startup configuration and exported certificate trust. These are local-process checks.
 
-Container smoke is `node scripts/verify-isolation-compose.mjs`. It starts this Compose project, attaches a probe on the internal network, and checks shared-CA trust, A→B success, direct B rejection with the correct password (`forbidden_source`), and failure after stopping A. It does not mark any capability `verified` or complete G0.
+Container smoke is `node scripts/verify-isolation-compose.mjs`. It uses a unique `proxyloom-isolation-t028-*` project and a per-run output directory, prints its report path, attaches a probe on the internal network, and checks shared-CA trust, A→B success, direct B rejection with the correct password (`forbidden_source`), and failure after stopping A. It refuses existing containers (including stopped ones), networks or volumes for its project name, inventory failures, and overlap with the fixed test subnet. Only resources owned by that run are cleaned up, including after a partial startup failure; success is reported only after cleanup succeeds. It does not mark any capability `verified` or complete G0.
+
+Resource-ownership regressions run with `node --test scripts/isolation-compose.test.mjs` and are included in `node scripts/check.mjs`. They do not require Docker or delete real resources. Concurrent smoke runs still share the fixed subnet: an overlapping run must fail rather than reuse the first run's network.
 
 Real Xray/sing-box/Mihomo clients against these fixtures are `node scripts/verify-live-chain.mjs` (T-028). That runner installs the test CA into an ephemeral Linux container's system trust store; it does not disable TLS verification and does not inject a custom CA field into compiled configs.
 

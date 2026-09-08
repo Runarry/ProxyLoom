@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/Runarry/ProxyLoom/internal/ir"
@@ -95,8 +96,29 @@ type Catalog struct {
 
 func (c *Catalog) Builds() []Build {
 	out := make([]Build, len(c.builds))
-	copy(out, c.builds)
+	for i, build := range c.builds {
+		out[i] = build.clone()
+	}
 	return out
+}
+
+func (b Build) clone() Build {
+	b.Capabilities = slices.Clone(b.Capabilities)
+	for i, record := range b.Capabilities {
+		b.Capabilities[i] = record.clone()
+	}
+	return b
+}
+
+func (r Record) clone() Record {
+	r.FixtureIDs = slices.Clone(r.FixtureIDs)
+	r.Evidence = r.Evidence.clone()
+	return r
+}
+
+func (e EvidenceRef) clone() EvidenceRef {
+	e.FixtureIDs = slices.Clone(e.FixtureIDs)
+	return e
 }
 
 func (c *Catalog) Build(id ir.ID) (Build, error) {
@@ -104,13 +126,13 @@ func (c *Catalog) Build(id ir.ID) (Build, error) {
 	if !ok {
 		return Build{}, ErrUnknownBuild
 	}
-	return c.builds[index], nil
+	return c.builds[index].clone(), nil
 }
 
 func (c *Catalog) Lookup(family ir.CoreFamily, version, os, arch string) (Build, error) {
 	for _, build := range c.builds {
 		if build.Family == family && build.Version == version && build.OS == os && build.Arch == arch {
-			return build, nil
+			return build.clone(), nil
 		}
 	}
 	return Build{}, ErrUnknownBuild
@@ -134,13 +156,13 @@ func (c *Catalog) Authenticate(id ir.ID, actualSHA256, os, arch string) error {
 }
 
 func (c *Catalog) Capability(id ir.ID, key string) (Record, error) {
-	build, err := c.Build(id)
-	if err != nil {
-		return Record{}, err
+	index, ok := c.byID[id]
+	if !ok {
+		return Record{}, ErrUnknownBuild
 	}
-	for _, record := range build.Capabilities {
+	for _, record := range c.builds[index].Capabilities {
 		if record.Key == key {
-			return record, nil
+			return record.clone(), nil
 		}
 	}
 	return Record{}, ErrUnknownCapability

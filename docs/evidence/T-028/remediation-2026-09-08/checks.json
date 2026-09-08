@@ -1,0 +1,63 @@
+{
+  "recorded_at_utc": "2026-09-08T02:32:41.1256988Z",
+  "base_commit": "dfc0ced205a09d1b99df9ec5f362820f6ee5e43f",
+  "source_manifest_sha256": "955e15a3502bbb885834532272ed38bf49672d2267ea233f3065313dc4117936",
+  "check_image_manifest": "sha256:9c421f0c02be929a6cf60fa201233322a74d457d8427c6927cdae5d5d445ff3a",
+  "checks": [
+    {
+      "platform": "windows/amd64",
+      "command": "node scripts/check.mjs",
+      "result": "pass"
+    },
+    {
+      "platform": "windows/amd64",
+      "command": "pnpm --dir proxyloom-web build",
+      "result": "pass"
+    },
+    {
+      "platform": "linux/amd64",
+      "command": "docker build -f deploy/Dockerfile.check -t proxyloom-check:m0-remediation-20260908 .",
+      "result": "pass"
+    },
+    {
+      "platform": "linux/amd64",
+      "command": "docker run --rm --network none proxyloom-check:m0-remediation-20260908 go test -mod=readonly -race -count=1 ./...",
+      "result": "pass"
+    },
+    {
+      "families": [
+        "xray",
+        "sing-box",
+        "mihomo"
+      ],
+      "platform": "linux/amd64",
+      "command": "node scripts/verify-compile-exec.mjs",
+      "coverage": [
+        "handwritten_valid_invalid_start_stop",
+        "generated_valid_invalid_start_stop"
+      ],
+      "result": "pass"
+    },
+    {
+      "platform": "linux/amd64",
+      "project": "proxyloom-isolation-t028-f5fda4df-b5e0-4f30-98ff-24fb27f27f35",
+      "command": "node scripts/verify-isolation-compose.mjs",
+      "cleanup": "pass",
+      "result": "pass"
+    },
+    {
+      "matrix_seconds": 160.86,
+      "result": "pass",
+      "command": "node scripts/verify-live-chain.mjs",
+      "scenario_count": 24,
+      "platform": "linux/amd64",
+      "session_cleanup_pass_count": 51
+    },
+    {
+      "tests": 19,
+      "result": "pass",
+      "command": "node --test scripts/isolation-compose.test.mjs"
+    }
+  ],
+  "limitation": "In_review only; no arm64, original xanmod host, client import or G0 approval."
+}

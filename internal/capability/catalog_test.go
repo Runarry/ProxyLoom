@@ -1,12 +1,150 @@
 package capability
 
 import (
+	"reflect"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/Runarry/ProxyLoom/compat"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 )
+
+func TestCatalogReturnValuesAreIsolated(t *testing.T) {
+	catalog, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Parse an independent baseline so a corrupted Load cache cannot hide a failure.
+	baseline, err := parse(compat.CoresLockYAML, compat.CombinationsYAML)
+	if err != nil {
+		t.Fatal(err)
+	}
+	build := baseline.builds[0]
+	var key string
+	for _, record := range build.Capabilities {
+		if len(record.FixtureIDs) > 0 && len(record.Evidence.FixtureIDs) > 0 {
+			key = record.Key
+			break
+		}
+	}
+	if key == "" {
+		t.Fatal("lock has no capability with nested fixture IDs")
+	}
+	accessors := map[string]func() []Record{
+		"Builds": func() []Record { return catalog.Builds()[0].Capabilities },
+		"Build": func() []Record {
+			got, err := catalog.Build(build.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return got.Capabilities
+		},
+		"Lookup": func() []Record {
+			got, err := catalog.Lookup(build.Family, build.Version, build.OS, build.Arch)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return got.Capabilities
+		},
+		"Capability": func() []Record {
+			got, err := catalog.Capability(build.ID, key)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return []Record{got}
+		},
+	}
+	for name, accessor := range accessors {
+		t.Run(name, func(t *testing.T) {
+			otherValues := map[string][]Record{}
+			for otherName, otherAccessor := range accessors {
+				otherValues[otherName] = otherAccessor()
+			}
+			mutateRecords(accessor())
+			if !reflect.DeepEqual(catalog, baseline) {
+				t.Fatal("accessor mutation changed source catalog")
+			}
+			for otherName, otherAccessor := range accessors {
+				if !reflect.DeepEqual(otherValues[otherName], otherAccessor()) {
+					t.Fatalf("mutation changed earlier %s result", otherName)
+				}
+			}
+			fresh, err := Load()
+			if err != nil || !reflect.DeepEqual(fresh, baseline) {
+				t.Fatalf("accessor mutation changed Load cache: %v", err)
+			}
+		})
+	}
+	// Direct package-level mutation also exercises Load's own clone boundary.
+	mutateRecords(catalog.builds[0].Capabilities)
+	catalog.Combinations[0].State = Verified
+	delete(catalog.byID, build.ID)
+	fresh, err := Load()
+	if err != nil || !reflect.DeepEqual(fresh, baseline) {
+		t.Fatalf("Load instances share mutable catalog data: %v", err)
+	}
+}
+
+func mutateRecords(records []Record) {
+	for i := range records {
+		records[i].State = Verified
+		records[i].Evidence.State = Verified
+		for j := range records[i].FixtureIDs {
+			records[i].FixtureIDs[j] = "mutated"
+		}
+		for j := range records[i].Evidence.FixtureIDs {
+			records[i].Evidence.FixtureIDs[j] = "mutated-evidence"
+		}
+	}
+}
+
+func TestCatalogConcurrentReturnValueMutation(t *testing.T) {
+	catalog, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := catalog.Builds()
+	build := baseline[0]
+	var workers sync.WaitGroup
+	for range 8 {
+		workers.Go(func() {
+			for range 20 {
+				mutateRecords(catalog.Builds()[0].Capabilities)
+				got, err := catalog.Build(build.ID)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				mutateRecords(got.Capabilities)
+				got, err = catalog.Lookup(build.Family, build.Version, build.OS, build.Arch)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				mutateRecords(got.Capabilities)
+				for _, record := range build.Capabilities {
+					got, err := catalog.Capability(build.ID, record.Key)
+					if err != nil {
+						t.Error(err)
+						return
+					}
+					mutateRecords([]Record{got})
+				}
+				fresh, err := Load()
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				mutateRecords(fresh.builds[0].Capabilities)
+			}
+		})
+	}
+	workers.Wait()
+	if !reflect.DeepEqual(catalog.Builds(), baseline) {
+		t.Fatal("concurrent return value mutations changed source catalog")
+	}
+}
 
 func TestEmbeddedLockPinsSixUnverifiedBuilds(t *testing.T) {
 	catalog, err := Load()

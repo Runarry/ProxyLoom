@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net"
 	"os"
 	"runtime"
 	"testing"
@@ -87,25 +86,32 @@ type harness struct {
 	cmp      *compiler.Compiler
 	registry runnerexec.DiskRegistry
 	ca       *isolation.CertificateAuthority
+	scenario *scenarioResult
 }
 
 func (h *harness) run(name string, fn func()) {
 	h.t.Run(name, func(t *testing.T) {
-		prev := h.t
+		prev, prevScenario := h.t, h.scenario
 		h.t = t
-		defer func() { h.t = prev }()
-		failed := true
-		defer func() {
-			status := "pass"
-			observed := ""
-			if failed {
-				status = "fail"
-				observed = "test failed"
+		result := &scenarioResult{
+			Family: string(h.fam.Family), Scenario: name,
+			CoreBuildID: string(h.fam.BuildID), CoreBuildSHA256: h.fam.BuildSHA256,
+		}
+		h.scenario = result
+		t.Cleanup(func() { h.t, h.scenario = prev, prevScenario })
+		// Register before any resources: LIFO cleanup records the final failure
+		// state only after every session has been stopped and checked.
+		t.Cleanup(func() {
+			result.Status = "pass"
+			if t.Failed() {
+				result.Status = "fail"
+				result.Observed = "test or cleanup failed"
+			} else if t.Skipped() {
+				result.Status = "skip"
 			}
-			recordResult(string(h.fam.Family), name, status, "", observed)
-		}()
+			recordResult(*result)
+		})
 		fn()
-		failed = false
 	})
 }
 
@@ -124,18 +130,14 @@ func (h *harness) forwardChain() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
 	}
 	baseTarget, baseA, baseB := topo.TargetLog.Count("ok"), topo.A.Log.Count("ok"), topo.B.Log.Count("ok")
 	beforeSeq := topo.TargetLog.Seq()
-	body, err := session.probe("fwd-"+string(h.fam.Family), host, port)
+	body, err := h.probe(session, "fwd-"+string(h.fam.Family), host, port)
 	if err != nil {
 		t.Fatalf("probe: %v %s", err, body)
 	}
@@ -172,11 +174,7 @@ func (h *harness) bypassForbiddenSource() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
@@ -184,7 +182,8 @@ func (h *harness) bypassForbiddenSource() {
 	beforeOK := topo.TargetLog.Count("ok")
 	beforeSeq := topo.TargetLog.Seq()
 	beforeForbidden := topo.B.Log.Count("forbidden_source")
-	body, err := session.probe("bypass-"+string(h.fam.Family), host, port)
+	defer h.observeTraffic(topo, "bypass-forbidden-source")()
+	body, err := h.probe(session, "bypass-"+string(h.fam.Family), host, port)
 	if err == nil && probeOK(body) {
 		t.Fatalf("direct B succeeded: %s", body)
 	}
@@ -215,11 +214,7 @@ func (h *harness) directionSwapOriginal() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
@@ -228,8 +223,9 @@ func (h *harness) directionSwapOriginal() {
 	beforeForbidden := topo.B.Log.Count("forbidden_source")
 	var body []byte
 	deadline := time.Now().Add(5 * time.Second)
+	defer h.observeTraffic(topo, "direction-swap-original")()
 	for {
-		body, err = session.probe("swap-orig-"+string(h.fam.Family), host, port)
+		body, err = h.probe(session, "swap-orig-"+string(h.fam.Family), host, port)
 		if err == nil && probeOK(body) {
 			t.Fatal("B→A succeeded on the original A→B source restriction")
 		}
@@ -262,16 +258,12 @@ func (h *harness) directionSwapReverse() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := session.probe("swap-rev-"+string(h.fam.Family), host, port)
+	body, err := h.probe(session, "swap-rev-"+string(h.fam.Family), host, port)
 	if err != nil || !probeOK(body) {
 		t.Fatalf("controlled B→A failed: %v %s", err, body)
 	}
@@ -365,12 +357,8 @@ func (h *harness) runMember(input ir.FrozenInput, host string, port int, request
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
-	body, err := session.probe(requestID, host, port)
+	session := h.startCore(artifact.Bytes)
+	body, err := h.probe(session, requestID, host, port)
 	if err != nil || !probeOK(body) {
 		t.Fatalf("%s probe: %v body=%q", requestID, err, truncate(body, 400))
 	}
@@ -378,6 +366,7 @@ func (h *harness) runMember(input ir.FrozenInput, host string, port int, request
 	if isolation.RemoteIP(remote) != wantIP {
 		t.Fatalf("%s exit %s, want %s", requestID, remote, wantIP)
 	}
+	session.stop()
 }
 
 func (h *harness) failClosed() {
@@ -413,24 +402,21 @@ func (h *harness) failClosedPhase(stop func(*topo), requestID string, forbidBOK 
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := session.probe(requestID+"-warm", host, port)
+	body, err := h.probe(session, requestID+"-warm", host, port)
 	if err != nil || !probeOK(body) {
 		t.Fatalf("warmup probe: %v %s", err, body)
 	}
 	beforeOK := topo.TargetLog.Count("ok")
 	beforeSeq := topo.TargetLog.Seq()
 	beforeBOK := topo.B.Log.Count("ok")
+	defer h.observeTraffic(topo, requestID)()
 	stop(topo)
-	body, err = session.probe(requestID, host, port)
+	body, err = h.probe(session, requestID, host, port)
 	if err == nil && probeOK(body) {
 		t.Fatalf("%s succeeded after fault: %s", requestID, body)
 	}
@@ -443,6 +429,7 @@ func (h *harness) failClosedPhase(stop func(*topo), requestID string, forbidBOK 
 	if forbidBOK && topo.B.Log.Count("ok") != beforeBOK {
 		t.Fatalf("%s produced extra B ok after stopping A", requestID)
 	}
+	session.stop()
 }
 
 func (h *harness) lifecycle() {
@@ -460,37 +447,23 @@ func (h *harness) lifecycle() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := session.probe("life-ok-"+string(h.fam.Family), host, port)
+	body, err := h.probe(session, "life-ok-"+string(h.fam.Family), host, port)
 	if err != nil || !probeOK(body) {
-		session.stop()
 		t.Fatalf("lifecycle probe: %v %s", err, body)
 	}
 	dir := session.workspace.Directory
-	res := session.stop()
+	session.stop()
 	if session.leftoverWorkspace() {
 		t.Fatalf("workspace leftover %s", dir)
 	}
-	if _, err := net.DialTimeout("tcp", h.fam.Listen, 300*time.Millisecond); err == nil {
-		t.Fatal("core inbound still listening after stop")
-	}
-	_ = res
 
-	session, err = startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	res = session.stop()
-	if !res.result.Canceled {
-		t.Fatalf("expected cancel %+v err=%v", res.result, res.err)
-	}
+	session = h.startCore(artifact.Bytes)
+	session.stop()
 	if session.leftoverWorkspace() {
 		t.Fatal("canceled core left workspace")
 	}
@@ -499,19 +472,18 @@ func (h *harness) lifecycle() {
 	if err != nil {
 		t.Fatal(err)
 	}
+	entry := h.configEvidence(artifact.Bytes, expectTimedOut)
+	var timeoutResult runResult
+	finishTimeout := observeCleanup(t, entry, func() runResult {
+		return finishCore(timeoutResult, ws, h.fam.Listen)
+	})
 	spec, err := runSpec(h.fam, ws)
 	if err != nil {
-		_ = ws.Close()
+		timeoutResult.err = err
 		t.Fatal(err)
 	}
-	result, err := runnerexec.Run(context.Background(), h.registry, spec, ws, runnerexec.Options{Timeout: 400 * time.Millisecond, Redact: redactFor(h.fam)})
-	_ = ws.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !result.TimedOut {
-		t.Fatalf("expected timeout %+v", result)
-	}
+	timeoutResult.result, timeoutResult.err = runnerexec.Run(context.Background(), h.registry, spec, ws, runnerexec.Options{Timeout: 400 * time.Millisecond, Redact: redactFor(h.fam)})
+	finishTimeout()
 	if _, err := os.Stat(ws.Directory); err == nil {
 		t.Fatal("timeout left workspace")
 	}
@@ -520,28 +492,26 @@ func (h *harness) lifecycle() {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer topo2.close()
 	input2, err := freezeChain(h.catalog, topo2.A.endpoint(), topo2.B.endpoint(), idNodeA, idNodeB, idChainAB, "A → B")
 	if err != nil {
-		topo2.close()
 		t.Fatal(err)
 	}
 	art2, _, err := compileFamily(h.cmp, input2, h.fam)
 	if err != nil {
-		topo2.close()
 		t.Fatal(err)
 	}
-	session, err = startCore(h.registry, h.fam, art2.Bytes)
-	if err != nil {
-		topo2.close()
-		t.Fatal(err)
-	}
+	session = h.startCore(art2.Bytes)
 	topo2.close()
-	_, _ = session.probe("life-fail-"+string(h.fam.Family), ipTarget.String(), 9)
-	res = session.stop()
+	defer h.observeTraffic(topo2, "lifecycle-failed-probe")()
+	body, err = h.probe(session, "life-fail-"+string(h.fam.Family), ipTarget.String(), 9)
+	if err == nil && probeOK(body) {
+		t.Fatal("lifecycle probe succeeded after closing the topology")
+	}
+	session.stop()
 	if session.leftoverWorkspace() {
 		t.Fatal("failure path left workspace")
 	}
-	_ = res
 }
 
 func (h *harness) observationDetectsBypass() {
@@ -559,16 +529,12 @@ func (h *harness) observationDetectsBypass() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := startCore(h.registry, h.fam, artifact.Bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer session.stop()
+	session := h.startCore(artifact.Bytes)
 	host, port, err := topo.targetHostPort()
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := session.probe("obs-bypass-"+string(h.fam.Family), host, port)
+	body, err := h.probe(session, "obs-bypass-"+string(h.fam.Family), host, port)
 	if err != nil || !probeOK(body) {
 		t.Fatalf("controlled bypass (open B) should succeed so observation can see it: %v %s", err, body)
 	}

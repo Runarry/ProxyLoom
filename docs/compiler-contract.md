@@ -29,6 +29,8 @@
 
 ## 能力
 
+能力目录的 `Load`、`Builds`、`Build`、`Lookup`、`Capability` 返回独立副本，含能力记录和嵌套证据列表。调用方修改返回对象不改变锁定目录或后续加载结果；该内存隔离修复不改变编译字节或能力状态。
+
 未知构建、摘要不符、格式/版本不符、P0 列表外的组合、`unsupported`（如 sing-box `policy.round_robin`）均失败且无 Artifact。锁定但 `unverified` 的组合允许原生产物，Plan 记录 `capability_state: unverified` 与 `CAPABILITY_UNVERIFIED` 信息诊断。`adapter_version` 为 `0.1.0-m0-native` 时 **不得**写出 `verified`。原生配置检查通过不是发布放行，也不等于链路或客户端验证。
 
 ## Golden 与内核检查

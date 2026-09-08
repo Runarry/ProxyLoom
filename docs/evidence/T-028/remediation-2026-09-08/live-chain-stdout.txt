@@ -1,0 +1,86 @@
+=== RUN   TestFreezeCompileKeepsVerifyTagsAndNodes
+--- PASS: TestFreezeCompileKeepsVerifyTagsAndNodes (0.05s)
+=== RUN   TestSocksConnectRequestUsesIPv4
+--- PASS: TestSocksConnectRequestUsesIPv4 (0.00s)
+=== RUN   TestCoreSessionStopIsIdempotent
+--- PASS: TestCoreSessionStopIsIdempotent (0.00s)
+=== RUN   TestCoreSessionStopJoinsRunWorkspaceAndInboundErrors
+--- PASS: TestCoreSessionStopJoinsRunWorkspaceAndInboundErrors (5.01s)
+=== RUN   TestLifecycleCleanupControlsExitAndReport
+=== RUN   TestLifecycleCleanupControlsExitAndReport/canceled
+=== RUN   TestLifecycleCleanupControlsExitAndReport/timed_out
+=== RUN   TestLifecycleCleanupControlsExitAndReport/canceled_cleanup_error
+=== RUN   TestLifecycleCleanupControlsExitAndReport/timed_out_cleanup_error
+=== RUN   TestLifecycleCleanupControlsExitAndReport/workspace_cleanup_error
+=== RUN   TestLifecycleCleanupControlsExitAndReport/unexpected_timeout
+=== RUN   TestLifecycleCleanupControlsExitAndReport/fatal_after_start
+=== RUN   TestLifecycleCleanupControlsExitAndReport/nonfatal_test_error
+--- PASS: TestLifecycleCleanupControlsExitAndReport (0.18s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/canceled (0.02s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/timed_out (0.02s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/canceled_cleanup_error (0.02s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/timed_out_cleanup_error (0.02s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/workspace_cleanup_error (0.03s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/unexpected_timeout (0.03s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/fatal_after_start (0.02s)
+    --- PASS: TestLifecycleCleanupControlsExitAndReport/nonfatal_test_error (0.02s)
+=== RUN   TestLifecycleReportChild
+--- PASS: TestLifecycleReportChild (0.00s)
+=== RUN   TestLiveChainMatrix
+=== RUN   TestLiveChainMatrix/xray
+=== RUN   TestLiveChainMatrix/xray/forward_chain
+=== RUN   TestLiveChainMatrix/xray/bypass_forbidden_source
+=== RUN   TestLiveChainMatrix/xray/direction_swap_original
+=== RUN   TestLiveChainMatrix/xray/direction_swap_reverse
+=== RUN   TestLiveChainMatrix/xray/node_reuse
+=== RUN   TestLiveChainMatrix/xray/fail_closed
+=== RUN   TestLiveChainMatrix/xray/lifecycle
+=== RUN   TestLiveChainMatrix/xray/observation_detects_bypass
+=== RUN   TestLiveChainMatrix/sing-box
+=== RUN   TestLiveChainMatrix/sing-box/forward_chain
+=== RUN   TestLiveChainMatrix/sing-box/bypass_forbidden_source
+=== RUN   TestLiveChainMatrix/sing-box/direction_swap_original
+=== RUN   TestLiveChainMatrix/sing-box/direction_swap_reverse
+=== RUN   TestLiveChainMatrix/sing-box/node_reuse
+=== RUN   TestLiveChainMatrix/sing-box/fail_closed
+=== RUN   TestLiveChainMatrix/sing-box/lifecycle
+=== RUN   TestLiveChainMatrix/sing-box/observation_detects_bypass
+=== RUN   TestLiveChainMatrix/mihomo
+=== RUN   TestLiveChainMatrix/mihomo/forward_chain
+=== RUN   TestLiveChainMatrix/mihomo/bypass_forbidden_source
+=== RUN   TestLiveChainMatrix/mihomo/direction_swap_original
+=== RUN   TestLiveChainMatrix/mihomo/direction_swap_reverse
+=== RUN   TestLiveChainMatrix/mihomo/node_reuse
+=== RUN   TestLiveChainMatrix/mihomo/fail_closed
+=== RUN   TestLiveChainMatrix/mihomo/lifecycle
+=== RUN   TestLiveChainMatrix/mihomo/observation_detects_bypass
+--- PASS: TestLiveChainMatrix (160.86s)
+    --- PASS: TestLiveChainMatrix/xray (61.54s)
+        --- PASS: TestLiveChainMatrix/xray/forward_chain (3.47s)
+        --- PASS: TestLiveChainMatrix/xray/bypass_forbidden_source (5.00s)
+        --- PASS: TestLiveChainMatrix/xray/direction_swap_original (6.16s)
+        --- PASS: TestLiveChainMatrix/xray/direction_swap_reverse (2.75s)
+        --- PASS: TestLiveChainMatrix/xray/node_reuse (16.79s)
+        --- PASS: TestLiveChainMatrix/xray/fail_closed (15.66s)
+        --- PASS: TestLiveChainMatrix/xray/lifecycle (9.30s)
+        --- PASS: TestLiveChainMatrix/xray/observation_detects_bypass (2.40s)
+    --- PASS: TestLiveChainMatrix/sing-box (48.30s)
+        --- PASS: TestLiveChainMatrix/sing-box/forward_chain (2.80s)
+        --- PASS: TestLiveChainMatrix/sing-box/bypass_forbidden_source (2.68s)
+        --- PASS: TestLiveChainMatrix/sing-box/direction_swap_original (2.78s)
+        --- PASS: TestLiveChainMatrix/sing-box/direction_swap_reverse (2.78s)
+        --- PASS: TestLiveChainMatrix/sing-box/node_reuse (15.49s)
+        --- PASS: TestLiveChainMatrix/sing-box/fail_closed (8.50s)
+        --- PASS: TestLiveChainMatrix/sing-box/lifecycle (10.66s)
+        --- PASS: TestLiveChainMatrix/sing-box/observation_detects_bypass (2.61s)
+    --- PASS: TestLiveChainMatrix/mihomo (47.45s)
+        --- PASS: TestLiveChainMatrix/mihomo/forward_chain (1.91s)
+        --- PASS: TestLiveChainMatrix/mihomo/bypass_forbidden_source (4.80s)
+        --- PASS: TestLiveChainMatrix/mihomo/direction_swap_original (4.67s)
+        --- PASS: TestLiveChainMatrix/mihomo/direction_swap_reverse (1.79s)
+        --- PASS: TestLiveChainMatrix/mihomo/node_reuse (10.10s)
+        --- PASS: TestLiveChainMatrix/mihomo/fail_closed (12.75s)
+        --- PASS: TestLiveChainMatrix/mihomo/lifecycle (9.38s)
+        --- PASS: TestLiveChainMatrix/mihomo/observation_detects_bypass (2.04s)
+PASS
+

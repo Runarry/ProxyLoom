@@ -244,7 +244,7 @@ func sha256Digest(value string) bool {
 
 func (c *Catalog) clone() *Catalog {
 	next := *c
-	next.builds = append([]Build(nil), c.builds...)
+	next.builds = c.Builds()
 	next.Combinations = append([]Combination(nil), c.Combinations...)
 	next.byID = make(map[ir.ID]int, len(c.byID))
 	for id, index := range c.byID {
