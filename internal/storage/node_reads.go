@@ -16,6 +16,14 @@ import (
 var _ catalog.AuditedTx = (*catalogTx)(nil)
 
 func (t *catalogTx) Head(ctx context.Context, id ir.ID) (ir.Resource, error) {
+	return t.readHead(ctx, id, true)
+}
+
+func (t *catalogTx) Probe(ctx context.Context, id ir.ID) (ir.Resource, error) {
+	return t.readHead(ctx, id, false)
+}
+
+func (t *catalogTx) readHead(ctx context.Context, id ir.ID, latchMissing bool) (ir.Resource, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if !t.active {
@@ -34,8 +42,11 @@ func (t *catalogTx) Head(ctx context.Context, id ir.ID) (ir.Resource, error) {
 		resource, err = t.store.open(dbgen.GetResourceRevisionRow(row))
 	}
 	if err != nil {
-		t.failed = catalogError(err)
-		return ir.Resource{}, t.failed
+		mapped := catalogError(err)
+		if latchMissing || (mapped != catalog.ErrNotFound && mapped != catalog.ErrInvalidInput) {
+			t.failed = mapped
+		}
+		return ir.Resource{}, mapped
 	}
 	return resource, nil
 }

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-08 M1输入窗口工程验收收口，累计21项done；T008仍in_review（基点远端CI通过，强制规则401未核实），T048节点／本地导入切片通过但整项in_progress，其余37项not_started。统一质量、35项实库、Linux race、32项Compose、真实三内核mTLS及浏览器证据已归档。G1未关闭，能力unverified；本工作树未提交，实际人日未采集。",
+  "status_note": "2026-09-09 M1来源基座与两跳链窗口：T012/T013/T017 in_review；累计21项done，T008仍in_review，T048 in_progress，其余34项not_started。工程检查、秘密扫描、契约与真实PostgreSQL foundation通过。G1未关闭，能力unverified。",
   "tasks": [
     {
       "id": "T-001",
@@ -233,7 +233,8 @@
         "T-011"
       ],
       "acceptance": "改名不破坏引用；同名异节点不静默合并；无可靠匹配的认证变更进入冲突处理。\nAC-04、AC-05",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-012/acceptance.md"
     },
     {
       "id": "T-013",
@@ -252,7 +253,8 @@
         "T-007"
       ],
       "acceptance": "私网、IPv4 映射 IPv6、重绑定及恶意重定向受阻；保留 Host／SNI；不继承环境代理。\nAC-20；SafeFetcher 专项",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-013/acceptance.md"
     },
     {
       "id": "T-014",
@@ -327,7 +329,8 @@
         "T-011"
       ],
       "acceptance": "A→B 与 B→A 独立；A→A、三跳、策略组作链跳拒绝；原节点修订不被链编辑修改。\nAC-07、AC-08",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-017/acceptance.md"
     },
     {
       "id": "T-018",

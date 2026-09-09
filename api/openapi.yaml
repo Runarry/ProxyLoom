@@ -1672,6 +1672,7 @@ components:
       type: "object"
       additionalProperties: false
       required: ["name", "hops", "failure_policy"]
+      description: "Create two distinct concrete node hops. The last hop is the exit. Editing a chain never rewrites the hop nodes."
       properties:
         name: { $ref: "#/components/schemas/Name" }
         hops: { $ref: "#/components/schemas/ChainHops" }
@@ -5215,7 +5216,7 @@ paths:
   /api/v1/chains:
     get:
       operationId: listChains
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List two-node chain resources
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -5225,7 +5226,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createChain
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create two distinct concrete node hops with the last hop as exit
       description: References follow node heads in the editing state. Does not modify either node or permit policy-group hops, fixed old revisions, or a direct fallback.
       requestBody:
@@ -5245,7 +5246,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getChain
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read a chain revision
       responses:
         '200': {$ref: '#/components/responses/ChainResponse'}
@@ -5255,7 +5256,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateChain
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Replace typed chain fields in a new immutable revision
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5276,7 +5277,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteChain
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete a chain while preserving revisions and references
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:

@@ -30,25 +30,27 @@ const (
 )
 
 const (
-	InvalidFormat   ir.DiagnosticCode = "IMPORT_INVALID_FORMAT"
-	EmptyInput      ir.DiagnosticCode = "IMPORT_EMPTY_INPUT"
-	InputTooLarge   ir.DiagnosticCode = "IMPORT_INPUT_TOO_LARGE"
-	DecodedTooLarge ir.DiagnosticCode = "IMPORT_DECODED_TOO_LARGE"
-	TooManyEntries  ir.DiagnosticCode = "IMPORT_TOO_MANY_ENTRIES"
-	URITooLarge     ir.DiagnosticCode = "IMPORT_URI_TOO_LARGE"
-	TooManyLayers   ir.DiagnosticCode = "IMPORT_TOO_MANY_BASE64_LAYERS"
-	InvalidBase64   ir.DiagnosticCode = "IMPORT_INVALID_BASE64"
-	InvalidUTF8     ir.DiagnosticCode = "IMPORT_INVALID_UTF8"
-	NativeConfig    ir.DiagnosticCode = "IMPORT_NATIVE_CONFIG_UNSUPPORTED"
-	InvalidURI      ir.DiagnosticCode = "IMPORT_INVALID_URI"
-	UnknownScheme   ir.DiagnosticCode = "IMPORT_UNKNOWN_SCHEME"
-	DuplicateField  ir.DiagnosticCode = "IMPORT_DUPLICATE_FIELD"
-	RequiredField   ir.DiagnosticCode = "IMPORT_REQUIRED_FIELD"
-	InvalidValue    ir.DiagnosticCode = "IMPORT_INVALID_VALUE"
-	Unsupported     ir.DiagnosticCode = "IMPORT_UNSUPPORTED_PARAMETER"
-	UnknownMetadata ir.DiagnosticCode = "IMPORT_UNKNOWN_METADATA"
-	UnsafeTLS       ir.DiagnosticCode = "IMPORT_UNSAFE_TLS"
-	Ambiguous       ir.DiagnosticCode = "IMPORT_AMBIGUOUS_PARAMETER"
+	InvalidFormat      ir.DiagnosticCode = "IMPORT_INVALID_FORMAT"
+	EmptyInput         ir.DiagnosticCode = "IMPORT_EMPTY_INPUT"
+	InputTooLarge      ir.DiagnosticCode = "IMPORT_INPUT_TOO_LARGE"
+	DecodedTooLarge    ir.DiagnosticCode = "IMPORT_DECODED_TOO_LARGE"
+	TooManyEntries     ir.DiagnosticCode = "IMPORT_TOO_MANY_ENTRIES"
+	URITooLarge        ir.DiagnosticCode = "IMPORT_URI_TOO_LARGE"
+	TooManyLayers      ir.DiagnosticCode = "IMPORT_TOO_MANY_BASE64_LAYERS"
+	InvalidBase64      ir.DiagnosticCode = "IMPORT_INVALID_BASE64"
+	InvalidUTF8        ir.DiagnosticCode = "IMPORT_INVALID_UTF8"
+	NativeConfig       ir.DiagnosticCode = "IMPORT_NATIVE_CONFIG_UNSUPPORTED"
+	InvalidURI         ir.DiagnosticCode = "IMPORT_INVALID_URI"
+	UnknownScheme      ir.DiagnosticCode = "IMPORT_UNKNOWN_SCHEME"
+	DuplicateField     ir.DiagnosticCode = "IMPORT_DUPLICATE_FIELD"
+	RequiredField      ir.DiagnosticCode = "IMPORT_REQUIRED_FIELD"
+	InvalidValue       ir.DiagnosticCode = "IMPORT_INVALID_VALUE"
+	Unsupported        ir.DiagnosticCode = "IMPORT_UNSUPPORTED_PARAMETER"
+	UnknownMetadata    ir.DiagnosticCode = "IMPORT_UNKNOWN_METADATA"
+	UnsafeTLS          ir.DiagnosticCode = "IMPORT_UNSAFE_TLS"
+	Ambiguous          ir.DiagnosticCode = "IMPORT_AMBIGUOUS_PARAMETER"
+	IdentitySuggestion ir.DiagnosticCode = "IMPORT_IDENTITY_SUGGESTION"
+	IdentityAmbiguous  ir.DiagnosticCode = "IMPORT_IDENTITY_AMBIGUOUS"
 )
 
 // Metadata contains isolated, potentially sensitive upstream fields. Values
@@ -133,6 +135,10 @@ func issue(code ir.DiagnosticCode, path string) ir.Diagnostic {
 		message = "Imported links cannot disable certificate verification."
 	case Ambiguous:
 		message = "Conflicting or ambiguous connection parameters are forbidden."
+	case IdentitySuggestion:
+		message = "A similar existing node is a suggestion only and was not merged."
+	case IdentityAmbiguous:
+		message = "Several existing nodes could match; choose a target explicitly."
 	}
 	return ir.Diagnostic{Code: code, Severity: ir.SeverityError, FieldPath: path, Message: message}
 }

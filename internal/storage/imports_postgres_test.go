@@ -13,6 +13,7 @@ import (
 
 	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/Runarry/ProxyLoom/internal/catalog"
+	"github.com/Runarry/ProxyLoom/internal/importparse"
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
@@ -248,6 +249,32 @@ func TestPostgresImportsConflictRollbackDuplicateHintsAndValidSelection(t *testi
 	}
 	if importCount(t, env, "SELECT count(*) FROM public.resources") != 2 {
 		t.Fatal("duplicate preview changed catalog")
+	}
+}
+
+func TestPostgresImportSuggestionDoesNotAutoMerge(t *testing.T) {
+	env, store, actor := newImportPostgres(t)
+	existing := syntheticNode()
+	existing.Auth = &ir.PasswordAuth{Kind: ir.AuthPassword, Password: ir.Secret("SYNTHETIC_OTHER_PASSWORD")}
+	mustCreate(t, env, catalog.CreateInput{Name: "Edge", Tags: []string{}, Enabled: true, Payload: existing})
+	text := []byte("trojan://" + postgresTestSecret + "@synthetic.example.invalid:443?alpn=h2%2Chttp%2F1.1#Edge\n")
+	accepted := createImportTest(t, env, store, actor, text)
+	parseImportTest(t, env, store)
+	b, err := store.Get(env.ctx, env.scope, accepted.BatchID, imports.PageOptions{Limit: 200})
+	if err != nil || len(b.Candidates) != 1 {
+		t.Fatal("suggestion preview unavailable")
+	}
+	if b.Candidates[0].State != "new" || b.Candidates[0].ExistingResourceID != "" || b.Candidates[0].MatchMethod != "" {
+		t.Fatalf("auth change was merged as identity: %#v", b.Candidates[0])
+	}
+	found := false
+	for _, diagnostic := range b.Candidates[0].Diagnostics {
+		if diagnostic.Code == importparse.IdentitySuggestion {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("similar node did not produce a suggestion diagnostic")
 	}
 }
 

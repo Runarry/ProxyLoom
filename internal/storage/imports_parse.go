@@ -11,6 +11,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/origin"
 	"github.com/Runarry/ProxyLoom/internal/runnerprotocol"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
@@ -21,11 +22,6 @@ type preparedImportCandidate struct {
 	id                 ir.ID
 	index              int
 	envelope, wrapping []byte
-}
-type importMatch struct {
-	id       ir.ID
-	revision int64
-	multiple bool
 }
 
 // HandleParse performs decoding and encryption before opening the completion
@@ -76,7 +72,7 @@ func (s *Imports) HandleParse(ctx context.Context, lease jobs.Lease) (jobs.Resul
 		if len(parsed.Candidates) > imports.MaxCandidates {
 			return jobs.Result{}, nil, imports.ErrInvalidInput
 		}
-		matches, err := s.importMatches(ctx, lease.Job.ScopeID)
+		records, err := s.importRecords(ctx, lease.Job.ScopeID)
 		if err != nil {
 			return jobs.Result{}, nil, err
 		}
@@ -107,16 +103,8 @@ func (s *Imports) HandleParse(ctx context.Context, lease jobs.Lease) (jobs.Resul
 				if err != nil {
 					return jobs.Result{}, nil, err
 				}
-				if match, ok := matches[fingerprint]; ok {
-					candidate.State = "matched"
-					candidate.MatchMethod = "exact_fingerprint"
-					candidate.ExistingID = match.id
-					candidate.ExistingRevision = match.revision
-					if match.multiple {
-						candidate.State = "conflict"
-						candidate.Diagnostics = append(candidate.Diagnostics, ir.Diagnostic{Code: "IMPORT_DUPLICATE_EXISTING", Severity: ir.SeverityWarning, FieldPath: "/node", Message: "Several existing nodes share this connection; choose a target explicitly."})
-					}
-				}
+				s.applyOriginMatch(&candidate, origin.Item{ExternalKey: origin.ExternalKeyFromMetadata(c.Metadata), Fingerprint: fingerprint,
+					Name: name, Protocol: c.Node.Protocol, Host: c.Node.Endpoint.Host, Port: c.Node.Endpoint.Port}, records)
 				if seen[fingerprint] {
 					candidate.State = "conflict"
 					candidate.Diagnostics = append(candidate.Diagnostics, ir.Diagnostic{Code: "IMPORT_DUPLICATE_INPUT", Severity: ir.SeverityWarning, FieldPath: "/node", Message: "Another candidate has the same connection. Confirm duplicate creation or skip it."})
@@ -186,7 +174,33 @@ func (s *Imports) connectionFingerprint(node ir.Node) (string, error) {
 	return hex.EncodeToString(digest), nil
 }
 
-func (s *Imports) importMatches(ctx context.Context, scope ir.ID) (map[string]importMatch, error) {
+func (s *Imports) applyOriginMatch(candidate *importCandidate, item origin.Item, records []origin.Record) {
+	decision, ok := origin.Match(item, records)
+	if !ok {
+		return
+	}
+	switch decision.Kind {
+	case origin.Identity, origin.Duplicate:
+		candidate.MatchMethod = string(decision.Method)
+		if decision.Ambiguous {
+			candidate.State = "conflict"
+			diagnostic := ir.Diagnostic{Code: "IMPORT_DUPLICATE_EXISTING", Severity: ir.SeverityWarning, FieldPath: "/node", Message: "Several existing nodes share this connection; choose a target explicitly."}
+			if decision.Kind == origin.Identity {
+				diagnostic.Code = importparse.IdentityAmbiguous
+				diagnostic.Message = "Several existing nodes could match; choose a target explicitly."
+			}
+			candidate.Diagnostics = append(candidate.Diagnostics, diagnostic)
+			return
+		}
+		candidate.State = "matched"
+		candidate.ExistingID = decision.NodeID
+		candidate.ExistingRevision = decision.Revision
+	case origin.Suggest:
+		candidate.Diagnostics = append(candidate.Diagnostics, ir.Diagnostic{Code: importparse.IdentitySuggestion, Severity: ir.SeverityWarning, FieldPath: "/node", Message: "A similar existing node is a suggestion only and was not merged."})
+	}
+}
+
+func (s *Imports) importRecords(ctx context.Context, scope ir.ID) ([]origin.Record, error) {
 	rows, err := s.catalog.pool.Query(ctx, `SELECT r.scope_id,r.resource_id,r.revision,r.schema_version,r.security_epoch,r.envelope,r.content_hmac,w.wrapping,w.wrap_version
 		FROM public.resources h JOIN public.resource_revisions r ON r.scope_id=h.scope_id AND r.resource_id=h.id AND r.revision=h.head_revision
 		JOIN public.resource_revision_wrappings w ON w.scope_id=r.scope_id AND w.resource_id=r.resource_id AND w.revision=r.revision
@@ -195,7 +209,7 @@ func (s *Imports) importMatches(ctx context.Context, scope ir.ID) (map[string]im
 		return nil, importError(err)
 	}
 	defer rows.Close()
-	matches := map[string]importMatch{}
+	records := []origin.Record{}
 	for rows.Next() {
 		var row dbgen.GetResourceRevisionRow
 		if err := rows.Scan(&row.ScopeID, &row.ResourceID, &row.Revision, &row.SchemaVersion, &row.SecurityEpoch, &row.Envelope, &row.ContentHmac, &row.Wrapping, &row.WrapVersion); err != nil {
@@ -213,12 +227,8 @@ func (s *Imports) importMatches(ctx context.Context, scope ir.ID) (map[string]im
 		if err != nil {
 			return nil, err
 		}
-		if existing, ok := matches[fingerprint]; ok {
-			existing.multiple = true
-			matches[fingerprint] = existing
-		} else {
-			matches[fingerprint] = importMatch{id: r.Metadata.ResourceID, revision: r.Metadata.Revision}
-		}
+		records = append(records, origin.Record{NodeID: r.Metadata.ResourceID, Revision: r.Metadata.Revision, Fingerprint: fingerprint,
+			Name: r.Metadata.Name, Protocol: node.Protocol, Host: node.Endpoint.Host, Port: node.Endpoint.Port})
 	}
-	return matches, importError(rows.Err())
+	return records, importError(rows.Err())
 }

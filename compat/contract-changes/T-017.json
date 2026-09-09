@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "task": "T-017",
+  "summary": "Mount two-hop chain management routes, mark the existing OpenAPI operations implemented, and append chain actions to the resource audit allowlist without rewriting earlier identity or node audit migrations.",
+  "documents": [
+    "docs/adr/0010-m1-source-and-chain.md",
+    "docs/m1-source-chain-contract.md"
+  ],
+  "fixtures": [
+    "fixtures/api/implemented-routes.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/querier.go",
+    "internal/storage/generated/chains.sql.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "65913fa48303a0a49d0c8be9fe96820165f9c18431b1af1a2424cf566afb3151",
+      "after_sha256": "1fc734e4d3c10e12e30c476a280c9c1ce12981cec0294322b86b476e9e05da7e",
+      "changes": [
+        {
+          "pointer": "/components/schemas/ChainCreateRequest/description",
+          "before_sha256": null,
+          "after_sha256": "a29b09a31bb3350987c196c2d06fa1266cc34efd13a5b1ce3fa639ef21c5a9cf"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1chains/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1chains/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1chains~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1chains~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1chains~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000008_chain_audit.up.sql",
+      "before_sha256": null,
+      "after_sha256": "76912f1991a47220f2d983c9f91ea8adddf186fc1784be009c06bf4907c0ac70",
+      "changes": []
+    }
+  ]
+}

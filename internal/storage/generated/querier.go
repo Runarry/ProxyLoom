@@ -46,6 +46,7 @@ type Querier interface {
 	InsertResourceRevision(ctx context.Context, arg InsertResourceRevisionParams) error
 	InsertResourceTag(ctx context.Context, arg InsertResourceTagParams) error
 	InsertResourceWrapping(ctx context.Context, arg InsertResourceWrappingParams) error
+	ListChainCandidates(ctx context.Context, arg ListChainCandidatesParams) ([]ListChainCandidatesRow, error)
 	ListNodeCandidates(ctx context.Context, arg ListNodeCandidatesParams) ([]ListNodeCandidatesRow, error)
 	ListNodeReferences(ctx context.Context, arg ListNodeReferencesParams) ([]ListNodeReferencesRow, error)
 	ListNodeRevisions(ctx context.Context, arg ListNodeRevisionsParams) ([]ListNodeRevisionsRow, error)

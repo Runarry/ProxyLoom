@@ -1299,6 +1299,7 @@ export interface components {
             hops: components["schemas"]["ChainHops"];
             schema_version: components["schemas"]["SchemaVersion"];
         };
+        /** @description Create two distinct concrete node hops. The last hop is the exit. Editing a chain never rewrites the hop nodes. */
         ChainCreateRequest: {
             enabled?: boolean;
             /** @constant */

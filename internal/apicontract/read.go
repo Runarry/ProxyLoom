@@ -202,3 +202,63 @@ func NewChainReadResponse(requestID string, resource ir.Resource) (ChainReadResp
 	}
 	return ChainReadResponse{RequestID: safeRequestID(requestID), Data: ChainResource{Metadata: metadata(resource.Metadata), Chain: ChainRead{SchemaVersion: chain.SchemaVersion, Hops: slices.Clone(chain.Hops), FailurePolicy: chain.FailurePolicy}}}, nil
 }
+
+type ChainListResponse struct {
+	RequestID string          `json:"request_id"`
+	Data      []ChainResource `json:"data"`
+	Page      PageInfo        `json:"page"`
+}
+
+func NewChainListResponse(requestID string, items []ir.Resource, page PageInfo) (ChainListResponse, error) {
+	response := ChainListResponse{RequestID: safeRequestID(requestID), Data: make([]ChainResource, 0, len(items)), Page: page}
+	for _, resource := range items {
+		read, err := NewChainReadResponse(requestID, resource)
+		if err != nil {
+			return ChainListResponse{}, err
+		}
+		response.Data = append(response.Data, read.Data)
+	}
+	return response, nil
+}
+
+type ChainPatchRequest struct {
+	Name          *string           `json:"name,omitempty"`
+	Tags          *[]string         `json:"tags,omitempty"`
+	Enabled       *bool             `json:"enabled,omitempty"`
+	Hops          *[]ir.NodeRef     `json:"hops,omitempty"`
+	FailurePolicy *ir.FailurePolicy `json:"failure_policy,omitempty"`
+}
+
+func (request ChainPatchRequest) Merge(old ir.Resource) (catalog.UpdateInput, error) {
+	if err := ValidateDTO("ChainPatchRequest", request); err != nil {
+		return catalog.UpdateInput{}, err
+	}
+	if old.Validate() != nil {
+		return catalog.UpdateInput{}, NewError(InternalError)
+	}
+	chain, ok := old.Payload.(*ir.Chain)
+	if !ok {
+		return catalog.UpdateInput{}, NewError(ValidationFailed)
+	}
+	next := ir.Chain{SchemaVersion: chain.SchemaVersion, Hops: slices.Clone(chain.Hops), FailurePolicy: chain.FailurePolicy}
+	if request.Hops != nil {
+		next.Hops = slices.Clone(*request.Hops)
+	}
+	if request.FailurePolicy != nil {
+		next.FailurePolicy = *request.FailurePolicy
+	}
+	if err := next.Validate(); err != nil {
+		return catalog.UpdateInput{}, AsError(err)
+	}
+	input := catalog.UpdateInput{Name: old.Metadata.Name, Tags: slices.Clone(old.Metadata.Tags), Enabled: old.Metadata.Enabled, Payload: &next}
+	if request.Name != nil {
+		input.Name = *request.Name
+	}
+	if request.Tags != nil {
+		input.Tags = slices.Clone(*request.Tags)
+	}
+	if request.Enabled != nil {
+		input.Enabled = *request.Enabled
+	}
+	return input, nil
+}

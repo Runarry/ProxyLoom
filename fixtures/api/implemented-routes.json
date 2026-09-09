@@ -38,6 +38,15 @@
   "/api/v1/nodes/{id}/reveal": [
     "post"
   ],
+  "/api/v1/chains": [
+    "get",
+    "post"
+  ],
+  "/api/v1/chains/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
   "/api/v1/imports": [
     "post"
   ],

@@ -12,6 +12,9 @@ import (
 type AuditedTx interface {
 	Tx
 	Head(context.Context, ir.ID) (ir.Resource, error)
+	// Probe reads a head revision without latching not-found. Callers that
+	// validate several optional targets must not use Head for missing IDs.
+	Probe(context.Context, ir.ID) (ir.Resource, error)
 	Audit(context.Context, MutationAudit) error
 }
 
@@ -26,6 +29,9 @@ const (
 	AuditNodeRemoveTags MutationAction = "node.remove_tags"
 	AuditNodeSetEnabled MutationAction = "node.set_enabled"
 	AuditImportCommit   MutationAction = "import.commit"
+	AuditChainCreate    MutationAction = "chain.create"
+	AuditChainUpdate    MutationAction = "chain.update"
+	AuditChainDelete    MutationAction = "chain.delete"
 )
 
 // MutationAudit contains only server-selected identifiers and allowlisted
@@ -45,7 +51,7 @@ func (a MutationAudit) Validate() error {
 		return ErrInvalidInput
 	}
 	switch a.Action {
-	case AuditNodeCreate, AuditNodeUpdate, AuditNodeDelete, AuditNodeClone, AuditNodeAddTags, AuditNodeRemoveTags, AuditNodeSetEnabled, AuditImportCommit:
+	case AuditNodeCreate, AuditNodeUpdate, AuditNodeDelete, AuditNodeClone, AuditNodeAddTags, AuditNodeRemoveTags, AuditNodeSetEnabled, AuditImportCommit, AuditChainCreate, AuditChainUpdate, AuditChainDelete:
 		return nil
 	}
 	return ErrInvalidInput
@@ -61,6 +67,18 @@ type NodeListOptions struct {
 }
 
 type NodePage struct {
+	Items []ir.Resource
+	Next  *Position
+}
+
+type ChainListOptions struct {
+	Tag     string
+	Enabled *bool
+	After   *Position
+	Limit   int
+}
+
+type ChainPage struct {
 	Items []ir.Resource
 	Next  *Position
 }
