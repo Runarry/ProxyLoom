@@ -215,10 +215,14 @@ type NodePatch struct {
 }
 
 type NodePatchRequest struct {
-	Name    *string    `json:"name,omitempty"`
-	Tags    *[]string  `json:"tags,omitempty"`
-	Enabled *bool      `json:"enabled,omitempty"`
-	Node    *NodePatch `json:"node,omitempty"`
+	Name            *string    `json:"name,omitempty"`
+	Tags            *[]string  `json:"tags,omitempty"`
+	Enabled         *bool      `json:"enabled,omitempty"`
+	Node            *NodePatch `json:"node,omitempty"`
+	BindingRevision *Revision  `json:"binding_revision,omitempty"`
+	RestoreFields   []string   `json:"restore_fields,omitempty"`
+	OriginAction    string     `json:"origin_action,omitempty"`
+	SourceItemID    ir.ID      `json:"source_item_id,omitempty"`
 }
 
 func (request NodePatchRequest) Merge(old ir.Resource) (catalog.UpdateInput, error) {

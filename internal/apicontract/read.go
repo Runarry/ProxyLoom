@@ -101,9 +101,19 @@ type NodeRead struct {
 	Origin        *ir.Origin    `json:"origin,omitempty"`
 }
 
+type NodeOriginBinding struct {
+	BindingRevision  Revision       `json:"binding_revision"`
+	OriginState      string         `json:"origin_state"`
+	OverriddenFields []string       `json:"overridden_fields"`
+	SourceItemID     ir.ID          `json:"source_item_id"`
+	SourceResourceID ir.ID          `json:"source_resource_id"`
+	MatchMethod      ir.MatchMethod `json:"match_method"`
+}
+
 type NodeResource struct {
-	Metadata ResourceMetadata `json:"metadata"`
-	Node     NodeRead         `json:"node"`
+	Metadata ResourceMetadata   `json:"metadata"`
+	Node     NodeRead           `json:"node"`
+	Binding  *NodeOriginBinding `json:"binding,omitempty"`
 }
 type NodeReadResponse struct {
 	RequestID string       `json:"request_id"`

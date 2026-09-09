@@ -168,11 +168,14 @@ type JobResult struct {
 }
 
 type NodeBinding struct {
-	NodeID          pgtype.UUID
-	ScopeID         pgtype.UUID
-	SourceItemID    pgtype.UUID
-	BindingRevision int64
-	MatchMethod     string
+	NodeID           pgtype.UUID
+	ScopeID          pgtype.UUID
+	SourceItemID     pgtype.UUID
+	BindingRevision  int64
+	MatchMethod      string
+	OverrideEnvelope []byte
+	Wrapping         []byte
+	State            string
 }
 
 type ProxyloomSchemaMigration struct {

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-09 M1来源刷新与依赖展开窗口：T012/T013/T014/T017/T018 in_review；累计21项done，T008仍in_review，T048 in_progress，其余32项not_started。G1未关闭，能力unverified。",
+  "status_note": "2026-09-09 M1覆盖与导出窗口：T015/T016 in_review；累计21项done，T008/T012/T013/T014/T017/T018仍in_review，T048 in_progress，其余30项not_started。G1未关闭，能力unverified。",
   "tasks": [
     {
       "id": "T-001",
@@ -293,7 +293,8 @@
         "T-014"
       ],
       "acceptance": "刷新保留人工名称；凭证变更走安全更新；模糊匹配须确认；来源恢复可识别原绑定。\nAC-04、AC-05、AC-17",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-015/acceptance.md"
     },
     {
       "id": "T-016",
@@ -312,7 +313,8 @@
         "T-017"
       ],
       "acceptance": "往返解析保留连接语义；链／路由方案直接转 URI 被拒；独立“仅导出原始节点”需明确确认。\nAC-03；节点导出专项",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-016/acceptance.md"
     },
     {
       "id": "T-017",

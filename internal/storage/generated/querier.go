@@ -41,6 +41,7 @@ type Querier interface {
 	GetResourceIndex(ctx context.Context, arg GetResourceIndexParams) (Resource, error)
 	GetResourceRevision(ctx context.Context, arg GetResourceRevisionParams) (GetResourceRevisionRow, error)
 	GetScope(ctx context.Context, id pgtype.UUID) (GetScopeRow, error)
+	GetSourceItem(ctx context.Context, arg GetSourceItemParams) (GetSourceItemRow, error)
 	GetWrappingVersion(ctx context.Context, arg GetWrappingVersionParams) (int64, error)
 	IdentityNow(ctx context.Context) (pgtype.Timestamptz, error)
 	IncrementIdentityRateLimit(ctx context.Context, keyHash []byte) error
@@ -55,6 +56,7 @@ type Querier interface {
 	InsertSourceSnapshot(ctx context.Context, arg InsertSourceSnapshotParams) error
 	ListChainCandidates(ctx context.Context, arg ListChainCandidatesParams) ([]ListChainCandidatesRow, error)
 	ListDueSourceSchedules(ctx context.Context, pageLimit int32) ([]ListDueSourceSchedulesRow, error)
+	ListNodeBindingsByNodes(ctx context.Context, arg ListNodeBindingsByNodesParams) ([]ListNodeBindingsByNodesRow, error)
 	ListNodeCandidates(ctx context.Context, arg ListNodeCandidatesParams) ([]ListNodeCandidatesRow, error)
 	ListNodeReferences(ctx context.Context, arg ListNodeReferencesParams) ([]ListNodeReferencesRow, error)
 	ListNodeRevisions(ctx context.Context, arg ListNodeRevisionsParams) ([]ListNodeRevisionsRow, error)

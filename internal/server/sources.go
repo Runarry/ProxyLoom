@@ -11,6 +11,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/override"
 	"github.com/Runarry/ProxyLoom/internal/source"
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +19,7 @@ import (
 type SourceRepository interface {
 	Head(context.Context, ir.ID, ir.ID) (source.Document, error)
 	List(context.Context, ir.ID, catalog.SourceListOptions) (source.Page, error)
+	Items(context.Context, ir.ID, ir.ID) ([]override.Item, error)
 	Create(context.Context, source.Mutation) (source.Document, error)
 	Update(context.Context, source.Mutation) (source.Document, error)
 	Delete(context.Context, source.Mutation) (source.Document, error)
@@ -55,11 +57,14 @@ func (h *sourceHandler) fail(c *gin.Context, err error) {
 	}
 }
 
-func (h *sourceHandler) document(c *gin.Context, status int, document source.Document) {
+func (h *sourceHandler) document(c *gin.Context, status int, document source.Document, items []apicontract.SourceItem) {
 	response, err := apicontract.NewSourceResponse(apicontract.RequestID(c.Request.Context()), document)
 	if err != nil {
 		h.fail(c, err)
 		return
+	}
+	if len(items) > 0 {
+		response.Data.Items = items
 	}
 	etag, err := apicontract.ETag(document.Metadata.Revision)
 	if err != nil {
@@ -88,7 +93,7 @@ func (h *sourceHandler) create(c *gin.Context) {
 		h.fail(c, err)
 		return
 	}
-	h.document(c, http.StatusCreated, document)
+	h.document(c, http.StatusCreated, document, nil)
 }
 
 func (h *sourceHandler) get(c *gin.Context) {
@@ -101,7 +106,16 @@ func (h *sourceHandler) get(c *gin.Context) {
 		h.fail(c, err)
 		return
 	}
-	h.document(c, http.StatusOK, document)
+	raw, err := h.store.Items(c.Request.Context(), nodeScope(c), id)
+	if err != nil {
+		h.fail(c, err)
+		return
+	}
+	items := make([]apicontract.SourceItem, 0, len(raw))
+	for _, item := range raw {
+		items = append(items, sourceItemDTO(item))
+	}
+	h.document(c, http.StatusOK, document, items)
 }
 
 func (h *sourceHandler) patch(c *gin.Context) {
@@ -138,7 +152,7 @@ func (h *sourceHandler) patch(c *gin.Context) {
 		h.fail(c, err)
 		return
 	}
-	h.document(c, http.StatusOK, document)
+	h.document(c, http.StatusOK, document, nil)
 }
 
 func (h *sourceHandler) delete(c *gin.Context) {

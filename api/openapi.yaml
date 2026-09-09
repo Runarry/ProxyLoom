@@ -1347,6 +1347,46 @@ components:
         match_method:
           type: "string"
           enum: ["stable_external_key", "manual_binding", "exact_fingerprint"]
+    OriginState:
+      type: "string"
+      enum: ["active", "stale", "conflict"]
+    OriginAction:
+      type: "string"
+      enum: ["bind", "skip"]
+    NodeOriginBinding:
+      type: "object"
+      additionalProperties: false
+      required: ["binding_revision", "origin_state", "overridden_fields", "source_item_id", "source_resource_id", "match_method"]
+      properties:
+        binding_revision: { $ref: "#/components/schemas/Revision" }
+        origin_state: { $ref: "#/components/schemas/OriginState" }
+        overridden_fields:
+          type: "array"
+          minItems: 0
+          maxItems: 64
+          items: { $ref: "#/components/schemas/SafeFieldPath" }
+        source_item_id: { $ref: "#/components/schemas/UUID" }
+        source_resource_id: { $ref: "#/components/schemas/UUID" }
+        match_method:
+          type: "string"
+          enum: ["stable_external_key", "manual_binding", "exact_fingerprint"]
+    SourceItem:
+      type: "object"
+      additionalProperties: false
+      required: ["id", "state", "name"]
+      properties:
+        id: { $ref: "#/components/schemas/UUID" }
+        state:
+          type: "string"
+          enum: ["active", "missing", "conflict"]
+        name: { $ref: "#/components/schemas/Name" }
+        external_key:
+          type: "string"
+          minLength: 1
+          maxLength: 128
+          pattern: '^[A-Za-z0-9._:~-]+$'
+        node_id: { $ref: "#/components/schemas/UUID" }
+        suggested_node_id: { $ref: "#/components/schemas/UUID" }
     NodeCreate:
       type: "object"
       additionalProperties: false
@@ -1597,7 +1637,16 @@ components:
         enabled:
           type: "boolean"
         node: { $ref: "#/components/schemas/NodePatch" }
+        binding_revision: { $ref: "#/components/schemas/Revision" }
+        restore_fields:
+          type: "array"
+          minItems: 1
+          maxItems: 32
+          items: { $ref: "#/components/schemas/SafeFieldPath" }
+        origin_action: { $ref: "#/components/schemas/OriginAction" }
+        source_item_id: { $ref: "#/components/schemas/UUID" }
       minProperties: 1
+      description: "Bound nodes write overlay fields, not the source baseline. Overlay, restore_fields and origin_action require binding_revision. Protocol cannot be overlaid."
     NodeResource:
       type: "object"
       additionalProperties: false
@@ -1609,6 +1658,7 @@ components:
             kind:
               const: "node"
         node: { $ref: "#/components/schemas/NodeRedacted" }
+        binding: { $ref: "#/components/schemas/NodeOriginBinding" }
     NodeReadResponse:
       type: "object"
       additionalProperties: false
@@ -2303,6 +2353,12 @@ components:
             kind:
               const: "source"
         source: { $ref: "#/components/schemas/SourceRedacted" }
+        items:
+          type: "array"
+          minItems: 0
+          maxItems: 5000
+          items: { $ref: "#/components/schemas/SourceItem" }
+      description: "List responses omit items. A single GET includes current source items without secrets."
     SourceResponse:
       type: "object"
       additionalProperties: false
@@ -5884,7 +5940,7 @@ paths:
   /api/v1/exports:
     post:
       operationId: createExport
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Export explicit resource revisions or publication artifacts
       description: Secret-bearing exports require server-verified recent authentication and an audit record. Source credentials, tokens, master keys and arbitrary native configuration are never accepted as input. No new resource revision is written.
       requestBody:

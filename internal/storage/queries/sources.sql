@@ -23,6 +23,10 @@ SELECT COUNT(*) FROM public.source_snapshots WHERE scope_id = sqlc.arg(scope_id)
 SELECT id, source_id, external_key, envelope, wrapping, base_revision, last_seen_at, state
 FROM public.source_items WHERE scope_id = sqlc.arg(scope_id) AND source_id = sqlc.arg(source_id) ORDER BY id;
 
+-- name: GetSourceItem :one
+SELECT id, source_id, external_key, envelope, wrapping, base_revision, last_seen_at, state
+FROM public.source_items WHERE scope_id = sqlc.arg(scope_id) AND id = sqlc.arg(id);
+
 -- name: InsertSourceItem :exec
 INSERT INTO public.source_items (id, scope_id, source_id, external_key, envelope, wrapping, base_revision, last_seen_at, state)
 VALUES (sqlc.arg(id), sqlc.arg(scope_id), sqlc.arg(source_id), sqlc.narg(external_key), sqlc.arg(envelope), sqlc.arg(wrapping),
@@ -34,19 +38,32 @@ UPDATE public.source_items SET envelope = sqlc.arg(envelope), wrapping = sqlc.ar
 WHERE scope_id = sqlc.arg(scope_id) AND id = sqlc.arg(id);
 
 -- name: GetNodeBindingByItem :one
-SELECT node_id, source_item_id, binding_revision, match_method
-FROM public.node_bindings WHERE scope_id = sqlc.arg(scope_id) AND source_item_id = sqlc.arg(source_item_id);
+SELECT b.node_id, b.source_item_id, i.source_id, b.binding_revision, b.match_method, b.state, b.override_envelope, b.wrapping
+FROM public.node_bindings b
+JOIN public.source_items i ON i.scope_id = b.scope_id AND i.id = b.source_item_id
+WHERE b.scope_id = sqlc.arg(scope_id) AND b.source_item_id = sqlc.arg(source_item_id);
 
 -- name: GetNodeBindingByNode :one
-SELECT node_id, source_item_id, binding_revision, match_method
-FROM public.node_bindings WHERE scope_id = sqlc.arg(scope_id) AND node_id = sqlc.arg(node_id);
+SELECT b.node_id, b.source_item_id, i.source_id, b.binding_revision, b.match_method, b.state, b.override_envelope, b.wrapping
+FROM public.node_bindings b
+JOIN public.source_items i ON i.scope_id = b.scope_id AND i.id = b.source_item_id
+WHERE b.scope_id = sqlc.arg(scope_id) AND b.node_id = sqlc.arg(node_id);
+
+-- name: ListNodeBindingsByNodes :many
+SELECT b.node_id, b.source_item_id, i.source_id, b.binding_revision, b.match_method, b.state, b.override_envelope, b.wrapping
+FROM public.node_bindings b
+JOIN public.source_items i ON i.scope_id = b.scope_id AND i.id = b.source_item_id
+WHERE b.scope_id = sqlc.arg(scope_id) AND b.node_id = ANY(sqlc.arg(node_ids)::uuid[])
+ORDER BY b.node_id;
 
 -- name: InsertNodeBinding :exec
-INSERT INTO public.node_bindings (node_id, scope_id, source_item_id, binding_revision, match_method)
-VALUES (sqlc.arg(node_id), sqlc.arg(scope_id), sqlc.arg(source_item_id), sqlc.arg(binding_revision), sqlc.arg(match_method));
+INSERT INTO public.node_bindings (node_id, scope_id, source_item_id, binding_revision, match_method, state, override_envelope, wrapping)
+VALUES (sqlc.arg(node_id), sqlc.arg(scope_id), sqlc.arg(source_item_id), sqlc.arg(binding_revision), sqlc.arg(match_method),
+    sqlc.arg(state), sqlc.narg(override_envelope), sqlc.narg(wrapping));
 
 -- name: UpdateNodeBinding :exec
-UPDATE public.node_bindings SET binding_revision = sqlc.arg(binding_revision), match_method = sqlc.arg(match_method)
+UPDATE public.node_bindings SET binding_revision = sqlc.arg(binding_revision), match_method = sqlc.arg(match_method),
+    state = sqlc.arg(state), override_envelope = sqlc.narg(override_envelope), wrapping = sqlc.narg(wrapping)
 WHERE scope_id = sqlc.arg(scope_id) AND node_id = sqlc.arg(node_id);
 
 -- name: UpsertSourceSchedule :exec

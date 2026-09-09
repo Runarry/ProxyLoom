@@ -21,11 +21,19 @@ type NodeListResponse struct {
 }
 
 func NewNodeListResponse(requestID string, items []ir.Resource, page PageInfo) (NodeListResponse, error) {
+	return NewNodeListResponseWithBindings(requestID, items, page, nil)
+}
+
+func NewNodeListResponseWithBindings(requestID string, items []ir.Resource, page PageInfo, bindings map[ir.ID]NodeOriginBinding) (NodeListResponse, error) {
 	response := NodeListResponse{RequestID: safeRequestID(requestID), Data: make([]NodeResource, 0, len(items)), Page: page}
 	for _, resource := range items {
 		read, err := NewNodeReadResponse(requestID, resource)
 		if err != nil {
 			return NodeListResponse{}, err
+		}
+		if binding, ok := bindings[resource.Metadata.ResourceID]; ok {
+			copy := binding
+			read.Data.Binding = &copy
 		}
 		response.Data = append(response.Data, read.Data)
 	}

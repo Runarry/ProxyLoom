@@ -9,6 +9,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/override"
 	"github.com/Runarry/ProxyLoom/internal/safefetch"
 	"github.com/Runarry/ProxyLoom/internal/source"
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
@@ -37,6 +38,10 @@ func (s *Sources) Head(ctx context.Context, scope, id ir.ID) (source.Document, e
 
 func (s *Sources) List(ctx context.Context, scope ir.ID, options catalog.SourceListOptions) (source.Page, error) {
 	return s.catalog.ListSources(ctx, scope, options)
+}
+
+func (s *Sources) Items(ctx context.Context, scope, sourceID ir.ID) ([]override.Item, error) {
+	return s.catalog.SourceItems(ctx, scope, sourceID)
 }
 
 func (s *Sources) Create(ctx context.Context, input source.Mutation) (source.Document, error) {

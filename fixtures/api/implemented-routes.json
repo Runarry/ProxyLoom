@@ -80,6 +80,9 @@
   "/api/v1/jobs/{id}/events": [
     "get"
   ],
+  "/api/v1/exports": [
+    "post"
+  ],
   "/internal/v1/runners/heartbeat": [
     "post"
   ],

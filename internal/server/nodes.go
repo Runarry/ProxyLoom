@@ -15,6 +15,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/ir"
+	"github.com/Runarry/ProxyLoom/internal/override"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,8 @@ type NodeRepository interface {
 	ListChains(context.Context, ir.ID, catalog.ChainListOptions) (catalog.ChainPage, error)
 	NodeRevisions(context.Context, ir.ID, ir.ID, int64, int) (catalog.NodeRevisionPage, error)
 	NodeReferences(context.Context, ir.ID, ir.ID, catalog.NodeReferenceOptions) (catalog.ReferencePage, error)
+	NodeBinding(context.Context, ir.ID, ir.ID) (override.Binding, error)
+	ListNodeBindings(context.Context, ir.ID, []ir.ID) (map[ir.ID]override.Binding, error)
 }
 
 type NodeDependencies struct {
@@ -127,6 +130,13 @@ func (h *nodeHandler) resource(c *gin.Context, status int, resource ir.Resource)
 		h.fail(c, err)
 		return
 	}
+	if binding, err := h.store.NodeBinding(c.Request.Context(), nodeScope(c), resource.Metadata.ResourceID); err == nil {
+		dto := originDTO(binding)
+		response.Data.Binding = &dto
+	} else if !errors.Is(err, catalog.ErrNotFound) {
+		h.fail(c, err)
+		return
+	}
 	etag, err := apicontract.ETag(resource.Metadata.Revision)
 	if err != nil {
 		h.fail(c, err)
@@ -150,6 +160,10 @@ func checkedNode(resource ir.Resource, expected int64) error {
 // the resource revision. Captured boundary errors preserve their intended HTTP
 // status across the catalog's intentionally narrower persistence error mapping.
 func (h *nodeHandler) mutate(c *gin.Context, action catalog.MutationAction, change func(catalog.AuditedTx) (ir.Resource, error)) (ir.Resource, error) {
+	return h.mutateAction(c, &action, change)
+}
+
+func (h *nodeHandler) mutateAction(c *gin.Context, action *catalog.MutationAction, change func(catalog.AuditedTx) (ir.Resource, error)) (ir.Resource, error) {
 	var resource ir.Resource
 	var boundary error
 	err := h.store.Transact(c.Request.Context(), nodeScope(c), func(tx catalog.Tx) error {
@@ -170,7 +184,7 @@ func (h *nodeHandler) mutate(c *gin.Context, action catalog.MutationAction, chan
 		session, _ := SessionFromContext(c.Request.Context())
 		return audited.Audit(c.Request.Context(), catalog.MutationAudit{PrincipalID: session.User.ID,
 			ObjectID: resource.Metadata.ResourceID, Revision: resource.Metadata.Revision,
-			RequestID: apicontract.RequestID(c.Request.Context()), Action: action})
+			RequestID: apicontract.RequestID(c.Request.Context()), Action: *action})
 	})
 	if err != nil && boundary != nil {
 		return ir.Resource{}, boundary
@@ -233,13 +247,29 @@ func (h *nodeHandler) patch(c *gin.Context) {
 	if !h.readRequest(c, "NodePatchRequest", &request) {
 		return
 	}
-	resource, err := h.mutate(c, catalog.AuditNodeUpdate, func(tx catalog.AuditedTx) (ir.Resource, error) {
+	action := catalog.AuditNodeUpdate
+	resource, err := h.mutateAction(c, &action, func(tx catalog.AuditedTx) (ir.Resource, error) {
 		old, err := tx.Head(c.Request.Context(), id)
 		if err == nil {
 			err = checkedNode(old, expected)
 		}
 		if err != nil {
 			return ir.Resource{}, err
+		}
+		if origin, ok := tx.(originMutator); ok {
+			if _, bindErr := origin.LoadOrigin(c.Request.Context(), old.Metadata.ResourceID); bindErr == nil {
+				next, nextAction, err := applyBoundPatch(c.Request.Context(), origin, old, request)
+				if err != nil {
+					return ir.Resource{}, err
+				}
+				action = nextAction
+				return next, nil
+			} else if !errors.Is(bindErr, catalog.ErrNotFound) {
+				return ir.Resource{}, bindErr
+			}
+		}
+		if request.BindingRevision != nil || request.OriginAction != "" || len(request.RestoreFields) > 0 || request.SourceItemID != "" {
+			return ir.Resource{}, apicontract.NewError(apicontract.ValidationFailed, apicontract.Detail{FieldPath: "/binding_revision"})
 		}
 		input, err := request.Merge(old)
 		if err != nil {
@@ -398,7 +428,20 @@ func (h *nodeHandler) list(c *gin.Context) {
 			return
 		}
 	}
-	response, err := apicontract.NewNodeListResponse(apicontract.RequestID(c.Request.Context()), page.Items, info)
+	ids := make([]ir.ID, 0, len(page.Items))
+	for _, item := range page.Items {
+		ids = append(ids, item.Metadata.ResourceID)
+	}
+	origins, err := h.store.ListNodeBindings(c.Request.Context(), nodeScope(c), ids)
+	if err != nil {
+		h.fail(c, err)
+		return
+	}
+	dtos := map[ir.ID]apicontract.NodeOriginBinding{}
+	for id, origin := range origins {
+		dtos[id] = originDTO(origin)
+	}
+	response, err := apicontract.NewNodeListResponseWithBindings(apicontract.RequestID(c.Request.Context()), page.Items, info, dtos)
 	if err != nil {
 		h.fail(c, err)
 		return

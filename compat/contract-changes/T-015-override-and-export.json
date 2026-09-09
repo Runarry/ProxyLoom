@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "task": "T-015",
+  "summary": "Add typed source overlays, origin stale/conflict state, source item visibility, and node URI/JSON resource export while keeping publication export contract-only.",
+  "documents": [
+    "docs/adr/0012-m1-override-and-export.md",
+    "docs/m1-override-export-contract.md"
+  ],
+  "fixtures": [
+    "fixtures/api/implemented-routes.json",
+    "fixtures/api/export-create.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/sources.sql.go",
+    "internal/storage/generated/querier.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "ecbce8066311524d3613b58ed98e38f75713184b77e5cb862aaa6a252158ebd7",
+      "after_sha256": "248fd88f3b738d4020a6c1ea2e87d85e5d60040707fafebe3f34d33d7092dc16",
+      "changes": [
+        {
+          "pointer": "/components/schemas/NodeOriginBinding",
+          "before_sha256": null,
+          "after_sha256": "e18bd23fd16af4961c4713d58806c2a2074beb93e77976ee6f819b7ab28272ca"
+        },
+        {
+          "pointer": "/components/schemas/NodePatchRequest/description",
+          "before_sha256": null,
+          "after_sha256": "3c4e182dfa98c9425af38ff30807d600c66695912833e60ecb11832e9ce16a81"
+        },
+        {
+          "pointer": "/components/schemas/NodePatchRequest/properties/binding_revision",
+          "before_sha256": null,
+          "after_sha256": "8ae63d5fdebb94df987bd6008ce78cdfd51eca854b366cd24fc2ec538df0294c"
+        },
+        {
+          "pointer": "/components/schemas/NodePatchRequest/properties/origin_action",
+          "before_sha256": null,
+          "after_sha256": "ec9f344132c6ae4aa092fe26c930d5134bce2988096fef00616e09e8bcf7b84e"
+        },
+        {
+          "pointer": "/components/schemas/NodePatchRequest/properties/restore_fields",
+          "before_sha256": null,
+          "after_sha256": "42ff22ff0bbee8a82c9050e27744c5a8be18e823d59d7e47641a4f4a70b5e054"
+        },
+        {
+          "pointer": "/components/schemas/NodePatchRequest/properties/source_item_id",
+          "before_sha256": null,
+          "after_sha256": "20a873ca4f3071405423ccd98855df2f784941148bd43c6b11bb8d2b185fafbd"
+        },
+        {
+          "pointer": "/components/schemas/NodeResource/properties/binding",
+          "before_sha256": null,
+          "after_sha256": "e3d4c1114f36e3ce7a915030bc488a4e7719d9e5b63eebe4cc52aad0dc193fdd"
+        },
+        {
+          "pointer": "/components/schemas/OriginAction",
+          "before_sha256": null,
+          "after_sha256": "f43a866c64939fa3b0f296b7f376801f85d805f6ff604edc4458a017f6b095ac"
+        },
+        {
+          "pointer": "/components/schemas/OriginState",
+          "before_sha256": null,
+          "after_sha256": "076884ddaa58327333c3812d9f9091a4465d122bdba5774a102781aebb30982f"
+        },
+        {
+          "pointer": "/components/schemas/SourceItem",
+          "before_sha256": null,
+          "after_sha256": "71823aab12780da87af65c042a3ae6901c08014cb779f37da9923e728e987a8b"
+        },
+        {
+          "pointer": "/components/schemas/SourceResource/description",
+          "before_sha256": null,
+          "after_sha256": "4fc8fd1ece88736d4e2d93af1f7b0ea8a7391b41e4e456fc157347804a5f7f95"
+        },
+        {
+          "pointer": "/components/schemas/SourceResource/properties/items",
+          "before_sha256": null,
+          "after_sha256": "26f554e5883c1ac9aaf63431c334f6fde05ebaf5b58808a05bd1db8cd8e63658"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1exports/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000010_overrides.up.sql",
+      "before_sha256": null,
+      "after_sha256": "7be354e300c1fec534cd090b22b87376170210bad94ef6c1de0c8d48f813809d",
+      "changes": []
+    }
+  ]
+}

@@ -43,8 +43,10 @@ func (q *Queries) DeleteSourceSchedule(ctx context.Context, arg DeleteSourceSche
 }
 
 const getNodeBindingByItem = `-- name: GetNodeBindingByItem :one
-SELECT node_id, source_item_id, binding_revision, match_method
-FROM public.node_bindings WHERE scope_id = $1 AND source_item_id = $2
+SELECT b.node_id, b.source_item_id, i.source_id, b.binding_revision, b.match_method, b.state, b.override_envelope, b.wrapping
+FROM public.node_bindings b
+JOIN public.source_items i ON i.scope_id = b.scope_id AND i.id = b.source_item_id
+WHERE b.scope_id = $1 AND b.source_item_id = $2
 `
 
 type GetNodeBindingByItemParams struct {
@@ -53,10 +55,14 @@ type GetNodeBindingByItemParams struct {
 }
 
 type GetNodeBindingByItemRow struct {
-	NodeID          pgtype.UUID
-	SourceItemID    pgtype.UUID
-	BindingRevision int64
-	MatchMethod     string
+	NodeID           pgtype.UUID
+	SourceItemID     pgtype.UUID
+	SourceID         pgtype.UUID
+	BindingRevision  int64
+	MatchMethod      string
+	State            string
+	OverrideEnvelope []byte
+	Wrapping         []byte
 }
 
 func (q *Queries) GetNodeBindingByItem(ctx context.Context, arg GetNodeBindingByItemParams) (GetNodeBindingByItemRow, error) {
@@ -65,15 +71,21 @@ func (q *Queries) GetNodeBindingByItem(ctx context.Context, arg GetNodeBindingBy
 	err := row.Scan(
 		&i.NodeID,
 		&i.SourceItemID,
+		&i.SourceID,
 		&i.BindingRevision,
 		&i.MatchMethod,
+		&i.State,
+		&i.OverrideEnvelope,
+		&i.Wrapping,
 	)
 	return i, err
 }
 
 const getNodeBindingByNode = `-- name: GetNodeBindingByNode :one
-SELECT node_id, source_item_id, binding_revision, match_method
-FROM public.node_bindings WHERE scope_id = $1 AND node_id = $2
+SELECT b.node_id, b.source_item_id, i.source_id, b.binding_revision, b.match_method, b.state, b.override_envelope, b.wrapping
+FROM public.node_bindings b
+JOIN public.source_items i ON i.scope_id = b.scope_id AND i.id = b.source_item_id
+WHERE b.scope_id = $1 AND b.node_id = $2
 `
 
 type GetNodeBindingByNodeParams struct {
@@ -82,10 +94,14 @@ type GetNodeBindingByNodeParams struct {
 }
 
 type GetNodeBindingByNodeRow struct {
-	NodeID          pgtype.UUID
-	SourceItemID    pgtype.UUID
-	BindingRevision int64
-	MatchMethod     string
+	NodeID           pgtype.UUID
+	SourceItemID     pgtype.UUID
+	SourceID         pgtype.UUID
+	BindingRevision  int64
+	MatchMethod      string
+	State            string
+	OverrideEnvelope []byte
+	Wrapping         []byte
 }
 
 func (q *Queries) GetNodeBindingByNode(ctx context.Context, arg GetNodeBindingByNodeParams) (GetNodeBindingByNodeRow, error) {
@@ -94,23 +110,68 @@ func (q *Queries) GetNodeBindingByNode(ctx context.Context, arg GetNodeBindingBy
 	err := row.Scan(
 		&i.NodeID,
 		&i.SourceItemID,
+		&i.SourceID,
 		&i.BindingRevision,
 		&i.MatchMethod,
+		&i.State,
+		&i.OverrideEnvelope,
+		&i.Wrapping,
+	)
+	return i, err
+}
+
+const getSourceItem = `-- name: GetSourceItem :one
+SELECT id, source_id, external_key, envelope, wrapping, base_revision, last_seen_at, state
+FROM public.source_items WHERE scope_id = $1 AND id = $2
+`
+
+type GetSourceItemParams struct {
+	ScopeID pgtype.UUID
+	ID      pgtype.UUID
+}
+
+type GetSourceItemRow struct {
+	ID           pgtype.UUID
+	SourceID     pgtype.UUID
+	ExternalKey  pgtype.Text
+	Envelope     []byte
+	Wrapping     []byte
+	BaseRevision int64
+	LastSeenAt   pgtype.Timestamptz
+	State        string
+}
+
+func (q *Queries) GetSourceItem(ctx context.Context, arg GetSourceItemParams) (GetSourceItemRow, error) {
+	row := q.db.QueryRow(ctx, getSourceItem, arg.ScopeID, arg.ID)
+	var i GetSourceItemRow
+	err := row.Scan(
+		&i.ID,
+		&i.SourceID,
+		&i.ExternalKey,
+		&i.Envelope,
+		&i.Wrapping,
+		&i.BaseRevision,
+		&i.LastSeenAt,
+		&i.State,
 	)
 	return i, err
 }
 
 const insertNodeBinding = `-- name: InsertNodeBinding :exec
-INSERT INTO public.node_bindings (node_id, scope_id, source_item_id, binding_revision, match_method)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO public.node_bindings (node_id, scope_id, source_item_id, binding_revision, match_method, state, override_envelope, wrapping)
+VALUES ($1, $2, $3, $4, $5,
+    $6, $7, $8)
 `
 
 type InsertNodeBindingParams struct {
-	NodeID          pgtype.UUID
-	ScopeID         pgtype.UUID
-	SourceItemID    pgtype.UUID
-	BindingRevision int64
-	MatchMethod     string
+	NodeID           pgtype.UUID
+	ScopeID          pgtype.UUID
+	SourceItemID     pgtype.UUID
+	BindingRevision  int64
+	MatchMethod      string
+	State            string
+	OverrideEnvelope []byte
+	Wrapping         []byte
 }
 
 func (q *Queries) InsertNodeBinding(ctx context.Context, arg InsertNodeBindingParams) error {
@@ -120,6 +181,9 @@ func (q *Queries) InsertNodeBinding(ctx context.Context, arg InsertNodeBindingPa
 		arg.SourceItemID,
 		arg.BindingRevision,
 		arg.MatchMethod,
+		arg.State,
+		arg.OverrideEnvelope,
+		arg.Wrapping,
 	)
 	return err
 }
@@ -227,6 +291,59 @@ func (q *Queries) ListDueSourceSchedules(ctx context.Context, pageLimit int32) (
 			&i.BackoffSeconds,
 			&i.LastJobID,
 			&i.HeadRevision,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listNodeBindingsByNodes = `-- name: ListNodeBindingsByNodes :many
+SELECT b.node_id, b.source_item_id, i.source_id, b.binding_revision, b.match_method, b.state, b.override_envelope, b.wrapping
+FROM public.node_bindings b
+JOIN public.source_items i ON i.scope_id = b.scope_id AND i.id = b.source_item_id
+WHERE b.scope_id = $1 AND b.node_id = ANY($2::uuid[])
+ORDER BY b.node_id
+`
+
+type ListNodeBindingsByNodesParams struct {
+	ScopeID pgtype.UUID
+	NodeIds []pgtype.UUID
+}
+
+type ListNodeBindingsByNodesRow struct {
+	NodeID           pgtype.UUID
+	SourceItemID     pgtype.UUID
+	SourceID         pgtype.UUID
+	BindingRevision  int64
+	MatchMethod      string
+	State            string
+	OverrideEnvelope []byte
+	Wrapping         []byte
+}
+
+func (q *Queries) ListNodeBindingsByNodes(ctx context.Context, arg ListNodeBindingsByNodesParams) ([]ListNodeBindingsByNodesRow, error) {
+	rows, err := q.db.Query(ctx, listNodeBindingsByNodes, arg.ScopeID, arg.NodeIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListNodeBindingsByNodesRow{}
+	for rows.Next() {
+		var i ListNodeBindingsByNodesRow
+		if err := rows.Scan(
+			&i.NodeID,
+			&i.SourceItemID,
+			&i.SourceID,
+			&i.BindingRevision,
+			&i.MatchMethod,
+			&i.State,
+			&i.OverrideEnvelope,
+			&i.Wrapping,
 		); err != nil {
 			return nil, err
 		}
@@ -367,21 +484,28 @@ func (q *Queries) ListSourceItems(ctx context.Context, arg ListSourceItemsParams
 }
 
 const updateNodeBinding = `-- name: UpdateNodeBinding :exec
-UPDATE public.node_bindings SET binding_revision = $1, match_method = $2
-WHERE scope_id = $3 AND node_id = $4
+UPDATE public.node_bindings SET binding_revision = $1, match_method = $2,
+    state = $3, override_envelope = $4, wrapping = $5
+WHERE scope_id = $6 AND node_id = $7
 `
 
 type UpdateNodeBindingParams struct {
-	BindingRevision int64
-	MatchMethod     string
-	ScopeID         pgtype.UUID
-	NodeID          pgtype.UUID
+	BindingRevision  int64
+	MatchMethod      string
+	State            string
+	OverrideEnvelope []byte
+	Wrapping         []byte
+	ScopeID          pgtype.UUID
+	NodeID           pgtype.UUID
 }
 
 func (q *Queries) UpdateNodeBinding(ctx context.Context, arg UpdateNodeBindingParams) error {
 	_, err := q.db.Exec(ctx, updateNodeBinding,
 		arg.BindingRevision,
 		arg.MatchMethod,
+		arg.State,
+		arg.OverrideEnvelope,
+		arg.Wrapping,
 		arg.ScopeID,
 		arg.NodeID,
 	)

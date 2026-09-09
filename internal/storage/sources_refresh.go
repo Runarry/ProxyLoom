@@ -14,6 +14,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
 	"github.com/Runarry/ProxyLoom/internal/origin"
+	"github.com/Runarry/ProxyLoom/internal/override"
 	"github.com/Runarry/ProxyLoom/internal/runnerprotocol"
 	"github.com/Runarry/ProxyLoom/internal/safefetch"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
@@ -24,13 +25,14 @@ import (
 )
 
 type storedSourceItem struct {
-	ID          ir.ID
-	ExternalKey string
-	Fingerprint string
-	Name        string
-	Node        *ir.Node
-	State       string
-	Revision    int64
+	ID              ir.ID
+	ExternalKey     string
+	Fingerprint     string
+	Name            string
+	SuggestedNodeID ir.ID
+	Node            *ir.Node
+	State           string
+	Revision        int64
 }
 
 type parsedCandidate struct {
@@ -225,7 +227,7 @@ func (s *Sources) applyCandidates(ctx context.Context, t *catalogTx, document so
 			}
 			seen[item.ID] = true
 			item.Node, item.Name, item.Fingerprint, item.ExternalKey, item.State = cloneNode(candidate.Node), candidate.Name, candidate.Fingerprint, candidate.ExternalKey, "active"
-			if err := s.commitNode(ctx, t, document, payload, candidate, item, records); err != nil {
+			if err := s.commitNode(ctx, t, document, payload, candidate, item, records, now); err != nil {
 				return err
 			}
 			continue
@@ -239,7 +241,7 @@ func (s *Sources) applyCandidates(ctx context.Context, t *catalogTx, document so
 		}
 		item = storedSourceItem{ID: id, ExternalKey: candidate.ExternalKey, Fingerprint: candidate.Fingerprint, Name: candidate.Name, Node: cloneNode(candidate.Node), State: "active"}
 		seen[id] = true
-		if err := s.commitNode(ctx, t, document, payload, candidate, item, records); err != nil {
+		if err := s.commitNode(ctx, t, document, payload, candidate, item, records, now); err != nil {
 			return err
 		}
 	}
@@ -284,6 +286,7 @@ func (s *Sources) loadItems(ctx context.Context, t *catalogTx, sourceID ir.ID) (
 		}
 		var stored struct {
 			Name, ExternalKey, Fingerprint string
+			SuggestedNodeID                ir.ID `json:"suggested_node_id"`
 			Node                           *ir.Node
 		}
 		if json.Unmarshal(plain, &stored) != nil {
@@ -291,7 +294,7 @@ func (s *Sources) loadItems(ctx context.Context, t *catalogTx, sourceID ir.ID) (
 			return nil, catalog.ErrCrypto
 		}
 		clear(plain)
-		item := storedSourceItem{ID: id, ExternalKey: stored.ExternalKey, Fingerprint: stored.Fingerprint, Name: stored.Name, Node: stored.Node, State: row.State, Revision: row.BaseRevision}
+		item := storedSourceItem{ID: id, ExternalKey: stored.ExternalKey, Fingerprint: stored.Fingerprint, Name: stored.Name, SuggestedNodeID: stored.SuggestedNodeID, Node: stored.Node, State: row.State, Revision: row.BaseRevision}
 		if row.ExternalKey.Valid {
 			item.ExternalKey = row.ExternalKey.String
 		}
@@ -301,10 +304,15 @@ func (s *Sources) loadItems(ctx context.Context, t *catalogTx, sourceID ir.ID) (
 }
 
 func (s *Sources) itemBytes(candidate parsedCandidate) ([]byte, error) {
+	return s.itemRecordBytes(candidate.Name, candidate.ExternalKey, candidate.Fingerprint, "", candidate.Node)
+}
+
+func (s *Sources) itemRecordBytes(name, externalKey, fingerprint string, suggested ir.ID, node ir.Node) ([]byte, error) {
 	return json.Marshal(struct {
 		Name, ExternalKey, Fingerprint string
+		SuggestedNodeID                ir.ID `json:"suggested_node_id,omitempty"`
 		Node                           ir.Node
-	}{candidate.Name, candidate.ExternalKey, candidate.Fingerprint, candidate.Node})
+	}{name, externalKey, fingerprint, suggested, node})
 }
 
 func (s *Sources) insertItem(ctx context.Context, t *catalogTx, document source.Document, id ir.ID, candidate parsedCandidate, now time.Time) error {
@@ -358,50 +366,79 @@ func (s *Sources) markMissing(ctx context.Context, t *catalogTx, document source
 		BaseRevision: item.Revision, LastSeenAt: pgtype.Timestamptz{Time: now, Valid: true}, State: "missing"}); err != nil {
 		return err
 	}
-	if document.Source.RefreshPolicy.MissingPolicy != source.Disable || document.Source.RefreshPolicy.CommitMode != source.SafeUpdates {
-		return nil
-	}
-	binding, err := t.q.GetNodeBindingByItem(ctx, dbgen.GetNodeBindingByItemParams{ScopeID: dbID(t.scope), SourceItemID: dbID(item.ID)})
-	if errors.Is(err, catalog.ErrNotFound) || errors.Is(catalogError(err), catalog.ErrNotFound) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	resource, err := t.Probe(ctx, irID(binding.NodeID))
+	binding, err := t.loadBindingByItem(ctx, item.ID)
 	if errors.Is(err, catalog.ErrNotFound) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
+	binding.State = override.Stale
+	binding.Revision++
+	if err := t.saveBinding(ctx, binding); err != nil {
+		return err
+	}
+	if document.Source.RefreshPolicy.MissingPolicy != source.Disable || document.Source.RefreshPolicy.CommitMode != source.SafeUpdates {
+		return nil
+	}
+	resource, err := t.Probe(ctx, binding.NodeID)
+	if errors.Is(err, catalog.ErrNotFound) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	updated, err := t.Update(ctx, resource.Metadata.ResourceID, resource.Metadata.Revision, catalog.UpdateInput{
+		Name: resource.Metadata.Name, Tags: resource.Metadata.Tags, Enabled: false, Payload: resource.Payload})
+	if err != nil {
+		return err
+	}
 	if payload.ActorID.Validate() == nil && payload.RequestID != "" {
-		updated, err := t.Update(ctx, resource.Metadata.ResourceID, resource.Metadata.Revision, catalog.UpdateInput{
-			Name: resource.Metadata.Name, Tags: resource.Metadata.Tags, Enabled: false, Payload: resource.Payload})
-		if err != nil {
-			return err
-		}
 		return t.Audit(ctx, catalog.MutationAudit{PrincipalID: payload.ActorID, ObjectID: updated.Metadata.ResourceID,
 			Revision: updated.Metadata.Revision, RequestID: payload.RequestID, Action: catalog.AuditNodeSetEnabled})
 	}
-	_, err = t.Update(ctx, resource.Metadata.ResourceID, resource.Metadata.Revision, catalog.UpdateInput{
-		Name: resource.Metadata.Name, Tags: resource.Metadata.Tags, Enabled: false, Payload: resource.Payload})
-	return err
+	return nil
 }
 
-func (s *Sources) commitNode(ctx context.Context, t *catalogTx, document source.Document, payload refreshPayload, candidate parsedCandidate, item storedSourceItem, records []origin.Record) error {
+func (s *Sources) commitNode(ctx context.Context, t *catalogTx, document source.Document, payload refreshPayload, candidate parsedCandidate, item storedSourceItem, records []origin.Record, now time.Time) error {
 	if document.Source.RefreshPolicy.CommitMode != source.SafeUpdates || candidate.Node.Validate() != nil {
 		return nil
 	}
 	decision, ok := origin.Match(origin.Item{SourceItemID: item.ID, ExternalKey: candidate.ExternalKey, Fingerprint: candidate.Fingerprint,
 		Name: candidate.Name, Protocol: candidate.Node.Protocol, Host: candidate.Node.Endpoint.Host, Port: candidate.Node.Endpoint.Port}, records)
 	if ok && (decision.Kind == origin.Duplicate || decision.Kind == origin.Suggest || decision.Ambiguous) {
-		return nil
+		return s.markConflict(ctx, t, document, item, decision, now)
 	}
 	if ok && decision.Kind == origin.Identity {
 		return s.updateBoundNode(ctx, t, document, payload, candidate, item, decision)
 	}
 	return s.createBoundNode(ctx, t, document, payload, candidate, item)
+}
+
+func (s *Sources) markConflict(ctx context.Context, t *catalogTx, document source.Document, item storedSourceItem, decision origin.Decision, now time.Time) error {
+	plain, err := s.itemRecordBytes(item.Name, item.ExternalKey, item.Fingerprint, decision.NodeID, derefNode(item.Node))
+	if err != nil {
+		return catalog.ErrUnavailable
+	}
+	defer clear(plain)
+	envelope, wrapping, _, err := s.sealRecord(t.scope, secretbox.TableSourceItems, item.ID, document.Metadata.Revision, plain)
+	if err != nil {
+		return err
+	}
+	if err := t.q.UpdateSourceItem(ctx, dbgen.UpdateSourceItemParams{ScopeID: dbID(t.scope), ID: dbID(item.ID), Envelope: envelope, Wrapping: wrapping,
+		BaseRevision: document.Metadata.Revision, LastSeenAt: pgtype.Timestamptz{Time: now, Valid: true}, State: "conflict"}); err != nil {
+		return err
+	}
+	binding, err := t.loadBindingByItem(ctx, item.ID)
+	if errors.Is(err, catalog.ErrNotFound) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	binding.State = override.Conflict
+	binding.Revision++
+	return t.saveBinding(ctx, binding)
 }
 
 func (s *Sources) updateBoundNode(ctx context.Context, t *catalogTx, document source.Document, payload refreshPayload, candidate parsedCandidate, item storedSourceItem, decision origin.Decision) error {
@@ -413,28 +450,44 @@ func (s *Sources) updateBoundNode(ctx context.Context, t *catalogTx, document so
 	if !ok {
 		return catalog.ErrInvalidInput
 	}
-	next := candidate.Node
+	binding, bindErr := t.loadBindingByNode(ctx, resource.Metadata.ResourceID)
+	patch := override.Document{}
+	if bindErr == nil {
+		patch = binding.Patch
+	} else if !errors.Is(bindErr, catalog.ErrNotFound) {
+		return bindErr
+	}
+	baseName := candidate.Name
+	if patch.Name != nil {
+		baseName = resource.Metadata.Name
+	}
+	next, name, _, err := override.Merge(candidate.Node, baseName, patch)
+	if err != nil {
+		return catalog.ErrInvalidInput
+	}
 	next.Origin = node.Origin
 	if next.Origin == nil {
 		next.Origin = &ir.Origin{SourceResourceID: document.Metadata.ResourceID, SourceItemID: item.ID, MatchMethod: ir.MatchMethod(decision.Method)}
+	} else {
+		next.Origin.MatchMethod = ir.MatchMethod(decision.Method)
+		next.Origin.SourceItemID = item.ID
+		next.Origin.SourceResourceID = document.Metadata.ResourceID
 	}
 	updated, err := t.Update(ctx, resource.Metadata.ResourceID, resource.Metadata.Revision, catalog.UpdateInput{
-		Name: resource.Metadata.Name, Tags: resource.Metadata.Tags, Enabled: resource.Metadata.Enabled, Payload: &next})
+		Name: name, Tags: resource.Metadata.Tags, Enabled: resource.Metadata.Enabled, Payload: &next})
 	if err != nil {
 		return err
 	}
-	binding, err := t.q.GetNodeBindingByNode(ctx, dbgen.GetNodeBindingByNodeParams{ScopeID: dbID(t.scope), NodeID: dbID(updated.Metadata.ResourceID)})
-	if err == nil {
-		if err := t.q.UpdateNodeBinding(ctx, dbgen.UpdateNodeBindingParams{ScopeID: dbID(t.scope), NodeID: dbID(updated.Metadata.ResourceID),
-			BindingRevision: binding.BindingRevision + 1, MatchMethod: string(decision.Method)}); err != nil {
-			return err
-		}
-	} else if errors.Is(catalogError(err), catalog.ErrNotFound) {
-		if err := t.q.InsertNodeBinding(ctx, dbgen.InsertNodeBindingParams{NodeID: dbID(updated.Metadata.ResourceID), ScopeID: dbID(t.scope),
-			SourceItemID: dbID(item.ID), BindingRevision: 1, MatchMethod: string(decision.Method)}); err != nil {
-			return err
-		}
-	} else {
+	if bindErr != nil {
+		binding = override.Binding{NodeID: updated.Metadata.ResourceID, SourceItemID: item.ID, SourceResourceID: document.Metadata.ResourceID, Revision: 0}
+	}
+	binding.SourceItemID = item.ID
+	binding.SourceResourceID = document.Metadata.ResourceID
+	binding.Method = ir.MatchMethod(decision.Method)
+	binding.State = override.Active
+	binding.Patch = patch
+	binding.Revision++
+	if err := t.saveBinding(ctx, binding); err != nil {
 		return err
 	}
 	if payload.ActorID.Validate() == nil && payload.RequestID != "" {
@@ -455,8 +508,10 @@ func (s *Sources) createBoundNode(ctx context.Context, t *catalogTx, document so
 	if err != nil {
 		return err
 	}
-	if err := t.q.InsertNodeBinding(ctx, dbgen.InsertNodeBindingParams{NodeID: dbID(created.Metadata.ResourceID), ScopeID: dbID(t.scope),
-		SourceItemID: dbID(item.ID), BindingRevision: 1, MatchMethod: string(method)}); err != nil {
+	if err := t.saveBinding(ctx, override.Binding{
+		NodeID: created.Metadata.ResourceID, SourceItemID: item.ID, SourceResourceID: document.Metadata.ResourceID,
+		Revision: 1, Method: method, State: override.Active,
+	}); err != nil {
 		return err
 	}
 	if payload.ActorID.Validate() == nil && payload.RequestID != "" {
@@ -464,6 +519,13 @@ func (s *Sources) createBoundNode(ctx context.Context, t *catalogTx, document so
 			Revision: created.Metadata.Revision, RequestID: payload.RequestID, Action: catalog.AuditNodeCreate})
 	}
 	return nil
+}
+
+func derefNode(node *ir.Node) ir.Node {
+	if node == nil {
+		return ir.Node{}
+	}
+	return *node
 }
 
 func (s *Sources) nodeRecords(ctx context.Context, t *catalogTx, sourceID ir.ID, items []storedSourceItem) ([]origin.Record, error) {

@@ -1930,6 +1930,15 @@ export interface components {
             source_item_id: components["schemas"]["UUID"];
             source_resource_id: components["schemas"]["UUID"];
         };
+        NodeOriginBinding: {
+            binding_revision: components["schemas"]["Revision"];
+            /** @enum {string} */
+            match_method: "stable_external_key" | "manual_binding" | "exact_fingerprint";
+            origin_state: components["schemas"]["OriginState"];
+            overridden_fields: components["schemas"]["SafeFieldPath"][];
+            source_item_id: components["schemas"]["UUID"];
+            source_resource_id: components["schemas"]["UUID"];
+        };
         /** @description Only these typed fields are writable. Endpoint/transport/features are whole-object replacements; auth/security use the documented typed merge. No arbitrary merge-patch, scope, revision, epoch, origin or native dependency fields. */
         NodePatch: {
             auth?: components["schemas"]["NodeAuthPatch"];
@@ -1939,10 +1948,15 @@ export interface components {
             security?: components["schemas"]["NodeSecurityPatch"];
             transport?: components["schemas"]["NodeTransport"];
         };
+        /** @description Bound nodes write overlay fields, not the source baseline. Overlay, restore_fields and origin_action require binding_revision. Protocol cannot be overlaid. */
         NodePatchRequest: {
+            binding_revision?: components["schemas"]["Revision"];
             enabled?: boolean;
             name?: components["schemas"]["Name"];
             node?: components["schemas"]["NodePatch"];
+            origin_action?: components["schemas"]["OriginAction"];
+            restore_fields?: components["schemas"]["SafeFieldPath"][];
+            source_item_id?: components["schemas"]["UUID"];
             tags?: components["schemas"]["Tags"];
         };
         NodePrecondition: {
@@ -1969,6 +1983,7 @@ export interface components {
             node_id: components["schemas"]["UUID"];
         };
         NodeResource: {
+            binding?: components["schemas"]["NodeOriginBinding"];
             metadata: components["schemas"]["ResourceMetadata"];
             node: components["schemas"]["NodeRedacted"];
         };
@@ -1992,6 +2007,10 @@ export interface components {
             /** @constant */
             mode: "none";
         };
+        /** @enum {string} */
+        OriginAction: "bind" | "skip";
+        /** @enum {string} */
+        OriginState: "active" | "stale" | "conflict";
         /** @enum {string} */
         OutputFormat: "xray_json" | "singbox_json" | "mihomo_yaml";
         PageInfo: {
@@ -2612,6 +2631,15 @@ export interface components {
             max_redirects: number;
             timeout_ms: number;
         };
+        SourceItem: {
+            external_key?: string;
+            id: components["schemas"]["UUID"];
+            name: components["schemas"]["Name"];
+            node_id?: components["schemas"]["UUID"];
+            /** @enum {string} */
+            state: "active" | "missing" | "conflict";
+            suggested_node_id?: components["schemas"]["UUID"];
+        };
         SourceListResponse: {
             data: components["schemas"]["SourceResource"][];
             page: components["schemas"]["PageInfo"];
@@ -2660,7 +2688,9 @@ export interface components {
             /** @enum {string} */
             missing_policy: "retain" | "disable";
         };
+        /** @description List responses omit items. A single GET includes current source items without secrets. */
         SourceResource: {
+            items?: components["schemas"]["SourceItem"][];
             metadata: components["schemas"]["ResourceMetadata"];
             source: components["schemas"]["SourceRedacted"];
         };

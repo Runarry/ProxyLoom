@@ -73,9 +73,19 @@ type SourceRedacted struct {
 	LastError       *ErrorBody           `json:"last_error,omitempty"`
 }
 
+type SourceItem struct {
+	ID              ir.ID  `json:"id"`
+	State           string `json:"state"`
+	Name            string `json:"name"`
+	ExternalKey     string `json:"external_key,omitempty"`
+	NodeID          ir.ID  `json:"node_id,omitempty"`
+	SuggestedNodeID ir.ID  `json:"suggested_node_id,omitempty"`
+}
+
 type SourceResource struct {
 	Metadata ResourceMetadata `json:"metadata"`
 	Source   SourceRedacted   `json:"source"`
+	Items    []SourceItem     `json:"items,omitempty"`
 }
 
 type SourceResponse struct {
