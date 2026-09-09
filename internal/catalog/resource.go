@@ -92,9 +92,15 @@ func Canonical(resource ir.Resource) ([]byte, error) {
 	if err := resource.Validate(); err != nil {
 		return nil, ErrInvalidInput
 	}
-	// Source persistence is outside this window. Do not admit unchecked provenance links.
 	if node, ok := resource.Payload.(*ir.Node); ok && node.Origin != nil {
-		return nil, ErrInvalidReference
+		if node.Origin.SourceResourceID.Validate() != nil || node.Origin.SourceItemID.Validate() != nil {
+			return nil, ErrInvalidReference
+		}
+		switch node.Origin.MatchMethod {
+		case ir.StableExternalKey, ir.ManualBinding, ir.ExactFingerprint:
+		default:
+			return nil, ErrInvalidReference
+		}
 	}
 	data, err := json.Marshal(resource)
 	if err != nil {
@@ -128,8 +134,8 @@ func payloadKind(payload ir.ResourcePayload) ir.ResourceKind {
 // ExtractReferences derives the single reference fact source from the payload.
 // Editing NodeRefs float to the head; storage resolves scope and availability.
 func ExtractReferences(resource ir.Resource) ([]Reference, error) {
-	if _, err := Canonical(resource); err != nil {
-		return nil, err
+	if err := resource.Validate(); err != nil || payloadKind(resource.Payload) == "" {
+		return nil, ErrInvalidInput
 	}
 	refs := []Reference{}
 	if chain, ok := resource.Payload.(*ir.Chain); ok {

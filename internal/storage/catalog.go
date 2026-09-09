@@ -62,6 +62,13 @@ func (c *Catalog) Head(ctx context.Context, scope, id ir.ID) (ir.Resource, error
 	if !validIDs(scope, id) {
 		return ir.Resource{}, catalog.ErrInvalidInput
 	}
+	index, err := c.q.GetResourceIndex(ctx, dbgen.GetResourceIndexParams{ScopeID: dbID(scope), ID: dbID(id)})
+	if err != nil {
+		return ir.Resource{}, catalogError(err)
+	}
+	if index.DeletedAt.Valid || (index.Kind != string(ir.KindNode) && index.Kind != string(ir.KindChain)) {
+		return ir.Resource{}, catalog.ErrNotFound
+	}
 	r, err := c.q.GetResourceHead(ctx, dbgen.GetResourceHeadParams{ScopeID: dbID(scope), ID: dbID(id)})
 	if err != nil {
 		return ir.Resource{}, catalogError(err)

@@ -32,6 +32,10 @@ const (
 	AuditChainCreate    MutationAction = "chain.create"
 	AuditChainUpdate    MutationAction = "chain.update"
 	AuditChainDelete    MutationAction = "chain.delete"
+	AuditSourceCreate   MutationAction = "source.create"
+	AuditSourceUpdate   MutationAction = "source.update"
+	AuditSourceDelete   MutationAction = "source.delete"
+	AuditSourceRefresh  MutationAction = "source.refresh"
 )
 
 // MutationAudit contains only server-selected identifiers and allowlisted
@@ -51,7 +55,7 @@ func (a MutationAudit) Validate() error {
 		return ErrInvalidInput
 	}
 	switch a.Action {
-	case AuditNodeCreate, AuditNodeUpdate, AuditNodeDelete, AuditNodeClone, AuditNodeAddTags, AuditNodeRemoveTags, AuditNodeSetEnabled, AuditImportCommit, AuditChainCreate, AuditChainUpdate, AuditChainDelete:
+	case AuditNodeCreate, AuditNodeUpdate, AuditNodeDelete, AuditNodeClone, AuditNodeAddTags, AuditNodeRemoveTags, AuditNodeSetEnabled, AuditImportCommit, AuditChainCreate, AuditChainUpdate, AuditChainDelete, AuditSourceCreate, AuditSourceUpdate, AuditSourceDelete, AuditSourceRefresh:
 		return nil
 	}
 	return ErrInvalidInput

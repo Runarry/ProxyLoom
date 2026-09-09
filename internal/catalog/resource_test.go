@@ -258,8 +258,8 @@ func TestReferencesAndRejectedInput(t *testing.T) {
 	}
 	n := node(t, "trojan-a")
 	n.Origin = &ir.Origin{SourceResourceID: scope, SourceItemID: scope, MatchMethod: ir.ManualBinding}
-	if _, err := catalog.New(scope, catalog.CreateInput{Name: "origin", Payload: n}); err != catalog.ErrInvalidReference {
-		t.Fatal("unsupported source reference accepted")
+	if _, err := catalog.New(scope, catalog.CreateInput{Name: "origin", Payload: n}); err != nil {
+		t.Fatal("confirmed source origin was rejected")
 	}
 	if _, err := catalog.New("secret-invalid-id", catalog.CreateInput{Name: "invalid", Payload: node(t, "trojan-a")}); err != catalog.ErrInvalidInput {
 		t.Fatal("unsafe invalid scope")
