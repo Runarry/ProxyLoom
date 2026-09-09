@@ -13,6 +13,7 @@ import (
 
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/ir"
+	"github.com/Runarry/ProxyLoom/internal/jobs"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
 	"github.com/jackc/pgx/v5"
@@ -216,6 +217,23 @@ func (t *catalogTx) mutate(fn func() (ir.Resource, error)) (ir.Resource, error) 
 	return r, nil
 }
 
+func (t *catalogTx) runLocked(fn func() error) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if !t.active {
+		return catalog.ErrTransactionClosed
+	}
+	if t.failed != nil {
+		return t.failed
+	}
+	if err := fn(); err != nil {
+		t.failed = catalogError(err)
+		return t.failed
+	}
+	t.dirty = true
+	return nil
+}
+
 func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.Resource, error) {
 	return t.mutate(func() (ir.Resource, error) {
 		r, err := catalog.New(t.scope, input)
@@ -341,7 +359,10 @@ func (t *catalogTx) persist(ctx context.Context, resource ir.Resource, refs []ca
 		return err
 	}
 	defer clear(plain)
-	m := resource.Metadata
+	return t.persistPlain(ctx, resource.Metadata, plain, refs, deleted)
+}
+
+func (t *catalogTx) persistPlain(ctx context.Context, m ir.Metadata, plain []byte, refs []catalog.Reference, deleted bool) error {
 	payload, wrapping, err := t.store.box.Seal(secretbox.Context{ScopeID: t.scope, Table: secretbox.TableResourceRevisions,
 		ObjectID: m.ResourceID, Revision: m.Revision, SchemaVersion: m.SchemaVersion}, plain)
 	if err != nil {
@@ -472,7 +493,7 @@ func catalogError(err error) error {
 	}
 	for _, safe := range []error{catalog.ErrNotFound, catalog.ErrRevisionConflict, catalog.ErrInvalidReference,
 		catalog.ErrInvalidInput, catalog.ErrUnavailable, catalog.ErrCrypto, catalog.ErrIdempotencyConflict,
-		catalog.ErrWrapConflict, catalog.ErrTransactionClosed, context.Canceled, context.DeadlineExceeded} {
+		catalog.ErrWrapConflict, catalog.ErrTransactionClosed, jobs.ErrConflict, jobs.ErrInvalidInput, context.Canceled, context.DeadlineExceeded} {
 		if errors.Is(err, safe) {
 			return safe
 		}

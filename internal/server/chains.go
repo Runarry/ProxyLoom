@@ -10,6 +10,7 @@ import (
 
 	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/Runarry/ProxyLoom/internal/catalog"
+	"github.com/Runarry/ProxyLoom/internal/depgraph"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/gin-gonic/gin"
 )
@@ -50,7 +51,7 @@ func checkedChain(resource ir.Resource, expected int64) error {
 	return nil
 }
 
-func requireEnabledHops(ctx context.Context, tx catalog.AuditedTx, hops []ir.NodeRef) error {
+func requireEnabledHops(ctx context.Context, tx catalog.AuditedTx, scope ir.ID, hops []ir.NodeRef) error {
 	if len(hops) != 2 {
 		return apicontract.NewError(apicontract.ValidationFailed, apicontract.Detail{FieldPath: "/hops"})
 	}
@@ -75,7 +76,27 @@ func requireEnabledHops(ctx context.Context, tx catalog.AuditedTx, hops []ir.Nod
 	if len(details) > 0 {
 		return apicontract.NewError(apicontract.ValidationFailed, details...)
 	}
-	return nil
+	resources := map[ir.ID]ir.Resource{}
+	for _, hop := range hops {
+		resource, err := tx.Probe(ctx, hop.NodeID)
+		if err != nil {
+			return err
+		}
+		resources[resource.Metadata.ResourceID] = resource
+	}
+	draft, err := catalog.New(scope, catalog.CreateInput{Name: "expand", Enabled: true, Payload: &ir.Chain{SchemaVersion: ir.SchemaVersion, Hops: hops, FailurePolicy: ir.FailClosed}})
+	if err != nil {
+		return err
+	}
+	resources[draft.Metadata.ResourceID] = draft
+	result := depgraph.Expand(resources, []ir.ID{draft.Metadata.ResourceID}, depgraph.Options{})
+	if len(result.Diagnostics) == 0 {
+		return nil
+	}
+	for _, diagnostic := range result.Diagnostics {
+		details = append(details, apicontract.Detail{FieldPath: diagnostic.FieldPath, ResourceID: diagnostic.ResourceID})
+	}
+	return apicontract.NewError(apicontract.ValidationFailed, details...)
 }
 
 func (h *chainHandler) mutate(c *gin.Context, action catalog.MutationAction, change func(catalog.AuditedTx) (ir.Resource, error)) (ir.Resource, error) {
@@ -93,7 +114,7 @@ func (h *chainHandler) create(c *gin.Context) {
 		return
 	}
 	resource, err := h.mutate(c, catalog.AuditChainCreate, func(tx catalog.AuditedTx) (ir.Resource, error) {
-		if err := requireEnabledHops(c.Request.Context(), tx, request.Hops); err != nil {
+		if err := requireEnabledHops(c.Request.Context(), tx, nodeScope(c), request.Hops); err != nil {
 			return ir.Resource{}, err
 		}
 		return tx.Create(c.Request.Context(), input)
@@ -147,7 +168,7 @@ func (h *chainHandler) patch(c *gin.Context) {
 			return ir.Resource{}, err
 		}
 		chain := input.Payload.(*ir.Chain)
-		if err := requireEnabledHops(c.Request.Context(), tx, chain.Hops); err != nil {
+		if err := requireEnabledHops(c.Request.Context(), tx, nodeScope(c), chain.Hops); err != nil {
 			return ir.Resource{}, err
 		}
 		return tx.Update(c.Request.Context(), id, expected, input)

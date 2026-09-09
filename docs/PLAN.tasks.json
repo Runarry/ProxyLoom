@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-09 M1来源基座与两跳链窗口：T012/T013/T017 in_review；累计21项done，T008仍in_review，T048 in_progress，其余34项not_started。工程检查、秘密扫描、契约与真实PostgreSQL foundation通过。G1未关闭，能力unverified。",
+  "status_note": "2026-09-09 M1来源刷新与依赖展开窗口：T012/T013/T014/T017/T018 in_review；累计21项done，T008仍in_review，T048 in_progress，其余32项not_started。G1未关闭，能力unverified。",
   "tasks": [
     {
       "id": "T-001",
@@ -274,7 +274,8 @@
         "T-039"
       ],
       "acceptance": "同来源只有一个有效提交；重启后调度可恢复；超时、空响应、解析失败不空覆盖旧数据。\nAC-04、AC-05",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-014/acceptance.md"
     },
     {
       "id": "T-015",
@@ -348,7 +349,8 @@
         "T-017"
       ],
       "acceptance": "缺失、跨 scope、错类型、循环、超限均定位；显式排除必要依赖产生错误而非漏项。\nAC-08、AC-12、AC-13",
-      "status": "not_started"
+      "status": "in_review",
+      "evidence": "docs/evidence/T-018/acceptance.md"
     },
     {
       "id": "T-019",

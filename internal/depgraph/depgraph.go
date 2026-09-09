@@ -41,7 +41,7 @@ func Expand(resources map[ir.ID]ir.Resource, roots []ir.ID, options Options) Res
 			return
 		}
 		if seen[id] == 1 {
-			out.Diagnostics = append(out.Diagnostics, ir.Diagnostic{Code: ir.InvalidValue, Severity: ir.SeverityError, ResourceID: id, FieldPath: via, Message: "The dependency graph contains a cycle."})
+			out.Diagnostics = append(out.Diagnostics, ir.Diagnostic{Code: "DEPENDENCY_CYCLE", Severity: ir.SeverityError, ResourceID: id, FieldPath: via, Message: "The dependency graph contains a cycle."})
 			return
 		}
 		if seen[id] == 2 {

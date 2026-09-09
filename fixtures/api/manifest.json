@@ -5,6 +5,11 @@
     "valid": true
   },
   {
+    "file": "source-create.json",
+    "schema": "SourceCreateRequest",
+    "valid": true
+  },
+  {
     "file": "node-patch-clear.json",
     "schema": "NodePatchRequest",
     "valid": true,

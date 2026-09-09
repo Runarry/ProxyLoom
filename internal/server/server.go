@@ -39,6 +39,7 @@ type Dependencies struct {
 	Development    bool
 	TrustedProxies []string
 	Nodes          *NodeDependencies
+	Sources        SourceRepository
 	Imports        imports.Repository
 	Jobs           jobs.ManagementRepository
 	JobCursor      *apicontract.CursorCodec
@@ -107,6 +108,12 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 		if err := mountChains(router, authentication, *dependencies.Nodes); err != nil {
 			root.Close()
 			return nil, err
+		}
+		if dependencies.Sources != nil {
+			if err := mountSources(router, authentication, *dependencies.Nodes, dependencies.Sources); err != nil {
+				root.Close()
+				return nil, err
+			}
 		}
 	}
 	if dependencies.Imports != nil || dependencies.Jobs != nil {

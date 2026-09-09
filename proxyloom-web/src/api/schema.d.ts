@@ -2599,6 +2599,7 @@ export interface components {
             /** @constant */
             kind: "bearer";
         };
+        /** @description Creates an encrypted source revision. Ordinary GET responses return only url_display and authentication presence; the raw URL and secrets stay on the refresh execution path. */
         SourceCreateRequest: {
             enabled?: boolean;
             name: components["schemas"]["Name"];

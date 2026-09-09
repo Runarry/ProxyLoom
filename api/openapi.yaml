@@ -2280,6 +2280,7 @@ components:
         enabled:
           type: "boolean"
         source: { $ref: "#/components/schemas/SourceWrite" }
+      description: "Creates an encrypted source revision. Ordinary GET responses return only url_display and authentication presence; the raw URL and secrets stay on the refresh execution path."
     SourcePatchRequest:
       type: "object"
       additionalProperties: false
@@ -4985,7 +4986,7 @@ paths:
   /api/v1/sources:
     get:
       operationId: listSources
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List source metadata without fetch credentials or secret URLs
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -4995,7 +4996,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createSource
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a remote source with a constrained fetch policy
       requestBody:
         required: true
@@ -5014,7 +5015,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getSource
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read redacted source configuration and latest refresh status
       responses:
         '200': {$ref: '#/components/responses/SourceResponse'}
@@ -5024,7 +5025,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateSource
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create an immutable source revision with secret-preserving patches
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5045,7 +5046,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteSource
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete the source and stop new refreshes
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:
@@ -5062,7 +5063,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: refreshSource
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Enqueue an API Worker refresh with one active lease per source
       description: Captures the matched source revision; final commit also compares source and binding revisions. Never assigned to a Runner.
       parameters: [{$ref: '#/components/parameters/IfMatch'}, {$ref: '#/components/parameters/IdempotencyKey'}]

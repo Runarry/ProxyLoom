@@ -87,6 +87,13 @@ type ChainPage struct {
 	Next  *Position
 }
 
+type SourceListOptions struct {
+	Tag     string
+	Enabled *bool
+	After   *Position
+	Limit   int
+}
+
 type NodeRevisionPage struct {
 	Items []ir.Resource
 	Next  int64

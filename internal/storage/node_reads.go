@@ -36,6 +36,20 @@ func (t *catalogTx) readHead(ctx context.Context, id ir.ID, latchMissing bool) (
 		t.failed = catalog.ErrInvalidInput
 		return ir.Resource{}, t.failed
 	}
+	index, err := t.q.GetResourceIndex(ctx, dbgen.GetResourceIndexParams{ScopeID: dbID(t.scope), ID: dbID(id)})
+	if err != nil {
+		mapped := catalogError(err)
+		if latchMissing || (mapped != catalog.ErrNotFound && mapped != catalog.ErrInvalidInput) {
+			t.failed = mapped
+		}
+		return ir.Resource{}, mapped
+	}
+	if index.DeletedAt.Valid || (index.Kind != string(ir.KindNode) && index.Kind != string(ir.KindChain)) {
+		if latchMissing {
+			t.failed = catalog.ErrNotFound
+		}
+		return ir.Resource{}, catalog.ErrNotFound
+	}
 	row, err := t.q.GetResourceHead(ctx, dbgen.GetResourceHeadParams{ScopeID: dbID(t.scope), ID: dbID(id)})
 	var resource ir.Resource
 	if err == nil {

@@ -1,0 +1,25 @@
+{
+  "name": "Example source",
+  "tags": ["feed"],
+  "enabled": true,
+  "source": {
+    "schema_version": 1,
+    "url": "https://feed.example.invalid/subscription",
+    "format": "uri_list",
+    "auth": {
+      "kind": "none"
+    },
+    "refresh_policy": {
+      "enabled": true,
+      "interval_seconds": 3600,
+      "commit_mode": "manual",
+      "missing_policy": "retain"
+    },
+    "fetch_limits": {
+      "timeout_ms": 15000,
+      "max_compressed_bytes": 1048576,
+      "max_decoded_bytes": 1048576,
+      "max_redirects": 3
+    }
+  }
+}

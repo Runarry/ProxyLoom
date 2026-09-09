@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "task": "T-014",
+  "summary": "Mount remote source management and source_refresh enqueue routes, mark the existing OpenAPI operations implemented, and keep source documents as encrypted catalog revisions rather than compile IR.",
+  "documents": [
+    "docs/adr/0011-m1-source-refresh-and-depgraph.md",
+    "docs/m1-source-refresh-contract.md"
+  ],
+  "fixtures": [
+    "fixtures/api/implemented-routes.json",
+    "fixtures/api/source-create.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/sources.sql.go",
+    "internal/storage/generated/querier.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "1fc734e4d3c10e12e30c476a280c9c1ce12981cec0294322b86b476e9e05da7e",
+      "after_sha256": "ecbce8066311524d3613b58ed98e38f75713184b77e5cb862aaa6a252158ebd7",
+      "changes": [
+        {
+          "pointer": "/components/schemas/SourceCreateRequest/description",
+          "before_sha256": null,
+          "after_sha256": "e145806b98b2ee341f51f8732bd7fa32e0bae5836f25a85b60c3c69f361c351a"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1sources/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1sources/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1sources~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1sources~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1sources~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1sources~1{id}~1refresh/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@
 
 来源是 `resources.kind=source` 的加密修订，不是编译 IR。普通 GET 只返回 `url_display`（scheme+authority）和认证存在性。URL 与请求头只在刷新执行路径解密。
 
-刷新由 API Worker 执行 `source_refresh`，`jobs.batch_id` 等于 source id。同一来源最多一个 queued／leased／running 任务；冲突返回 409。Runner 不能领取该类型。
+管理 HTTP 挂载 `GET/POST /api/v1/sources`、`GET/PATCH/DELETE /api/v1/sources/{id}` 与 `POST /api/v1/sources/{id}/refresh`。刷新由 API Worker 执行 `source_refresh`，`jobs.batch_id` 等于 source id。同一来源最多一个 queued／leased／running 任务；冲突返回 409。Runner 不能领取该类型。
 
 抓取使用 `internal/safefetch`。管理员保存的 `http://` URL 视为显式允许 HTTP；默认生产拨号不允许私网。超时、空响应、非 2xx、解析失败只记录 `last_error`，不删除或替换最近成功快照与条目。
 

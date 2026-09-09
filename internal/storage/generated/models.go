@@ -167,6 +167,14 @@ type JobResult struct {
 	CreatedAt    pgtype.Timestamptz
 }
 
+type NodeBinding struct {
+	NodeID          pgtype.UUID
+	ScopeID         pgtype.UUID
+	SourceItemID    pgtype.UUID
+	BindingRevision int64
+	MatchMethod     string
+}
+
 type ProxyloomSchemaMigration struct {
 	Version   int64
 	Name      string
@@ -252,6 +260,41 @@ type Session struct {
 	ExpiresAt   pgtype.Timestamptz
 	LastSeenAt  pgtype.Timestamptz
 	ReauthAt    pgtype.Timestamptz
+}
+
+type SourceItem struct {
+	ID           pgtype.UUID
+	ScopeID      pgtype.UUID
+	SourceID     pgtype.UUID
+	ExternalKey  pgtype.Text
+	Envelope     []byte
+	Wrapping     []byte
+	BaseRevision int64
+	LastSeenAt   pgtype.Timestamptz
+	State        string
+}
+
+type SourceSchedule struct {
+	SourceID       pgtype.UUID
+	ScopeID        pgtype.UUID
+	NextRunAt      pgtype.Timestamptz
+	BackoffSeconds int32
+	LastJobID      pgtype.UUID
+}
+
+type SourceSnapshot struct {
+	ID             pgtype.UUID
+	ScopeID        pgtype.UUID
+	SourceID       pgtype.UUID
+	SourceRevision int64
+	Envelope       []byte
+	Wrapping       []byte
+	ContentHmac    []byte
+	HttpStatus     pgtype.Int4
+	ContentType    pgtype.Text
+	DecodedBytes   int32
+	State          string
+	CreatedAt      pgtype.Timestamptz
 }
 
 type User struct {

@@ -16,6 +16,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
 	"github.com/Runarry/ProxyLoom/internal/runnercontrol"
+	"github.com/Runarry/ProxyLoom/internal/safefetch"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	"github.com/Runarry/ProxyLoom/internal/server"
 	"github.com/Runarry/ProxyLoom/internal/storage"
@@ -94,12 +95,16 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	if err != nil {
 		return errors.New("import_configuration_invalid")
 	}
+	sourceStore, err := storage.NewSources(catalogStore, jobStore, &safefetch.Client{})
+	if err != nil {
+		return errors.New("source_configuration_invalid")
+	}
 	cursor, err := apicontract.NewCursorCodec(jobStore)
 	if err != nil {
 		return errors.New("cursor_configuration_invalid")
 	}
 	worker, err := jobs.NewWorker(jobStore, jobs.WorkerConfig{
-		WorkerID: jobs.NewID(), Handlers: map[jobs.Type]jobs.Handler{jobs.ImportParse: importStore.HandleParse},
+		WorkerID: jobs.NewID(), Handlers: map[jobs.Type]jobs.Handler{jobs.ImportParse: importStore.HandleParse, jobs.SourceRefresh: sourceStore.HandleRefresh},
 	})
 	if err != nil {
 		return errors.New("worker_configuration_invalid")
@@ -135,7 +140,7 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		Identity: identities, PublicURL: cfg.PublicURL, Development: cfg.Development,
 		TrustedProxies: cfg.TrustedProxies(),
 		Nodes:          &server.NodeDependencies{Repository: catalogStore, Cursor: cursor},
-		Imports:        importStore, Jobs: jobStore, JobCursor: cursor,
+		Sources:        sourceStore, Imports: importStore, Jobs: jobStore, JobCursor: cursor,
 	}, logger)
 	if err != nil {
 		return err
@@ -146,11 +151,12 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	finished := make(chan error, 4)
-	count := 3
+	finished := make(chan error, 5)
+	count := 4
 	go func() { finished <- server.Serve(runCtx, cfg.HTTPAddr, handler, logger) }()
 	go func() { finished <- worker.Run(runCtx) }()
 	go func() { finished <- expireImports(runCtx, importStore, logger) }()
+	go func() { finished <- scheduleSources(runCtx, sourceStore, logger) }()
 	if internalListener != nil {
 		count++
 		go func() { finished <- internalListener.Serve(runCtx, internalConfig.Address, logger) }()

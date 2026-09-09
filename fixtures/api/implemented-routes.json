@@ -56,6 +56,18 @@
   "/api/v1/imports/{id}/commit": [
     "post"
   ],
+  "/api/v1/sources": [
+    "get",
+    "post"
+  ],
+  "/api/v1/sources/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/sources/{id}/refresh": [
+    "post"
+  ],
   "/api/v1/jobs": [
     "get"
   ],

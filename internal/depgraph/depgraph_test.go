@@ -46,7 +46,7 @@ func TestExpandChainIncludesHopsAndRejectsMissingExcludeAndCycles(t *testing.T) 
 		}
 		return []catalog.Reference{{TargetID: a.Metadata.ResourceID, ExpectedKind: ir.KindNode, Path: "/cycle"}}, nil
 	}})
-	if !hasCode(cyclic, ir.InvalidValue) {
+	if !hasCode(cyclic, "DEPENDENCY_CYCLE") {
 		t.Fatal("cycle was not diagnosed")
 	}
 
