@@ -1,10 +1,12 @@
 package server
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/apicontract"
@@ -51,7 +53,7 @@ func (h *nodeHandler) export(c *gin.Context) {
 		h.fail(c, err)
 		return
 	}
-	if request.Format != "uri_list" && request.Format != "proxyloom_json" {
+	if request.Format != "uri_list" && request.Format != "base64_uri_list" && request.Format != "proxyloom_json" {
 		h.fail(c, apicontract.NewError(apicontract.ValidationFailed, apicontract.Detail{FieldPath: "/format"}))
 		return
 	}
@@ -74,7 +76,7 @@ func (h *nodeHandler) export(c *gin.Context) {
 	}
 	artifact, err := encodeExport(request.Format, nodes)
 	if err != nil {
-		h.fail(c, apicontract.NewError(apicontract.ValidationFailed))
+		h.fail(c, err)
 		return
 	}
 	response := apicontract.ExportResponse{RequestID: apicontract.RequestID(c.Request.Context()), Data: apicontract.ExportData{
@@ -85,25 +87,27 @@ func (h *nodeHandler) export(c *gin.Context) {
 
 func encodeExport(format string, nodes []ir.Resource) (apicontract.ExportedArtifact, error) {
 	switch format {
-	case "uri_list":
+	case "uri_list", "base64_uri_list":
 		lines := make([]string, 0, len(nodes))
-		for _, resource := range nodes {
+		for i, resource := range nodes {
 			node, ok := resource.Payload.(*ir.Node)
 			if !ok {
 				return apicontract.ExportedArtifact{}, catalog.ErrInvalidInput
 			}
 			uri, err := importparse.EncodeURI(resource.Metadata.Name, *node)
 			if err != nil {
-				return apicontract.ExportedArtifact{}, err
+				path := "/node"
+				var diagnostic *importparse.ExportError
+				if errors.As(err, &diagnostic) {
+					path = diagnostic.FieldPath
+				}
+				return apicontract.ExportedArtifact{}, apicontract.NewError(apicontract.ValidationFailed, apicontract.Detail{FieldPath: "/resources/" + strconv.Itoa(i) + path, ResourceID: resource.Metadata.ResourceID})
 			}
 			lines = append(lines, uri)
 		}
-		content := ""
-		for i, line := range lines {
-			if i > 0 {
-				content += "\n"
-			}
-			content += line
+		content := strings.Join(lines, "\n")
+		if format == "base64_uri_list" {
+			return apicontract.ExportedArtifact{Filename: "nodes-base64.txt", MediaType: "text/plain", Content: base64.StdEncoding.EncodeToString([]byte(content)), ContainsSecrets: true}, nil
 		}
 		return apicontract.ExportedArtifact{Filename: "nodes-uri.txt", MediaType: "text/plain", Content: content, ContainsSecrets: true}, nil
 	case "proxyloom_json":

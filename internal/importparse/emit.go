@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/netip"
 	"net/url"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,23 +14,71 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/ir"
 )
 
+// ExportError reports a field without retaining any secret-bearing values.
+type ExportError struct{ FieldPath string }
+
+func (*ExportError) Error() string { return "export_unrepresentable" }
+
 func EncodeURI(name string, node ir.Node) (string, error) {
-	if node.Validate() != nil || !safeText(name) {
-		return "", fmt.Errorf("export_unrepresentable")
+	if node.Validate() != nil {
+		return "", &ExportError{FieldPath: "/node"}
 	}
-	if node.Features.UDP != nil || node.Features.Multiplex != nil {
-		return "", fmt.Errorf("export_unrepresentable")
+	if !safeText(name) {
+		return "", &ExportError{FieldPath: "/name"}
 	}
+	if node.Features.UDP != nil {
+		return "", &ExportError{FieldPath: "/node/features/udp"}
+	}
+	if node.Features.Multiplex != nil {
+		return "", &ExportError{FieldPath: "/node/features/multiplex"}
+	}
+	if security, ok := node.Security.(*ir.TLSSecurity); ok && security.VerifyCertificate != nil && !*security.VerifyCertificate {
+		return "", &ExportError{FieldPath: "/node/security/verify_certificate"}
+	}
+	var uri string
+	var err error
 	switch node.Protocol {
 	case ir.Shadowsocks:
-		return encodeShadowsocks(name, node)
+		uri, err = encodeShadowsocks(name, node)
 	case ir.VMess:
-		return encodeVMessURI(name, node)
+		uri, err = encodeVMessURI(name, node)
 	case ir.VLESS, ir.Trojan, ir.SOCKS5, ir.HTTP:
-		return encodeURLNode(name, node)
+		uri, err = encodeURLNode(name, node)
 	default:
-		return "", fmt.Errorf("export_unrepresentable")
+		return "", &ExportError{FieldPath: "/node/protocol"}
 	}
+	if err != nil {
+		return "", &ExportError{FieldPath: "/node"}
+	}
+	// Check against the supported import dialect, so no encoded field can be
+	// silently discarded. Origin is local bookkeeping, not connection data.
+	parsed := ParseURI(uri)
+	if !parsed.Valid() {
+		path := "/node"
+		if len(parsed.Diagnostics) > 0 && parsed.Diagnostics[0].FieldPath != "" {
+			path += parsed.Diagnostics[0].FieldPath
+		}
+		return "", &ExportError{FieldPath: path}
+	}
+	if parsed.Name != name {
+		return "", &ExportError{FieldPath: "/name"}
+	}
+	for _, field := range []struct {
+		path          string
+		before, after any
+	}{
+		{"/node/protocol", node.Protocol, parsed.Node.Protocol},
+		{"/node/endpoint", node.Endpoint, parsed.Node.Endpoint},
+		{"/node/auth", node.Auth, parsed.Node.Auth},
+		{"/node/transport", node.Transport, parsed.Node.Transport},
+		{"/node/security", node.Security, parsed.Node.Security},
+		{"/node/features", node.Features, parsed.Node.Features},
+	} {
+		if !reflect.DeepEqual(field.before, field.after) {
+			return "", &ExportError{FieldPath: field.path}
+		}
+	}
+	return uri, nil
 }
 
 func encodeShadowsocks(name string, node ir.Node) (string, error) {

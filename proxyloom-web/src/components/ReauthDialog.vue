@@ -18,7 +18,7 @@ async function submit() {
 
 <template>
   <AppDialog title="再次验证身份" @close="auth.finishReauth(false)">
-    <p class="muted">查看节点秘密前，请输入管理员密码。验证有效期为 5 分钟。</p>
+    <p class="muted">查看或导出节点秘密前，请输入管理员密码。验证有效期为 5 分钟。</p>
     <ErrorNotice :error="error" />
     <form @submit.prevent="submit">
       <label>管理员密码<input v-model="password" type="password" autocomplete="current-password" required autofocus maxlength="1024" /></label>

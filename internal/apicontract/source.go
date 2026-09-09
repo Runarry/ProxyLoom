@@ -60,17 +60,18 @@ type SourceAuthRedacted struct {
 }
 
 type SourceRedacted struct {
-	SchemaVersion   int                  `json:"schema_version"`
-	URLDisplay      string               `json:"url_display"`
-	HasURL          bool                 `json:"has_url"`
-	Format          source.Format        `json:"format"`
-	Auth            SourceAuthRedacted   `json:"auth"`
-	RefreshPolicy   source.RefreshPolicy `json:"refresh_policy"`
-	FetchLimits     source.FetchLimits   `json:"fetch_limits"`
-	BindingRevision Revision             `json:"binding_revision"`
-	LastSuccessAt   *time.Time           `json:"last_success_at,omitempty"`
-	LastJobID       ir.ID                `json:"last_job_id,omitempty"`
-	LastError       *ErrorBody           `json:"last_error,omitempty"`
+	SchemaVersion        int                  `json:"schema_version"`
+	URLDisplay           string               `json:"url_display"`
+	HasURL               bool                 `json:"has_url"`
+	Format               source.Format        `json:"format"`
+	Auth                 SourceAuthRedacted   `json:"auth"`
+	RefreshPolicy        source.RefreshPolicy `json:"refresh_policy"`
+	FetchLimits          source.FetchLimits   `json:"fetch_limits"`
+	BindingRevision      Revision             `json:"binding_revision"`
+	LastSuccessAt        *time.Time           `json:"last_success_at,omitempty"`
+	LastJobID            ir.ID                `json:"last_job_id,omitempty"`
+	LatestPreviewBatchID ir.ID                `json:"latest_preview_batch_id,omitempty"`
+	LastError            *ErrorBody           `json:"last_error,omitempty"`
 }
 
 type SourceItem struct {
@@ -174,7 +175,8 @@ func NewSourceResponse(requestID string, document source.Document) (SourceRespon
 	}
 	read := SourceRedacted{SchemaVersion: document.Source.SchemaVersion, URLDisplay: display, HasURL: document.Source.URL != "",
 		Format: document.Source.Format, RefreshPolicy: document.Source.RefreshPolicy, FetchLimits: document.Source.FetchLimits,
-		BindingRevision: Revision(document.Source.BindingRevision), LastSuccessAt: document.Source.LastSuccessAt, LastJobID: document.Source.LastJobID}
+		BindingRevision: Revision(document.Source.BindingRevision), LastSuccessAt: document.Source.LastSuccessAt, LastJobID: document.Source.LastJobID,
+		LatestPreviewBatchID: document.Source.LatestPreviewBatchID}
 	switch document.Source.Auth.Kind {
 	case source.AuthNone:
 		read.Auth = SourceAuthRedacted{Kind: source.AuthNone}

@@ -60,6 +60,9 @@ type ImportBatch struct {
 	Diagnostics    []byte
 	CreatedAt      pgtype.Timestamptz
 	ExpiresAt      pgtype.Timestamptz
+	SourceID       pgtype.UUID
+	SnapshotID     pgtype.UUID
+	SourceRevision pgtype.Int8
 }
 
 type ImportCandidate struct {
@@ -266,15 +269,18 @@ type Session struct {
 }
 
 type SourceItem struct {
-	ID           pgtype.UUID
-	ScopeID      pgtype.UUID
-	SourceID     pgtype.UUID
-	ExternalKey  pgtype.Text
-	Envelope     []byte
-	Wrapping     []byte
-	BaseRevision int64
-	LastSeenAt   pgtype.Timestamptz
-	State        string
+	ID              pgtype.UUID
+	ScopeID         pgtype.UUID
+	SourceID        pgtype.UUID
+	ExternalKey     pgtype.Text
+	Envelope        []byte
+	Wrapping        []byte
+	BaseRevision    int64
+	LastSeenAt      pgtype.Timestamptz
+	State           string
+	AppliedEnvelope []byte
+	AppliedWrapping []byte
+	AppliedRevision pgtype.Int8
 }
 
 type SourceSchedule struct {

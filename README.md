@@ -2,7 +2,7 @@
 
 自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。本窗口接入六类节点管理、本地 URI／文本／Base64 导入、登录与管理界面、持久任务及独立 mTLS Runner 配置校验。逐项验收状态与限制见 `docs/PLAN.md` 和 `docs/evidence/`，实现存在不代表所有阶段门槛完成。
 
-来源刷新、链／策略编排、订阅发布及网络测速仍由后续任务提供。六类节点可解析／保存与内核兼容分别展示；三内核能力保持 `unverified`，已有原型证据不扩大为所有协议、架构或客户端支持。决策见 `docs/adr/0009-m1-input-and-validation.md`。
+来源管理、刷新差异确认、人工覆盖恢复、节点 URI／Base64 导出和策略组后端已接入本窗口。两跳链与策略组可通过 API 管理；完整编排界面、路由／DNS、订阅发布及网络测速仍由后续任务提供。六类节点可解析／保存与内核兼容分别展示；三内核能力保持 `unverified`，已有原型证据不扩大为所有协议、架构或客户端支持。新增契约见 `docs/m1-source-policy-contract.md`。
 
 基座提交 `1ff4c09` 的远端运行 [34201742618](https://github.com/Runarry/ProxyLoom/actions/runs/34201742618) 已通过；基座收口见 `docs/reviews/2026-09-08-m1-foundation-closeout.md`。该运行不代表本窗新增代码已在远端执行。
 

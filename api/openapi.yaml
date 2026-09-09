@@ -2001,6 +2001,26 @@ components:
       properties:
         request_id: { $ref: "#/components/schemas/RequestID" }
         data: { $ref: "#/components/schemas/ImportAccepted" }
+    SourceFieldChange:
+      type: "object"
+      additionalProperties: false
+      required: ["field_path"]
+      properties:
+        field_path: { $ref: "#/components/schemas/SafeFieldPath" }
+        secret_changed:
+          type: "boolean"
+          const: true
+        before: {}
+        after: {}
+      allOf:
+        - if:
+            required: ["secret_changed"]
+          then:
+            not:
+              anyOf:
+                - required: ["before"]
+                - required: ["after"]
+      description: "Only typed node/name field paths. Secret changes expose no before or after values."
     ImportCandidate:
       type: "object"
       additionalProperties: false
@@ -2018,6 +2038,19 @@ components:
         node: { $ref: "#/components/schemas/NodeRedacted" }
         existing_resource_id: { $ref: "#/components/schemas/UUID" }
         existing_revision: { $ref: "#/components/schemas/Revision" }
+        source_item_id: { $ref: "#/components/schemas/UUID" }
+        change_kind:
+          type: "string"
+          enum: ["new", "modified", "missing", "conflict", "unchanged"]
+        auto_applied:
+          type: "boolean"
+        binding_revision: { $ref: "#/components/schemas/Revision" }
+        upstream_changes:
+          type: "array"
+          items: { $ref: "#/components/schemas/SourceFieldChange" }
+        effective_changes:
+          type: "array"
+          items: { $ref: "#/components/schemas/SourceFieldChange" }
         match_method:
           type: "string"
           enum: ["stable_external_key", "manual_binding", "exact_fingerprint", "suggestion"]
@@ -2037,8 +2070,9 @@ components:
         job_id: { $ref: "#/components/schemas/UUID" }
         state:
           type: "string"
-          enum: ["queued", "parsing", "ready", "failed", "committed", "expired"]
+          enum: ["queued", "parsing", "ready", "failed", "committed", "expired", "superseded"]
         source_id: { $ref: "#/components/schemas/UUID" }
+        snapshot_id: { $ref: "#/components/schemas/UUID" }
         source_revision: { $ref: "#/components/schemas/Revision" }
         binding_revision: { $ref: "#/components/schemas/Revision" }
         expires_at: { $ref: "#/components/schemas/Timestamp" }
@@ -2072,6 +2106,7 @@ components:
           enum: ["create", "update", "skip", "bind"]
         resource_id: { $ref: "#/components/schemas/UUID" }
         expected_revision: { $ref: "#/components/schemas/Revision" }
+        expected_binding_revision: { $ref: "#/components/schemas/Revision" }
         override: { $ref: "#/components/schemas/NodePatchRequest" }
       allOf:
         -
@@ -2105,7 +2140,7 @@ components:
           items: { $ref: "#/components/schemas/ImportDecision" }
         source_revision: { $ref: "#/components/schemas/Revision" }
         binding_revision: { $ref: "#/components/schemas/Revision" }
-      description: "The preview ETag is supplied in If-Match. Source-backed commits additionally require matching source_revision and binding_revision. Selected writes and binding changes are one transaction; conflicts never silently overwrite."
+      description: "The preview ETag is supplied in If-Match. Source-backed commits require source_revision and each bound decision's expected_binding_revision. Top-level binding_revision remains reserved and rejected. New successful refreshes or source edits supersede pending previews. Selected writes and bindings are atomic and idempotent; confirmation never fetches the source again."
     ImportCommitItem:
       type: "object"
       additionalProperties: false
@@ -2319,6 +2354,7 @@ components:
         binding_revision: { $ref: "#/components/schemas/Revision" }
         last_success_at: { $ref: "#/components/schemas/Timestamp" }
         last_job_id: { $ref: "#/components/schemas/UUID" }
+        latest_preview_batch_id: { $ref: "#/components/schemas/UUID" }
         last_error: { $ref: "#/components/schemas/SafeError" }
     SourceCreateRequest:
       type: "object"
@@ -3790,7 +3826,7 @@ components:
           uniqueItems: true
         format:
           type: "string"
-          enum: ["proxyloom_json", "uri_list"]
+          enum: ["proxyloom_json", "uri_list", "base64_uri_list"]
         include_secrets:
           type: "boolean"
     PublicationExportRequest:
@@ -5350,7 +5386,7 @@ paths:
   /api/v1/policy-groups:
     get:
       operationId: listPolicyGroups
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List policy groups and compatibility diagnostics
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -5360,7 +5396,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createPolicyGroup
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a nonnested policy group of nodes and chains
       requestBody:
         required: true
@@ -5379,7 +5415,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getPolicyGroup
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read a typed policy group
       responses:
         '200': {$ref: '#/components/responses/PolicyGroupResponse'}
@@ -5389,7 +5425,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updatePolicyGroup
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Update typed strategy fields and validate membership
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5410,7 +5446,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deletePolicyGroup
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete a policy group and block unsafe dependent publication access
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:

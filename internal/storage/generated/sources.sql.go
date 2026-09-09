@@ -485,8 +485,8 @@ func (q *Queries) ListSourceItems(ctx context.Context, arg ListSourceItemsParams
 
 const updateNodeBinding = `-- name: UpdateNodeBinding :exec
 UPDATE public.node_bindings SET binding_revision = $1, match_method = $2,
-    state = $3, override_envelope = $4, wrapping = $5
-WHERE scope_id = $6 AND node_id = $7
+    state = $3, override_envelope = $4, wrapping = $5, source_item_id = $6
+WHERE scope_id = $7 AND node_id = $8
 `
 
 type UpdateNodeBindingParams struct {
@@ -495,6 +495,7 @@ type UpdateNodeBindingParams struct {
 	State            string
 	OverrideEnvelope []byte
 	Wrapping         []byte
+	SourceItemID     pgtype.UUID
 	ScopeID          pgtype.UUID
 	NodeID           pgtype.UUID
 }
@@ -506,6 +507,7 @@ func (q *Queries) UpdateNodeBinding(ctx context.Context, arg UpdateNodeBindingPa
 		arg.State,
 		arg.OverrideEnvelope,
 		arg.Wrapping,
+		arg.SourceItemID,
 		arg.ScopeID,
 		arg.NodeID,
 	)

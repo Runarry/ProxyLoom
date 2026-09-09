@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "run_id": "518d57ed-71ab-45fb-90e4-a7f75f4c0950",
+  "started_at": "2026-09-09T16:26:00.674Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "full",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s ./internal/catalog ./internal/storage ./internal/secretbox ./internal/apicontract ./internal/identity ./internal/server ./internal/config ./proxyloom-server ./api",
+  "source_manifest_sha256": "7f1f67047ca5be33018e5e5d9da1d35c537e1325ea38fe3a4f97fd31e2260256",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresMigrationFreshPrefixRepeatAndRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityAdminResetCommand",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogDatabaseConstraintsAndPrivileges",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogReferenceScopeKindAndFixedRevision",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresPolicyGroupStorageRejectsUnavailableClosureAndLatchesFailure",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogLifecycle",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogConcurrentTransactions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogIdempotencyConcurrentReplayConflictAndRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogRewrapCASPreservesImmutableState",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresCatalogScopedPagination",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresChainCRUDSwapReuseAndHopRejection",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresBase64ExportRevisionReauthAndDiagnostics",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresFoundationAPITransactionBoundary",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityHTTPSAcceptance",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySetupConcurrentAtomicAndNeverReopens",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySessionLifecyclePersistenceAndReset",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityExpiryEpochDisableAndForeignCredentials",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityLoginDoesNotRevokeAnotherUser",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityRateLimitsPersistRecoverAndBound",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityAuditFailureRollsBackSensitiveTransitions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityResetSerializesLoginAndReauthentication",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPrivilegesAndDatabaseLoss",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPersistedDigestsTamperingAndLiveUserVersion",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresImports5000CrossPageAtomicConcurrentReplay",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresImportsConflictRollbackDuplicateHintsAndValidSelection",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresImportSuggestionDoesNotAutoMerge",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresImportsLeaseFencingExpirationAndAtomicEnqueue",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresImportsUpdateScopeCursorAuditAndReceiptRetention",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsHTTPAuthorizationCursorCancelAndSSE",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsHTTPDatabaseFailureDeniesSnapshot",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsConcurrentClaimsEncryptedPayloadAndRestart",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsAtomicCompletionRollbackReplayAndExpiry",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsCancellationBatchAggregationAndEvents",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsRunnerCapacityRetryClassificationAndExhaustion",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsEnqueueTransactionScopeAndList",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresNodeCRUDHistoryCloneAndReferences",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresNodeAuthenticationRevealConcurrencyAndAudit",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresNodeAuditLockOrderAndImmutability",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresNodeBatchAcceptsTwoHundredPreconditions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOverrideStaleConflictRestoreAndExport",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresPolicyGroupCRUDPaginationReferencesAndAudit",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresPolicyGroupRejectsBadReferencesAndUnauditedWrites",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresSourceCRUDRefreshFailClosedAndUniqueJob",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresSourcePreviewManualCrossPageFailureAndReplay",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresSourcePreviewPendingOverlayAndAtomicRevisionConflicts",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresSourcePreviewSuggestionBindingOwnershipAndMissingSkip",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresSourcePreviewSafeSupersedeExpiryAndScheduledActor",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresSourcePreviewLegacyBindConfirmsLatestBaseline",
+      "result": "pass"
+    }
+  ],
+  "identity_tests": [
+    {
+      "name": "TestPostgresIdentityAdminResetCommand",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityHTTPSAcceptance",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySetupConcurrentAtomicAndNeverReopens",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentitySessionLifecyclePersistenceAndReset",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityExpiryEpochDisableAndForeignCredentials",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityLoginDoesNotRevokeAnotherUser",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityRateLimitsPersistRecoverAndBound",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityAuditFailureRollsBackSensitiveTransitions",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityResetSerializesLoginAndReauthentication",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPrivilegesAndDatabaseLoss",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresIdentityPersistedDigestsTamperingAndLiveUserVersion",
+      "result": "pass"
+    }
+  ],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-09T16:27:14.054Z",
+  "source_commit": "29e29c82f99a50e3ecb2fbe6343bfb6c1310246c"
+}

@@ -63,7 +63,7 @@ VALUES (sqlc.arg(node_id), sqlc.arg(scope_id), sqlc.arg(source_item_id), sqlc.ar
 
 -- name: UpdateNodeBinding :exec
 UPDATE public.node_bindings SET binding_revision = sqlc.arg(binding_revision), match_method = sqlc.arg(match_method),
-    state = sqlc.arg(state), override_envelope = sqlc.narg(override_envelope), wrapping = sqlc.narg(wrapping)
+    state = sqlc.arg(state), override_envelope = sqlc.narg(override_envelope), wrapping = sqlc.narg(wrapping), source_item_id = sqlc.arg(source_item_id)
 WHERE scope_id = sqlc.arg(scope_id) AND node_id = sqlc.arg(node_id);
 
 -- name: UpsertSourceSchedule :exec

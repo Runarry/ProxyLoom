@@ -17,7 +17,7 @@ import (
 )
 
 func validateImportCommit(input imports.CommitInput) error {
-	if !validIDs(input.ScopeID, input.PrincipalID, input.BatchID) || input.ExpectedRevision < 1 || input.ExpectedRevision == math.MaxInt64 || !validImportKey(input.IdempotencyKey) || len(input.Decisions) < 1 || len(input.Decisions) > imports.MaxCandidates {
+	if !validIDs(input.ScopeID, input.PrincipalID, input.BatchID) || input.ExpectedRevision < 1 || input.ExpectedRevision == math.MaxInt64 || input.SourceRevision < 0 || !validImportKey(input.IdempotencyKey) || len(input.Decisions) < 1 || len(input.Decisions) > imports.MaxCandidates {
 		return imports.ErrInvalidInput
 	}
 	if (catalog.MutationAudit{PrincipalID: input.PrincipalID, ObjectID: input.BatchID, Revision: input.ExpectedRevision, RequestID: input.RequestID, Action: catalog.AuditImportCommit}).Validate() != nil {
@@ -26,22 +26,20 @@ func validateImportCommit(input imports.CommitInput) error {
 	seen := map[ir.ID]bool{}
 	targets := map[ir.ID]bool{}
 	for _, d := range input.Decisions {
-		if d.CandidateID.Validate() != nil || seen[d.CandidateID] {
+		if d.CandidateID.Validate() != nil || seen[d.CandidateID] || d.ExpectedBindingRevision < 0 {
 			return imports.ErrInvalidInput
 		}
 		seen[d.CandidateID] = true
 		switch d.Action {
 		case "create", "skip":
-			if d.ResourceID != "" || d.ExpectedRevision != 0 {
+			if d.ResourceID != "" || d.ExpectedRevision != 0 || d.ExpectedBindingRevision != 0 {
 				return imports.ErrInvalidInput
 			}
-		case "update":
+		case "update", "bind":
 			if d.ResourceID.Validate() != nil || d.ExpectedRevision < 1 || targets[d.ResourceID] {
 				return imports.ErrInvalidInput
 			}
 			targets[d.ResourceID] = true
-		case "bind":
-			return imports.ErrUnsupported
 		default:
 			return imports.ErrInvalidInput
 		}
@@ -61,8 +59,9 @@ func (s *Imports) Commit(ctx context.Context, input imports.CommitInput) (import
 	canonical, err := json.Marshal(struct {
 		Scope, Actor, Batch ir.ID
 		Revision            int64
+		SourceRevision      int64 `json:",omitempty"`
 		Decisions           []imports.Decision
-	}{input.ScopeID, input.PrincipalID, input.BatchID, input.ExpectedRevision, input.Decisions})
+	}{input.ScopeID, input.PrincipalID, input.BatchID, input.ExpectedRevision, input.SourceRevision, input.Decisions})
 	if err != nil || len(canonical) > secretbox.MaxDigestBytes {
 		return imports.Commit{}, imports.ErrInvalidInput
 	}
@@ -79,7 +78,9 @@ func (s *Imports) Commit(ctx context.Context, input imports.CommitInput) (import
 		var revision int64
 		var state string
 		var expired bool
-		err := t.tx.QueryRow(ctx, `SELECT revision,state,expires_at<=clock_timestamp() FROM public.import_batches WHERE scope_id=$1 AND id=$2 FOR UPDATE`, dbID(input.ScopeID), dbID(input.BatchID)).Scan(&revision, &state, &expired)
+		var sourceID pgtype.UUID
+		var sourceRevision pgtype.Int8
+		err := t.tx.QueryRow(ctx, `SELECT revision,state,expires_at<=clock_timestamp(),source_id,source_revision FROM public.import_batches WHERE scope_id=$1 AND id=$2 FOR UPDATE`, dbID(input.ScopeID), dbID(input.BatchID)).Scan(&revision, &state, &expired, &sourceID, &sourceRevision)
 		if err != nil {
 			return err
 		}
@@ -105,11 +106,28 @@ func (s *Imports) Commit(ctx context.Context, input imports.CommitInput) (import
 		if state == "expired" || expired {
 			return imports.ErrExpired
 		}
+		if state == "superseded" {
+			return imports.ErrStateConflict
+		}
 		if revision != input.ExpectedRevision {
 			return imports.ErrRevisionConflict
 		}
 		if state != "ready" {
 			return imports.ErrStateConflict
+		}
+		if sourceID.Valid {
+			if err := s.validateSourcePreview(ctx, t, input, irID(sourceID), sourceRevision.Int64); err != nil {
+				return err
+			}
+		} else {
+			if input.SourceRevision != 0 {
+				return imports.ErrUnsupported
+			}
+			for _, decision := range input.Decisions {
+				if decision.Action == "bind" || decision.ExpectedBindingRevision != 0 {
+					return imports.ErrUnsupported
+				}
+			}
 		}
 		ids := make([]pgtype.UUID, 0, len(input.Decisions))
 		for _, d := range input.Decisions {
@@ -143,10 +161,25 @@ func (s *Imports) Commit(ctx context.Context, input imports.CommitInput) (import
 		if len(candidates) != len(input.Decisions) {
 			return imports.ErrInvalidInput
 		}
+		if sourceID.Valid {
+			for _, decision := range input.Decisions {
+				if err := validateSourceDecision(ctx, t, irID(sourceID), candidates[decision.CandidateID], decision); err != nil {
+					return err
+				}
+			}
+		}
 		receipt = imports.Commit{BatchID: input.BatchID, Revision: apicontract.Revision(revision + 1), Items: make([]imports.CommitItem, 0, len(input.Decisions))}
 		// Every selection is resolved by ID across the entire batch; pagination
 		// neither limits membership nor changes the transaction's atomicity.
 		for _, decision := range input.Decisions {
+			if sourceID.Valid {
+				item, err := s.commitSourceDecision(ctx, t, irID(sourceID), candidates[decision.CandidateID], decision)
+				if err != nil {
+					return err
+				}
+				receipt.Items = append(receipt.Items, item)
+				continue
+			}
 			item := imports.CommitItem{CandidateID: decision.CandidateID, Status: "skipped"}
 			if decision.Action != "skip" {
 				candidate := candidates[decision.CandidateID]

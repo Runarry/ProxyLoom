@@ -15,6 +15,8 @@ type originMutator interface {
 	LoadOrigin(context.Context, ir.ID) (override.Binding, error)
 	StoreOrigin(context.Context, override.Binding) error
 	LoadSourceBaseline(context.Context, ir.ID) (ir.Node, string, override.Item, error)
+	LoadSourceCandidate(context.Context, ir.ID) (ir.Node, string, override.Item, error)
+	ApplySourceBaseline(context.Context, ir.ID) error
 }
 
 func originDTO(binding override.Binding) apicontract.NodeOriginBinding {
@@ -59,7 +61,7 @@ func applyBoundPatch(ctx context.Context, tx originMutator, old ir.Resource, req
 		if itemID == "" {
 			itemID = binding.SourceItemID
 		}
-		base, baseName, item, err := tx.LoadSourceBaseline(ctx, itemID)
+		base, baseName, item, err := tx.LoadSourceCandidate(ctx, itemID)
 		if err != nil {
 			return ir.Resource{}, "", err
 		}
@@ -95,6 +97,9 @@ func applyBoundPatch(ctx context.Context, tx originMutator, old ir.Resource, req
 		binding.NodeID = updated.Metadata.ResourceID
 		binding.Revision++
 		if err := tx.StoreOrigin(ctx, binding); err != nil {
+			return ir.Resource{}, "", err
+		}
+		if err := tx.ApplySourceBaseline(ctx, itemID); err != nil {
 			return ir.Resource{}, "", err
 		}
 		return updated, catalog.AuditNodeOverride, nil

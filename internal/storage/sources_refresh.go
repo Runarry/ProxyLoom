@@ -11,6 +11,7 @@ import (
 
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/importparse"
+	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
 	"github.com/Runarry/ProxyLoom/internal/origin"
@@ -40,7 +41,11 @@ type parsedCandidate struct {
 	ExternalKey string
 	Fingerprint string
 	Node        ir.Node
+	Diagnostics ir.Diagnostics
 }
+
+const sourcePreviewLimit = "SOURCE_PREVIEW_LIMIT"
+const sourceInvalidEntries = "SOURCE_INVALID_ENTRIES"
 
 func (s *Sources) HandleRefresh(ctx context.Context, lease jobs.Lease) (jobs.Result, jobs.CommitFunc, error) {
 	if lease.Job.Executor != jobs.APIWorker || lease.Job.Type != jobs.SourceRefresh || !lease.Identity.Valid() || lease.Identity.JobID != lease.Job.ID || !validIDs(lease.Job.ScopeID, lease.Job.BatchID) {
@@ -74,7 +79,7 @@ func (s *Sources) HandleRefresh(ctx context.Context, lease jobs.Lease) (jobs.Res
 	if parseErr == nil {
 		for _, item := range parsed.Candidates {
 			if !item.Valid() {
-				continue
+				return s.failedRefresh(document, lease.Job.ID, payload, fetched, sourceInvalidEntries, now)
 			}
 			fingerprint, err := s.connectionFingerprint(*item.Node)
 			if err != nil {
@@ -84,12 +89,23 @@ func (s *Sources) HandleRefresh(ctx context.Context, lease jobs.Lease) (jobs.Res
 			if name == "" {
 				name = "Imported source node"
 			}
+			if (ir.Metadata{ResourceID: payload.SourceID, ScopeID: lease.Job.ScopeID, Kind: ir.KindNode, Revision: 1,
+				SchemaVersion: 1, SecurityEpoch: 1, Name: name, Enabled: true, Tags: []string{}}).Validate() != nil {
+				return s.failedRefresh(document, lease.Job.ID, payload, fetched, sourceInvalidEntries, now)
+			}
 			candidates = append(candidates, parsedCandidate{Name: name, ExternalKey: origin.ExternalKeyFromMetadata(item.Metadata),
-				Fingerprint: fingerprint, Node: *item.Node})
+				Fingerprint: fingerprint, Node: *item.Node, Diagnostics: item.Diagnostics})
 		}
 	}
 	if parseErr != nil || len(candidates) == 0 {
 		return s.failedRefresh(document, lease.Job.ID, payload, fetched, "INVALID_CONFIG", now)
+	}
+	existing, err := s.loadItems(ctx, &catalogTx{q: s.catalog.q, scope: lease.Job.ScopeID}, payload.SourceID)
+	if err != nil {
+		return jobs.Result{}, nil, err
+	}
+	if sourcePreviewCount(existing, candidates) > imports.MaxCandidates {
+		return s.failedRefresh(document, lease.Job.ID, payload, fetched, sourcePreviewLimit, now)
 	}
 	return jobs.Result{State: jobs.Succeeded, Verdict: jobs.Pass}, func(ctx context.Context, tx pgx.Tx) error {
 		return s.commitRefresh(ctx, tx, lease.Job, payload, document, fetched, candidates, now, true, "")
@@ -97,9 +113,24 @@ func (s *Sources) HandleRefresh(ctx context.Context, lease jobs.Lease) (jobs.Res
 }
 
 func (s *Sources) failedRefresh(document source.Document, job ir.ID, payload refreshPayload, fetched safefetch.Result, code string, now time.Time) (jobs.Result, jobs.CommitFunc, error) {
-	return jobs.Result{State: jobs.Failed, Verdict: jobs.Fail, Error: runnerprotocol.Safe(code)}, func(ctx context.Context, tx pgx.Tx) error {
+	return jobs.Result{State: jobs.Failed, Verdict: jobs.Fail, Error: sourceRefreshError(code)}, func(ctx context.Context, tx pgx.Tx) error {
 		return s.commitRefresh(ctx, tx, jobs.Job{ID: job, ScopeID: document.Metadata.ScopeID, BatchID: document.Metadata.ResourceID}, payload, document, fetched, nil, now, false, code)
 	}, nil
+}
+
+func sourceRefreshError(code string) *runnerprotocol.SafeError {
+	switch code {
+	case sourcePreviewLimit:
+		err := runnerprotocol.Safe("VALIDATION_FAILED")
+		err.Message = "The source preview exceeds the 5000-candidate limit, including missing items. No changes were applied."
+		return err
+	case sourceInvalidEntries:
+		err := runnerprotocol.Safe("VALIDATION_FAILED")
+		err.Message = "The source contains invalid or unsupported entries. Previous successful data was retained."
+		return err
+	default:
+		return runnerprotocol.Safe(code)
+	}
 }
 
 func refreshFetchCode(err error, fetched safefetch.Result) string {
@@ -107,6 +138,8 @@ func refreshFetchCode(err error, fetched safefetch.Result) string {
 	case errors.Is(err, safefetch.ErrTimeout):
 		return "JOB_TIMEOUT"
 	case errors.Is(err, safefetch.ErrInvalidURL), errors.Is(err, safefetch.ErrHTTPDisabled), errors.Is(err, safefetch.ErrBlockedAddress), errors.Is(err, safefetch.ErrTooLarge):
+		return "INVALID_CONFIG"
+	case err == nil && fetched.Status >= 200 && fetched.Status <= 299 && len(fetched.Body) == 0:
 		return "INVALID_CONFIG"
 	case err != nil, fetched.Status < 200, fetched.Status > 299, len(fetched.Body) == 0:
 		return "SERVICE_UNAVAILABLE"
@@ -140,6 +173,9 @@ func basicAuth(username, password string) string {
 func (s *Sources) commitRefresh(ctx context.Context, tx pgx.Tx, job jobs.Job, payload refreshPayload, observed source.Document, fetched safefetch.Result, candidates []parsedCandidate, now time.Time, success bool, code string) error {
 	t := attachCatalogTx(s.catalog, tx, job.ScopeID)
 	defer t.close()
+	if _, err := t.q.LockScope(ctx, dbID(job.ScopeID)); err != nil {
+		return err
+	}
 	if err := t.lockAndCheckRefs(ctx, []ir.ID{payload.SourceID}, nil); err != nil {
 		return err
 	}
@@ -150,7 +186,8 @@ func (s *Sources) commitRefresh(ctx context.Context, tx pgx.Tx, job jobs.Job, pa
 	if current.Metadata.Revision != payload.Revision {
 		return nil
 	}
-	if err := s.insertSnapshot(ctx, t, current, fetched, success); err != nil {
+	snapshotID, err := s.insertSnapshot(ctx, t, current, fetched, success)
+	if err != nil {
 		return err
 	}
 	cfg := current.Source
@@ -159,11 +196,13 @@ func (s *Sources) commitRefresh(ctx context.Context, tx pgx.Tx, job jobs.Job, pa
 		cfg.LastError = nil
 		cfg.LastSuccessAt = &now
 		cfg.BindingRevision++
-		if err := s.applyCandidates(ctx, t, current, payload, candidates, now); err != nil {
+		batchID, err := s.createSourcePreview(ctx, t, current, payload, job.ID, snapshotID, candidates, now)
+		if err != nil {
 			return err
 		}
+		cfg.LatestPreviewBatchID = batchID
 	} else {
-		cfg.LastError = runnerprotocol.Safe(code)
+		cfg.LastError = sourceRefreshError(code)
 	}
 	next, err := t.UpdateSource(ctx, current.Metadata.ResourceID, current.Metadata.Revision, current.Metadata.Name, current.Metadata.Tags, current.Metadata.Enabled, cfg)
 	if err != nil {
@@ -179,10 +218,10 @@ func (s *Sources) commitRefresh(ctx context.Context, tx pgx.Tx, job jobs.Job, pa
 	return t.failed
 }
 
-func (s *Sources) insertSnapshot(ctx context.Context, t *catalogTx, document source.Document, fetched safefetch.Result, success bool) error {
+func (s *Sources) insertSnapshot(ctx context.Context, t *catalogTx, document source.Document, fetched safefetch.Result, success bool) (ir.ID, error) {
 	id, err := newResourceID()
 	if err != nil {
-		return err
+		return "", err
 	}
 	body := fetched.Body
 	if body == nil {
@@ -190,7 +229,7 @@ func (s *Sources) insertSnapshot(ctx context.Context, t *catalogTx, document sou
 	}
 	envelope, wrapping, digest, err := s.sealRecord(document.Metadata.ScopeID, secretbox.TableSourceSnapshots, id, 1, body)
 	if err != nil {
-		return err
+		return "", err
 	}
 	state := "failed"
 	if success {
@@ -204,56 +243,10 @@ func (s *Sources) insertSnapshot(ctx context.Context, t *catalogTx, document sou
 	if fetched.ContentType != "" {
 		contentType = pgtype.Text{String: fetched.ContentType, Valid: true}
 	}
-	return t.q.InsertSourceSnapshot(ctx, dbgen.InsertSourceSnapshotParams{ID: dbID(id), ScopeID: dbID(document.Metadata.ScopeID),
+	err = t.q.InsertSourceSnapshot(ctx, dbgen.InsertSourceSnapshotParams{ID: dbID(id), ScopeID: dbID(document.Metadata.ScopeID),
 		SourceID: dbID(document.Metadata.ResourceID), SourceRevision: document.Metadata.Revision, Envelope: envelope, Wrapping: wrapping,
 		ContentHmac: digest, HttpStatus: status, ContentType: contentType, DecodedBytes: int32(len(body)), State: state})
-}
-
-func (s *Sources) applyCandidates(ctx context.Context, t *catalogTx, document source.Document, payload refreshPayload, candidates []parsedCandidate, now time.Time) error {
-	existing, err := s.loadItems(ctx, t, document.Metadata.ResourceID)
-	if err != nil {
-		return err
-	}
-	records, err := s.nodeRecords(ctx, t, document.Metadata.ResourceID, existing)
-	if err != nil {
-		return err
-	}
-	seen := map[ir.ID]bool{}
-	for _, candidate := range candidates {
-		item, found := matchStoredItem(existing, candidate)
-		if found {
-			if err := s.updateItem(ctx, t, document, item.ID, candidate, now); err != nil {
-				return err
-			}
-			seen[item.ID] = true
-			item.Node, item.Name, item.Fingerprint, item.ExternalKey, item.State = cloneNode(candidate.Node), candidate.Name, candidate.Fingerprint, candidate.ExternalKey, "active"
-			if err := s.commitNode(ctx, t, document, payload, candidate, item, records, now); err != nil {
-				return err
-			}
-			continue
-		}
-		id, err := newResourceID()
-		if err != nil {
-			return err
-		}
-		if err := s.insertItem(ctx, t, document, id, candidate, now); err != nil {
-			return err
-		}
-		item = storedSourceItem{ID: id, ExternalKey: candidate.ExternalKey, Fingerprint: candidate.Fingerprint, Name: candidate.Name, Node: cloneNode(candidate.Node), State: "active"}
-		seen[id] = true
-		if err := s.commitNode(ctx, t, document, payload, candidate, item, records, now); err != nil {
-			return err
-		}
-	}
-	for _, item := range existing {
-		if seen[item.ID] {
-			continue
-		}
-		if err := s.markMissing(ctx, t, document, payload, item, now); err != nil {
-			return err
-		}
-	}
-	return nil
+	return id, err
 }
 
 func sameItem(item storedSourceItem, candidate parsedCandidate) bool {
@@ -335,6 +328,12 @@ func (s *Sources) insertItem(ctx context.Context, t *catalogTx, document source.
 }
 
 func (s *Sources) updateItem(ctx context.Context, t *catalogTx, document source.Document, id ir.ID, candidate parsedCandidate, now time.Time) error {
+	// A pending manual preview must not replace the baseline used by overlays.
+	if _, err := t.tx.Exec(ctx, `UPDATE public.source_items SET applied_envelope=envelope,applied_wrapping=wrapping,applied_revision=base_revision
+		WHERE scope_id=$1 AND id=$2 AND applied_revision IS NULL
+		AND EXISTS(SELECT 1 FROM public.node_bindings b WHERE b.scope_id=$1 AND b.source_item_id=$2)`, dbID(t.scope), dbID(id)); err != nil {
+		return err
+	}
 	plain, err := s.itemBytes(candidate)
 	if err != nil {
 		return catalog.ErrUnavailable
@@ -373,10 +372,12 @@ func (s *Sources) markMissing(ctx context.Context, t *catalogTx, document source
 	if err != nil {
 		return err
 	}
-	binding.State = override.Stale
-	binding.Revision++
-	if err := t.saveBinding(ctx, binding); err != nil {
-		return err
+	if binding.State != override.Stale {
+		binding.State = override.Stale
+		binding.Revision++
+		if err := t.saveBinding(ctx, binding); err != nil {
+			return err
+		}
 	}
 	if document.Source.RefreshPolicy.MissingPolicy != source.Disable || document.Source.RefreshPolicy.CommitMode != source.SafeUpdates {
 		return nil
@@ -387,6 +388,9 @@ func (s *Sources) markMissing(ctx context.Context, t *catalogTx, document source
 	}
 	if err != nil {
 		return err
+	}
+	if !resource.Metadata.Enabled {
+		return nil
 	}
 	updated, err := t.Update(ctx, resource.Metadata.ResourceID, resource.Metadata.Revision, catalog.UpdateInput{
 		Name: resource.Metadata.Name, Tags: resource.Metadata.Tags, Enabled: false, Payload: resource.Payload})

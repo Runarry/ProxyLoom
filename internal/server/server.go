@@ -109,6 +109,10 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 			root.Close()
 			return nil, err
 		}
+		if err := mountPolicyGroups(router, authentication, *dependencies.Nodes); err != nil {
+			root.Close()
+			return nil, err
+		}
 		if err := mountExports(router, authentication, *dependencies.Nodes); err != nil {
 			root.Close()
 			return nil, err

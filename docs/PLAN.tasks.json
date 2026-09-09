@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-09 M1覆盖与导出窗口：T015/T016 in_review；累计21项done，T008/T012/T013/T014/T017/T018仍in_review，T048 in_progress，其余30项not_started。G1未关闭，能力unverified。",
+  "status_note": "2026-09-10 来源闭环与策略组窗口：累计21项done；T008/T012～T019/T048共10项in_review；其余29项not_started。实现进入联合验收，具体运行结果见证据。G1未关闭，能力unverified。",
   "tasks": [
     {
       "id": "T-001",
@@ -370,7 +370,9 @@
         "T-018"
       ],
       "acceptance": "空组、嵌套、非法默认项拒绝；不把手动选择变成固定，不把轮询变成低延迟选优。\nAC-10、AC-11",
-      "status": "not_started"
+      "status": "in_review",
+      "progress_note": "类型化策略、覆盖纯校验、CRUD、修订与依赖闭包已接入，进入联合验收。真实内核策略映射仍属T029。",
+      "evidence": ["docs/evidence/T-019/acceptance.md"]
     },
     {
       "id": "T-020",
@@ -931,9 +933,10 @@
         "T-047"
       ],
       "acceptance": "隐藏旧字段不误提交；遮罩不回写；412 保留草稿；导入确认前不改库；秘密复制须明确授权。\nAC-02～AC-06、AC-23",
-      "status": "in_progress",
+      "status": "in_review",
       "review_record": "docs/reviews/2026-09-08-m1-input-exit.md",
-      "progress_note": "节点／本地导入切片通过真实API与浏览器验收；来源刷新、覆盖和冲突合并等待T014/T015，整项不标done。"
+      "progress_note": "新增来源管理、刷新差异确认、覆盖恢复与节点导出，进入联合验收；真实浏览器结果见source-window证据，整项不自动done。",
+      "evidence": ["docs/evidence/T-048/source-window/acceptance.md"]
     },
     {
       "id": "T-049",

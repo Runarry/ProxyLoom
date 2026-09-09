@@ -24,7 +24,7 @@ async function logout() {
   <div class="app-shell">
     <header class="site-header">
       <RouterLink class="brand" to="/"><span class="brand-mark" aria-hidden="true">P</span><span>ProxyLoom<small>织流 · 工作空间</small></span></RouterLink>
-      <nav v-if="auth.user" aria-label="主要导航"><RouterLink to="/nodes" :class="{ active: route.path.startsWith('/nodes') }">节点</RouterLink><RouterLink to="/imports" :class="{ active: route.path.startsWith('/imports') }">导入</RouterLink></nav>
+      <nav v-if="auth.user" aria-label="主要导航"><RouterLink to="/nodes" :class="{ active: route.path.startsWith('/nodes') }">节点</RouterLink><RouterLink to="/sources" :class="{ active: route.path.startsWith('/sources') }">来源</RouterLink><RouterLink to="/imports" :class="{ active: route.path.startsWith('/imports') }">导入</RouterLink></nav>
       <div v-if="auth.user" class="account"><span :title="`会话到期：${localTime(auth.user.session_expires_at)}`">{{ auth.user.username }}<small>管理员</small></span><button type="button" class="text-button" :disabled="loggingOut" @click="logout">退出</button></div>
       <span v-else class="header-note">节点管理</span>
     </header>

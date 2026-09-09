@@ -48,9 +48,9 @@ export const useAuthStore = defineStore('auth', () => {
     accept((await api<Schema<'SessionResponse'>>('/auth/reauth', { method: 'POST', body: { password } satisfies Schema<'ReauthenticationRequest'>, preserveSessionOn401: true })).body.data)
     finishReauth(true)
   }
-  function requireRecentAuthentication(): Promise<boolean> {
+  function requireRecentAuthentication(force = false): Promise<boolean> {
     const until = user.value?.recent_authentication_expires_at
-    if (until && new Date(until).getTime() > Date.now()) return Promise.resolve(true)
+    if (!force && until && new Date(until).getTime() > Date.now()) return Promise.resolve(true)
     finishReauth(false)
     reauthOpen.value = true
     return new Promise(resolve => { resolveReauth = resolve })

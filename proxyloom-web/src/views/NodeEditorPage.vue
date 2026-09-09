@@ -17,7 +17,7 @@ const loading = ref(editing.value)
 const busy = ref(false)
 const error = ref<unknown>(null)
 const compared = ref(false)
-const conflict = computed(() => error.value instanceof APIError && error.value.status === 412)
+const conflict = ref(false)
 async function load() {
   loading.value = true; error.value = null
   try {
@@ -34,13 +34,13 @@ async function compare() {
 function useLatestAsBase() {
   if (!latest.value || !compared.value) return
   baseline.value = latest.value; etag.value = revisionTag(latest.value.metadata.revision)
-  latest.value = null; error.value = null
+  latest.value = null; error.value = null; conflict.value = false
 }
 function replaceWithLatest() {
   if (!latest.value) return
   clearDraftSecrets(draft.value)
   baseline.value = latest.value; etag.value = revisionTag(latest.value.metadata.revision)
-  draft.value = draftFromResource(latest.value); latest.value = null; error.value = null
+  draft.value = draftFromResource(latest.value); latest.value = null; error.value = null; conflict.value = false
 }
 async function submit() {
   busy.value = true; error.value = null
@@ -50,7 +50,7 @@ async function submit() {
       : await api<Schema<'NodeReadResponse'>>('/nodes', { method: 'POST', body: createRequest(draft.value) })
     clearDraftSecrets(draft.value)
     await router.push(`/nodes/${response.body.data.metadata.resource_id}`)
-  } catch (failure) { error.value = failure } finally { busy.value = false }
+  } catch (failure) { error.value = failure; if (failure instanceof APIError && [409, 412].includes(failure.status)) conflict.value = true } finally { busy.value = false }
 }
 onMounted(() => { if (editing.value) void load() })
 onBeforeUnmount(() => clearDraftSecrets(draft.value))
@@ -61,7 +61,7 @@ onBeforeUnmount(() => clearDraftSecrets(draft.value))
     <ErrorNotice :error="error" />
     <section v-if="conflict || latest" class="panel conflict-panel"><h2>修订冲突 · 草稿已保留</h2><p>先读取服务器最新版本；不会自动覆盖当前草稿或再次提交。</p><button type="button" class="secondary" :disabled="busy" @click="compare">加载最新版本进行比较</button><template v-if="latest"><div class="comparison"><div><h3>编辑开始时 · r{{ baseline?.metadata.revision }}</h3><pre>{{ JSON.stringify(baseline, null, 2) }}</pre></div><div><h3>服务器最新 · r{{ latest.metadata.revision }}</h3><pre>{{ JSON.stringify(latest, null, 2) }}</pre></div></div><p class="hint">下方表单仍为你的草稿。保留的秘密会采用服务器最新值；如需修改，请明确输入新值。</p><label class="checkbox-label"><input v-model="compared" type="checkbox" />已比较差异，确认基于最新修订继续编辑</label><div class="actions"><button type="button" class="secondary" @click="replaceWithLatest">放弃草稿，采用最新版本</button><button type="button" :disabled="!compared" @click="useLatestAsBase">保留草稿，采用最新修订号</button></div></template></section>
     <div v-if="loading" class="empty-state" role="status">正在读取节点…</div>
-    <NodeForm v-else-if="!editing || baseline" v-model="draft" :editing="editing" :busy="busy" :blocked="conflict || !!latest" @submit="submit" />
+    <template v-else-if="!editing || baseline"><p v-if="baseline?.binding" class="notice info">当前节点绑定来源。修改会形成本地覆盖，绑定修订为 {{ baseline.binding.binding_revision }}；可在节点详情逐字段恢复来源值。</p><NodeForm v-model="draft" :editing="editing" :busy="busy" :blocked="conflict || !!latest" :bound="!!baseline?.binding" @submit="submit" /></template>
     <button v-else type="button" class="secondary" @click="load">重新读取</button>
   </main>
 </template>

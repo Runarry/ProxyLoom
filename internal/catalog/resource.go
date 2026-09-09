@@ -127,6 +127,8 @@ func payloadKind(payload ir.ResourcePayload) ir.ResourceKind {
 		return ir.KindNode
 	case *ir.Chain:
 		return ir.KindChain
+	case *ir.PolicyGroup:
+		return ir.KindPolicyGroup
 	}
 	return ""
 }
@@ -143,6 +145,16 @@ func ExtractReferences(resource ir.Resource) ([]Reference, error) {
 			refs = append(refs, Reference{SourceID: resource.Metadata.ResourceID, SourceRevision: resource.Metadata.Revision,
 				TargetID: hop.NodeID, ExpectedKind: ir.KindNode, Path: "/payload/hops/" + strconv.Itoa(i) + "/node_id", Current: true})
 		}
+	}
+	if group, ok := resource.Payload.(*ir.PolicyGroup); ok {
+		for i, member := range group.Members {
+			refs = append(refs, Reference{SourceID: resource.Metadata.ResourceID, SourceKind: ir.KindPolicyGroup,
+				SourceRevision: resource.Metadata.Revision, TargetID: member.ResourceID, ExpectedKind: member.Kind,
+				Path: "/payload/members/" + strconv.Itoa(i) + "/resource_id", Current: true})
+		}
+		refs = append(refs, Reference{SourceID: resource.Metadata.ResourceID, SourceKind: ir.KindPolicyGroup,
+			SourceRevision: resource.Metadata.Revision, TargetID: group.DefaultMember.ResourceID, ExpectedKind: group.DefaultMember.Kind,
+			Path: "/payload/default_member/resource_id", Current: true})
 	}
 	return refs, nil
 }

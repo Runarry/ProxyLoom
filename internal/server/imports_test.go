@@ -23,15 +23,17 @@ import (
 const importHTTPBatch ir.ID = "41000000-0000-4000-8000-000000000001"
 
 type fakeImports struct {
-	created       int
-	committed     int
-	got           int
-	scope, actor  ir.ID
-	format        string
-	size          int
-	decisionCount int
-	expected      int64
-	key           string
+	created        int
+	committed      int
+	got            int
+	scope, actor   ir.ID
+	format         string
+	size           int
+	decisionCount  int
+	expected       int64
+	sourceRevision int64
+	decisions      []imports.Decision
+	key            string
 }
 
 func (f *fakeImports) Create(_ context.Context, input imports.CreateInput) (imports.Accepted, error) {
@@ -57,6 +59,8 @@ func (f *fakeImports) Commit(_ context.Context, input imports.CommitInput) (impo
 	f.actor = input.PrincipalID
 	f.decisionCount = len(input.Decisions)
 	f.expected = input.ExpectedRevision
+	f.sourceRevision = input.SourceRevision
+	f.decisions = input.Decisions
 	f.key = input.IdempotencyKey
 	items := make([]imports.CommitItem, 0, len(input.Decisions))
 	for _, d := range input.Decisions {
@@ -195,12 +199,14 @@ func TestImportsHTTP5000DecisionCommitAndPreconditions(t *testing.T) {
 	if response.Code != 200 || repo.committed != 1 || repo.decisionCount != 5000 || repo.expected != 2 || repo.actor != session.User.ID || repo.key != "import-test-key" {
 		t.Fatalf("large confirmation failed with status %d", response.Code)
 	}
-	for _, body := range []string{
-		`{"decisions":[{"candidate_id":"43000000-0000-4000-8000-000000000001","action":"bind","resource_id":"44000000-0000-4000-8000-000000000001","expected_revision":"1"}]}`,
-		`{"decisions":[{"candidate_id":"43000000-0000-4000-8000-000000000001","action":"skip"}],"source_revision":"1"}`,
-	} {
-		if response := importRequest(handler, session, http.MethodPost, path, "application/json", []byte(body), `"r2"`); response.Code != 422 {
-			t.Fatal("source-dependent operation accepted")
-		}
+	source := `{"decisions":[{"candidate_id":"43000000-0000-4000-8000-000000000001","action":"bind","resource_id":"44000000-0000-4000-8000-000000000001","expected_revision":"1","expected_binding_revision":"3"}],"source_revision":"4"}`
+	response = importRequest(handler, session, http.MethodPost, path, "application/json", []byte(source), `"r2"`)
+	if response.Code != 200 || repo.sourceRevision != 4 || repo.decisions[0].Action != "bind" || repo.decisions[0].ExpectedBindingRevision != 3 {
+		t.Fatal("source preconditions were not forwarded to the transactional repository")
+	}
+	reserved := `{"decisions":[{"candidate_id":"43000000-0000-4000-8000-000000000001","action":"skip"}],"binding_revision":"1"}`
+	before := repo.committed
+	if response := importRequest(handler, session, http.MethodPost, path, "application/json", []byte(reserved), `"r2"`); response.Code != 422 || repo.committed != before {
+		t.Fatal("reserved batch-wide binding precondition accepted")
 	}
 }

@@ -131,6 +131,9 @@ export function createRequest(draft: NodeDraft): Schema<'NodeCreateRequest'> {
 }
 export function patchRequest(draft: NodeDraft, baseline: Schema<'NodeResource'>): Schema<'NodePatchRequest'> {
   const node = draftNode(draft, true)
+  if (baseline.binding && draft.protocol !== baseline.node.protocol) throw new DraftError('来源绑定节点不能覆盖协议，请创建独立节点。')
+  const before = baseline.binding ? draftNode(draftFromResource(baseline), true) : undefined
+  const unchanged = before ? (Object.keys(node) as (keyof Schema<'NodePatch'>)[]).filter(key => JSON.stringify(node[key]) === JSON.stringify(before[key])) : []
   const security = node.security
   const oldSecurity = baseline.node.security
   if (security && security.mode === oldSecurity.mode && security.mode !== 'none' && oldSecurity.mode !== 'none') {
@@ -141,5 +144,22 @@ export function patchRequest(draft: NodeDraft, baseline: Schema<'NodeResource'>)
     else if (security.mode === 'tls') security.client_fingerprint = draft.fingerprint || null
   }
   const tags = draft.tags === baseline.metadata.tags.join(', ') ? [...baseline.metadata.tags] : splitList(draft.tags)
+  if (baseline.binding) {
+    for (const key of unchanged) delete node[key]
+    for (const [current, previous, discriminator] of [[node.auth, before?.auth, 'kind'], [node.security, before?.security, 'mode']] as const) {
+      if (!current || !previous) continue
+      const fields = current as unknown as Record<string, unknown>
+      const oldFields = previous as unknown as Record<string, unknown>
+      if (fields[discriminator] !== oldFields[discriminator]) continue
+      for (const key of Object.keys(fields)) if (key !== discriminator && JSON.stringify(fields[key]) === JSON.stringify(oldFields[key])) delete fields[key]
+    }
+    const result: Schema<'NodePatchRequest'> = { binding_revision: baseline.binding.binding_revision }
+    if (draft.name !== baseline.metadata.name) result.name = draft.name
+    if (JSON.stringify(tags) !== JSON.stringify(baseline.metadata.tags)) result.tags = tags
+    if (draft.enabled !== baseline.metadata.enabled) result.enabled = draft.enabled
+    if (Object.keys(node).length) result.node = node
+    if (Object.keys(result).length === 1) throw new DraftError('没有需要保存的更改。')
+    return result
+  }
   return { name: draft.name, tags, enabled: draft.enabled, node }
 }

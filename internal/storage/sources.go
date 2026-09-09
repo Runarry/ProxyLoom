@@ -75,6 +75,9 @@ func (s *Sources) Update(ctx context.Context, input source.Mutation) (source.Doc
 		if err != nil {
 			return err
 		}
+		if err := supersedeSourcePreviews(ctx, t, input.ResourceID); err != nil {
+			return err
+		}
 		if err := t.Audit(ctx, catalog.MutationAudit{PrincipalID: input.PrincipalID, ObjectID: document.Metadata.ResourceID,
 			Revision: document.Metadata.Revision, RequestID: input.RequestID, Action: catalog.AuditSourceUpdate}); err != nil {
 			return err
@@ -93,6 +96,9 @@ func (s *Sources) Delete(ctx context.Context, input source.Mutation) (source.Doc
 		var err error
 		document, err = t.DeleteSource(ctx, input.ResourceID, input.ExpectedRevision)
 		if err != nil {
+			return err
+		}
+		if err := supersedeSourcePreviews(ctx, t, input.ResourceID); err != nil {
 			return err
 		}
 		if err := t.Audit(ctx, catalog.MutationAudit{PrincipalID: input.PrincipalID, ObjectID: document.Metadata.ResourceID,

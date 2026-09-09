@@ -20,6 +20,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/jobs"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Imports struct {
@@ -241,18 +242,21 @@ func (s *Imports) Get(ctx context.Context, scope, batch ir.ID, options imports.P
 	defer tx.Rollback(ctx)
 	b := imports.Batch{Candidates: []imports.Candidate{}, Diagnostics: ir.Diagnostics{}}
 	var diagnostics []byte
+	var sourceID, snapshotID pgtype.UUID
+	var sourceRevision pgtype.Int8
 	err = tx.QueryRow(ctx, `SELECT b.id,b.revision,b.job_id,
 		CASE WHEN b.state='queued' AND j.state IN ('leased','running') THEN 'parsing'
 		WHEN b.state='queued' AND j.state IN ('failed','canceled','timed_out') THEN 'failed' ELSE b.state END,
-		b.candidate_count,b.created_at,b.expires_at,b.diagnostics
+		b.candidate_count,b.created_at,b.expires_at,b.diagnostics,b.source_id,b.snapshot_id,b.source_revision
 		FROM public.import_batches b JOIN public.jobs j ON j.scope_id=b.scope_id AND j.id=b.job_id
-		WHERE b.scope_id=$1 AND b.id=$2`, dbID(scope), dbID(batch)).Scan(&b.BatchID, &b.Revision, &b.JobID, &b.State, &b.CandidateCount, &b.CreatedAt, &b.ExpiresAt, &diagnostics)
+		WHERE b.scope_id=$1 AND b.id=$2`, dbID(scope), dbID(batch)).Scan(&b.BatchID, &b.Revision, &b.JobID, &b.State, &b.CandidateCount, &b.CreatedAt, &b.ExpiresAt, &diagnostics, &sourceID, &snapshotID, &sourceRevision)
 	if err != nil {
 		return imports.Batch{}, importError(err)
 	}
 	if json.Unmarshal(diagnostics, &b.Diagnostics) != nil {
 		return imports.Batch{}, imports.ErrUnavailable
 	}
+	b.SourceID, b.SnapshotID, b.SourceRevision = irID(sourceID), irID(snapshotID), apicontract.Revision(sourceRevision.Int64)
 	if b.State == "failed" && len(b.Diagnostics) == 0 {
 		b.Diagnostics = ir.Diagnostics{{Code: "IMPORT_JOB_FAILED", Severity: ir.SeverityError, FieldPath: "/text", Message: "The import parsing job did not complete. Submit a new import to retry."}}
 	}
@@ -305,16 +309,25 @@ func (s *Imports) Get(ctx context.Context, scope, batch ir.ID, options imports.P
 // Candidate details, including arbitrary upstream metadata, never appear in a
 // plaintext database column. DecodeNode restores the validated typed unions.
 type importCandidate struct {
-	BatchID          ir.ID                      `json:"batch_id"`
-	Index            int                        `json:"index"`
-	Name             string                     `json:"name"`
-	State            string                     `json:"state"`
-	Node             json.RawMessage            `json:"node,omitempty"`
-	Metadata         map[string]json.RawMessage `json:"metadata,omitempty"`
-	Diagnostics      ir.Diagnostics             `json:"diagnostics"`
-	ExistingID       ir.ID                      `json:"existing_id,omitempty"`
-	ExistingRevision int64                      `json:"existing_revision,omitempty"`
-	MatchMethod      string                     `json:"match_method,omitempty"`
+	BatchID          ir.ID                       `json:"batch_id"`
+	Index            int                         `json:"index"`
+	Name             string                      `json:"name"`
+	State            string                      `json:"state"`
+	Node             json.RawMessage             `json:"node,omitempty"`
+	Metadata         map[string]json.RawMessage  `json:"metadata,omitempty"`
+	Diagnostics      ir.Diagnostics              `json:"diagnostics"`
+	ExistingID       ir.ID                       `json:"existing_id,omitempty"`
+	ExistingRevision int64                       `json:"existing_revision,omitempty"`
+	MatchMethod      string                      `json:"match_method,omitempty"`
+	SourceItemID     ir.ID                       `json:"source_item_id,omitempty"`
+	ChangeKind       string                      `json:"change_kind,omitempty"`
+	AutoApplied      bool                        `json:"auto_applied,omitempty"`
+	BindingRevision  int64                       `json:"binding_revision,omitempty"`
+	BoundItemID      ir.ID                       `json:"bound_item_id,omitempty"`
+	BoundSourceID    ir.ID                       `json:"bound_source_id,omitempty"`
+	UpstreamChanges  []imports.SourceFieldChange `json:"upstream_changes,omitempty"`
+	EffectiveChanges []imports.SourceFieldChange `json:"effective_changes,omitempty"`
+	MissingDisable   bool                        `json:"missing_disable,omitempty"`
 }
 
 func (importCandidate) Format(state fmt.State, _ rune) { _, _ = fmt.Fprint(state, "[REDACTED]") }
@@ -346,6 +359,9 @@ func (c importCandidate) resource(scope, id ir.ID) (ir.Resource, error) {
 
 func (c importCandidate) read(scope, id ir.ID, index int) (imports.Candidate, error) {
 	read := imports.Candidate{CandidateID: id, Index: index, Name: c.Name, State: c.State, Diagnostics: c.Diagnostics, ExistingResourceID: c.ExistingID, ExistingRevision: apicontract.Revision(c.ExistingRevision), MatchMethod: c.MatchMethod}
+	read.SourceItemID, read.ChangeKind, read.AutoApplied = c.SourceItemID, c.ChangeKind, c.AutoApplied
+	read.BindingRevision = apicontract.Revision(c.BindingRevision)
+	read.UpstreamChanges, read.EffectiveChanges = c.UpstreamChanges, c.EffectiveChanges
 	if read.Diagnostics == nil {
 		read.Diagnostics = ir.Diagnostics{}
 	}

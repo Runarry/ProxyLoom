@@ -1,0 +1,10 @@
+{
+  "source_revision": "3",
+  "decisions": [{
+    "candidate_id": "10000000-0000-4000-8000-000000000002",
+    "action": "update",
+    "resource_id": "10000000-0000-4000-8000-000000000001",
+    "expected_revision": "2",
+    "expected_binding_revision": "1"
+  }]
+}

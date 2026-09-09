@@ -23,6 +23,7 @@ type NodeRepository interface {
 	catalog.Repository
 	ListNodes(context.Context, ir.ID, catalog.NodeListOptions) (catalog.NodePage, error)
 	ListChains(context.Context, ir.ID, catalog.ChainListOptions) (catalog.ChainPage, error)
+	ListPolicyGroups(context.Context, ir.ID, catalog.PolicyGroupListOptions) (catalog.PolicyGroupPage, error)
 	NodeRevisions(context.Context, ir.ID, ir.ID, int64, int) (catalog.NodeRevisionPage, error)
 	NodeReferences(context.Context, ir.ID, ir.ID, catalog.NodeReferenceOptions) (catalog.ReferencePage, error)
 	NodeBinding(context.Context, ir.ID, ir.ID) (override.Binding, error)

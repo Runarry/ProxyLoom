@@ -11,6 +11,7 @@ import (
 const DefaultMaxResources = 2000
 
 type Options struct {
+	ScopeID      ir.ID
 	Exclude      map[ir.ID]bool
 	MaxResources int
 	Refs         func(ir.Resource) ([]catalog.Reference, error)
@@ -33,6 +34,7 @@ func Expand(resources map[ir.ID]ir.Resource, roots []ir.ID, options Options) Res
 		options.Exclude = map[ir.ID]bool{}
 	}
 	out := Result{Order: []ir.ID{}, Resources: []ir.Resource{}, Diagnostics: ir.Diagnostics{}}
+	scope := options.ScopeID
 	seen := map[ir.ID]int{} // 0 unknown, 1 visiting, 2 done
 	var walk func(id ir.ID, path []ir.ID, via string)
 	walk = func(id ir.ID, path []ir.ID, via string) {
@@ -50,6 +52,17 @@ func Expand(resources map[ir.ID]ir.Resource, roots []ir.ID, options Options) Res
 		resource, ok := resources[id]
 		if !ok {
 			out.Diagnostics = append(out.Diagnostics, ir.Diagnostic{Code: ir.ReferenceMissing, Severity: ir.SeverityError, ResourceID: id, FieldPath: via, Message: "The referenced resource is missing."})
+			return
+		}
+		if scope == "" {
+			scope = resource.Metadata.ScopeID
+		}
+		if resource.Metadata.ScopeID != scope {
+			out.Diagnostics = append(out.Diagnostics, ir.Diagnostic{Code: ir.ScopeMismatch, Severity: ir.SeverityError, ResourceID: id, FieldPath: via, Message: ir.ScopeMismatch.Message()})
+			return
+		}
+		if !resource.Metadata.Enabled {
+			out.Diagnostics = append(out.Diagnostics, ir.Diagnostic{Code: ir.ResourceDisabled, Severity: ir.SeverityError, ResourceID: id, FieldPath: via, Message: ir.ResourceDisabled.Message()})
 			return
 		}
 		if len(out.Order)+len(path) >= options.MaxResources {

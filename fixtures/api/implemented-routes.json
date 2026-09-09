@@ -47,6 +47,8 @@
     "patch",
     "delete"
   ],
+  "/api/v1/policy-groups": ["get", "post"],
+  "/api/v1/policy-groups/{id}": ["get", "patch", "delete"],
   "/api/v1/imports": [
     "post"
   ],

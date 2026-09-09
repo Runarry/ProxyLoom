@@ -34,6 +34,9 @@ const (
 	AuditChainCreate       MutationAction = "chain.create"
 	AuditChainUpdate       MutationAction = "chain.update"
 	AuditChainDelete       MutationAction = "chain.delete"
+	AuditPolicyGroupCreate MutationAction = "policy_group.create"
+	AuditPolicyGroupUpdate MutationAction = "policy_group.update"
+	AuditPolicyGroupDelete MutationAction = "policy_group.delete"
 	AuditSourceCreate      MutationAction = "source.create"
 	AuditSourceUpdate      MutationAction = "source.update"
 	AuditSourceDelete      MutationAction = "source.delete"
@@ -57,6 +60,8 @@ func (a MutationAudit) Validate() error {
 		return ErrInvalidInput
 	}
 	switch a.Action {
+	case AuditPolicyGroupCreate, AuditPolicyGroupUpdate, AuditPolicyGroupDelete:
+		return nil
 	case AuditNodeCreate, AuditNodeUpdate, AuditNodeDelete, AuditNodeClone, AuditNodeAddTags, AuditNodeRemoveTags, AuditNodeSetEnabled, AuditNodeOverride, AuditNodeRestoreSource, AuditImportCommit, AuditChainCreate, AuditChainUpdate, AuditChainDelete, AuditSourceCreate, AuditSourceUpdate, AuditSourceDelete, AuditSourceRefresh:
 		return nil
 	}

@@ -60,6 +60,7 @@ type Querier interface {
 	ListNodeCandidates(ctx context.Context, arg ListNodeCandidatesParams) ([]ListNodeCandidatesRow, error)
 	ListNodeReferences(ctx context.Context, arg ListNodeReferencesParams) ([]ListNodeReferencesRow, error)
 	ListNodeRevisions(ctx context.Context, arg ListNodeRevisionsParams) ([]ListNodeRevisionsRow, error)
+	ListPolicyGroupCandidates(ctx context.Context, arg ListPolicyGroupCandidatesParams) ([]ListPolicyGroupCandidatesRow, error)
 	ListResourceReferences(ctx context.Context, arg ListResourceReferencesParams) ([]ListResourceReferencesRow, error)
 	ListResourceTags(ctx context.Context, arg ListResourceTagsParams) ([]string, error)
 	ListResources(ctx context.Context, arg ListResourcesParams) ([]ListResourcesRow, error)

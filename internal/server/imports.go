@@ -276,18 +276,16 @@ func (r *importRoutes) commit(c *gin.Context) {
 		r.fail(c, err)
 		return
 	}
-	if request.SourceRevision != nil || request.BindingRevision != nil {
+	if request.BindingRevision != nil {
 		r.fail(c, imports.ErrUnsupported)
 		return
 	}
-	for _, d := range request.Decisions {
-		if d.Action == "bind" {
-			r.fail(c, imports.ErrUnsupported)
-			return
-		}
+	var sourceRevision int64
+	if request.SourceRevision != nil {
+		sourceRevision = int64(*request.SourceRevision)
 	}
 	session, _ := SessionFromContext(c.Request.Context())
-	result, err := r.repository.Commit(c.Request.Context(), imports.CommitInput{ScopeID: session.User.ScopeID, PrincipalID: session.User.ID, BatchID: id, ExpectedRevision: expected, IdempotencyKey: key, RequestID: apicontract.RequestID(c.Request.Context()), Decisions: request.Decisions})
+	result, err := r.repository.Commit(c.Request.Context(), imports.CommitInput{ScopeID: session.User.ScopeID, PrincipalID: session.User.ID, BatchID: id, ExpectedRevision: expected, SourceRevision: sourceRevision, IdempotencyKey: key, RequestID: apicontract.RequestID(c.Request.Context()), Decisions: request.Decisions})
 	if err != nil {
 		r.fail(c, err)
 		return

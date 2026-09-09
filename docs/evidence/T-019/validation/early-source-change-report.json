@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "run_id": "ba6d6eb8-eba4-434d-b839-9f252fcc46ad",
+  "profile": "full",
+  "started_at": "2026-09-09T16:17:42.709Z",
+  "result": "fail",
+  "scope": "source-and-postgres",
+  "steps": [
+    {
+      "name": "secret-scan",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 1250
+    },
+    {
+      "name": "node-version",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 70
+    },
+    {
+      "name": "tool-locks",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 99
+    },
+    {
+      "name": "pnpm-version",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 387
+    },
+    {
+      "name": "frontend-frozen-install",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 623
+    },
+    {
+      "name": "sqlc-locked-install",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 285
+    },
+    {
+      "name": "quality-and-script-selftests",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 11023
+    },
+    {
+      "name": "engineering",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 308502
+    },
+    {
+      "name": "frontend-types-and-build",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 4583
+    },
+    {
+      "name": "api-generated-drift",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 1343
+    },
+    {
+      "name": "contract-base-diff",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 4569
+    },
+    {
+      "name": "postgres-foundation-and-identity",
+      "result": "pass",
+      "exit_code": 0,
+      "duration_ms": 80654
+    },
+    {
+      "name": "source-stability",
+      "result": "fail"
+    }
+  ],
+  "error": "source-changed-during-quality-run",
+  "foundation_runs": [
+    "d3d4a525-a247-47b5-8846-653762a99860"
+  ]
+}

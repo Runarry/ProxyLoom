@@ -345,7 +345,7 @@ func (q *Queries) InsertResourceWrapping(ctx context.Context, arg InsertResource
 }
 
 const listResourceReferences = `-- name: ListResourceReferences :many
-SELECT f.resource_id, f.revision, f.target_resource_id, f.target_revision, f.expected_kind, f.ref_path,
+SELECT f.resource_id, r.kind AS source_kind, f.revision, f.target_resource_id, f.target_revision, f.expected_kind, f.ref_path,
     (r.head_revision = f.revision AND r.deleted_at IS NULL AND r.enabled) AS current
 FROM public.resource_refs f
 JOIN public.resources r ON r.scope_id = f.scope_id AND r.id = f.resource_id
@@ -369,6 +369,7 @@ type ListResourceReferencesParams struct {
 
 type ListResourceReferencesRow struct {
 	ResourceID       pgtype.UUID
+	SourceKind       string
 	Revision         int64
 	TargetResourceID pgtype.UUID
 	TargetRevision   pgtype.Int8
@@ -397,6 +398,7 @@ func (q *Queries) ListResourceReferences(ctx context.Context, arg ListResourceRe
 		var i ListResourceReferencesRow
 		if err := rows.Scan(
 			&i.ResourceID,
+			&i.SourceKind,
 			&i.Revision,
 			&i.TargetResourceID,
 			&i.TargetRevision,

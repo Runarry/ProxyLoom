@@ -67,7 +67,7 @@ func (c *Catalog) Head(ctx context.Context, scope, id ir.ID) (ir.Resource, error
 	if err != nil {
 		return ir.Resource{}, catalogError(err)
 	}
-	if index.DeletedAt.Valid || (index.Kind != string(ir.KindNode) && index.Kind != string(ir.KindChain)) {
+	if index.DeletedAt.Valid || (index.Kind != string(ir.KindNode) && index.Kind != string(ir.KindChain) && index.Kind != string(ir.KindPolicyGroup)) {
 		return ir.Resource{}, catalog.ErrNotFound
 	}
 	r, err := c.q.GetResourceHead(ctx, dbgen.GetResourceHeadParams{ScopeID: dbID(scope), ID: dbID(id)})
@@ -240,6 +240,9 @@ func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.R
 		if err != nil {
 			return ir.Resource{}, err
 		}
+		if err := t.checkPolicyMembers(ctx, r); err != nil {
+			return ir.Resource{}, err
+		}
 		refs, err := catalog.ExtractReferences(r)
 		if err != nil {
 			return ir.Resource{}, err
@@ -257,7 +260,13 @@ func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.R
 }
 
 func (t *catalogTx) Update(ctx context.Context, id ir.ID, expected int64, input catalog.UpdateInput) (ir.Resource, error) {
-	return t.change(ctx, id, expected, false, func(old ir.Resource) (ir.Resource, error) { return catalog.Apply(old, input) })
+	return t.change(ctx, id, expected, false, func(old ir.Resource) (ir.Resource, error) {
+		next, err := catalog.Apply(old, input)
+		if err == nil {
+			err = t.checkPolicyMembers(ctx, next)
+		}
+		return next, err
+	})
 }
 
 func (t *catalogTx) Delete(ctx context.Context, id ir.ID, expected int64) (ir.Resource, error) {

@@ -4,6 +4,7 @@ package imports
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -57,6 +58,22 @@ type Candidate struct {
 	ExistingRevision   apicontract.Revision  `json:"existing_revision,omitempty"`
 	MatchMethod        string                `json:"match_method,omitempty"`
 	Diagnostics        ir.Diagnostics        `json:"diagnostics"`
+	SourceItemID       ir.ID                 `json:"source_item_id,omitempty"`
+	ChangeKind         string                `json:"change_kind,omitempty"`
+	AutoApplied        bool                  `json:"auto_applied"`
+	BindingRevision    apicontract.Revision  `json:"binding_revision,omitempty"`
+	UpstreamChanges    []SourceFieldChange   `json:"upstream_changes,omitempty"`
+	EffectiveChanges   []SourceFieldChange   `json:"effective_changes,omitempty"`
+}
+
+// SourceFieldChange contains values only for non-secret typed node fields.
+// Secret changes carry their path and a flag, including rotations between two
+// configured values that a normal redacted node read cannot distinguish.
+type SourceFieldChange struct {
+	FieldPath     string          `json:"field_path"`
+	SecretChanged bool            `json:"secret_changed,omitempty"`
+	Before        json.RawMessage `json:"before,omitempty"`
+	After         json.RawMessage `json:"after,omitempty"`
 }
 
 type PageOptions struct {
@@ -75,14 +92,18 @@ type Batch struct {
 	ExpiresAt      time.Time            `json:"expires_at"`
 	Diagnostics    ir.Diagnostics       `json:"diagnostics"`
 	NextCursor     string               `json:"-"`
+	SourceID       ir.ID                `json:"source_id,omitempty"`
+	SnapshotID     ir.ID                `json:"snapshot_id,omitempty"`
+	SourceRevision apicontract.Revision `json:"source_revision,omitempty"`
 }
 
 type Decision struct {
-	CandidateID      ir.ID                         `json:"candidate_id"`
-	Action           string                        `json:"action"`
-	ResourceID       ir.ID                         `json:"resource_id,omitempty"`
-	ExpectedRevision apicontract.Revision          `json:"expected_revision,omitempty"`
-	Override         *apicontract.NodePatchRequest `json:"override,omitempty"`
+	CandidateID             ir.ID                         `json:"candidate_id"`
+	Action                  string                        `json:"action"`
+	ResourceID              ir.ID                         `json:"resource_id,omitempty"`
+	ExpectedRevision        apicontract.Revision          `json:"expected_revision,omitempty"`
+	ExpectedBindingRevision apicontract.Revision          `json:"expected_binding_revision,omitempty"`
+	Override                *apicontract.NodePatchRequest `json:"override,omitempty"`
 }
 
 type CommitInput struct {
@@ -90,6 +111,7 @@ type CommitInput struct {
 	PrincipalID      ir.ID
 	BatchID          ir.ID
 	ExpectedRevision int64
+	SourceRevision   int64
 	IdempotencyKey   string
 	RequestID        string
 	Decisions        []Decision

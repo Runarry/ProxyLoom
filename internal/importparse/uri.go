@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/Runarry/ProxyLoom/internal/ir"
+	"github.com/Runarry/ProxyLoom/internal/origin"
 	"golang.org/x/net/idna"
 )
 
@@ -53,6 +54,14 @@ func ParseURI(raw string) Candidate {
 	}
 	if err == nil && c.Name != "" && !safeText(c.Name) {
 		err = failure(InvalidValue, "/name")
+	}
+	if value, exists := c.Metadata["external_key"]; err == nil && exists {
+		var key string
+		if json.Unmarshal(value, &key) != nil {
+			err = failure(InvalidValue, "/metadata/external_key")
+		} else if _, valid := origin.ParseExternalKey(key); !valid {
+			err = failure(InvalidValue, "/metadata/external_key")
+		}
 	}
 	if err == nil {
 		err = supportedCombination(node)
@@ -364,7 +373,7 @@ func fields(names ...string) map[string]bool {
 }
 
 func metadataKey(key string) bool {
-	return strings.HasPrefix(key, "x-") || key == "remarks" || key == "remark" || key == "group" || key == "tag" || key == "name"
+	return strings.HasPrefix(key, "x-") || key == "external_key" || key == "remarks" || key == "remark" || key == "group" || key == "tag" || key == "name"
 }
 
 func isolateUnknown(c *Candidate, q map[string]string, allowed map[string]bool) error {

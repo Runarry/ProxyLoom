@@ -63,7 +63,8 @@ func (v *FrozenRef) UnmarshalJSON(data []byte) error {
 }
 
 // FrozenInputSpec is mutable construction data, not a compile input. Members and
-// resources form exactly the node/chain dependency closure for this prototype.
+// resources form exactly the member dependency closure, including policy members
+// and the concrete node hops of their chains.
 type FrozenInputSpec struct {
 	SchemaVersion   int         `json:"schema_version"`
 	SnapshotID      ID          `json:"snapshot_id"`
@@ -161,26 +162,43 @@ func (v FrozenInputSpec) Validate() error {
 			add(ReferenceEpoch, path+"/security_epoch", member.ResourceID)
 		}
 	}
-	// Every Chain edge must resolve to a concrete Node. This also prevents self
-	// references, nested chains, policy groups and cycles without a generic graph.
+	// Validate all typed edges, then walk from the roots independently of the
+	// resource array order. P0 groups cannot nest and chain hops are concrete nodes.
+	edges := make(map[ID][]ID, len(resources))
 	for i, resource := range v.Resources {
-		chain, ok := resource.Payload.(*Chain)
-		if !ok {
-			continue
-		}
-		for hopIndex, hop := range chain.Hops {
-			path := "/resources/" + strconv.Itoa(i) + "/payload/hops/" + strconv.Itoa(hopIndex) + "/node_id"
-			node, exists := resources[hop.NodeID]
+		check := func(id ID, kind ResourceKind, field string) {
+			path := "/resources/" + strconv.Itoa(i) + "/payload" + field
+			target, exists := resources[id]
 			if !exists {
 				add(ReferenceMissing, path, resource.Metadata.ResourceID)
-				continue
+				return
 			}
-			if node.Metadata.Kind != KindNode {
+			if target.Metadata.Kind != kind {
 				add(ReferenceKind, path, resource.Metadata.ResourceID)
-				continue
+				return
 			}
-			if reachable[resource.Metadata.ResourceID] {
-				reachable[hop.NodeID] = true
+			edges[resource.Metadata.ResourceID] = append(edges[resource.Metadata.ResourceID], id)
+		}
+		switch payload := resource.Payload.(type) {
+		case *Chain:
+			for hopIndex, hop := range payload.Hops {
+				check(hop.NodeID, KindNode, "/hops/"+strconv.Itoa(hopIndex)+"/node_id")
+			}
+		case *PolicyGroup:
+			for memberIndex, member := range payload.Members {
+				check(member.ResourceID, member.Kind, "/members/"+strconv.Itoa(memberIndex)+"/resource_id")
+			}
+		}
+	}
+	queue := make([]ID, 0, len(v.Members))
+	for _, member := range v.Members {
+		queue = append(queue, member.ResourceID)
+	}
+	for i := 0; i < len(queue); i++ {
+		for _, id := range edges[queue[i]] {
+			if !reachable[id] {
+				reachable[id] = true
+				queue = append(queue, id)
 			}
 		}
 	}
@@ -325,6 +343,12 @@ func cloneSpec(source FrozenInputSpec) (FrozenInputSpec, error) {
 			chain := *payload
 			chain.Hops = slices.Clone(payload.Hops)
 			copy.Resources[i].Payload = &chain
+		case *PolicyGroup:
+			if payload == nil {
+				return FrozenInputSpec{}, Diagnostics{issue(InvalidUnion, "/resources/"+strconv.Itoa(i)+"/payload")}
+			}
+			group := payload.Clone()
+			copy.Resources[i].Payload = &group
 		default:
 			return FrozenInputSpec{}, Diagnostics{issue(InvalidUnion, "/resources/"+strconv.Itoa(i)+"/payload")}
 		}

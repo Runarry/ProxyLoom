@@ -118,7 +118,7 @@ func DecodeChain(data []byte) (Chain, error) {
 }
 
 // Metadata is independent of the immutable typed payload. ResourceKind reserves
-// future names, but Resource admits only node and chain payloads in this slice.
+// future names, but Resource admits only implemented typed payloads.
 type Metadata struct {
 	ResourceID    ID           `json:"resource_id"`
 	ScopeID       ID           `json:"scope_id"`
@@ -164,6 +164,13 @@ func (v Resource) Validate() error {
 		if payload == nil || v.Metadata.Kind != KindChain {
 			return Diagnostics{issue(InvalidUnion, "/payload")}
 		}
+	case *PolicyGroup:
+		if payload == nil || v.Metadata.Kind != KindPolicyGroup {
+			return Diagnostics{issue(InvalidUnion, "/payload")}
+		}
+		if err := payload.Validate(); err != nil {
+			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
+		}
 	default:
 		return Diagnostics{issue(InvalidUnion, "/payload")}
 	}
@@ -187,6 +194,8 @@ func (v *Resource) UnmarshalJSON(data []byte) error {
 		payload = &Node{}
 	case KindChain:
 		payload = &Chain{}
+	case KindPolicyGroup:
+		payload = &PolicyGroup{}
 	default:
 		return Diagnostics{issue(InvalidUnion, "/metadata/kind")}
 	}

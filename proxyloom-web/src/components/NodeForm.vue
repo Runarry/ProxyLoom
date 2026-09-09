@@ -4,7 +4,7 @@ import { changeProtocol, resetAuthentication, resetSecurity, protocols } from '.
 import type { NodeDraft, Protocol } from '../domain/node-form'
 import SecretField from './SecretField.vue'
 const draft = defineModel<NodeDraft>({ required: true })
-defineProps<{ editing: boolean; busy: boolean; blocked?: boolean }>()
+defineProps<{ editing: boolean; busy: boolean; blocked?: boolean; bound?: boolean }>()
 const emit = defineEmits<{ submit: [] }>()
 const proxyAuth = computed(() => draft.value.protocol === 'socks5' || draft.value.protocol === 'http')
 const securityModes = computed(() => draft.value.protocol === 'shadowsocks' ? ['none'] : draft.value.protocol === 'trojan' ? ['tls'] : draft.value.protocol === 'vless' ? ['none', 'tls', 'reality'] : ['none', 'tls'])
@@ -17,7 +17,7 @@ function transportChanged() { draft.value.wsPath = '/'; draft.value.wsHost = '';
   <form class="node-form" @submit.prevent="emit('submit')">
     <fieldset :disabled="busy || blocked">
       <legend>基本信息</legend>
-      <div class="form-grid"><label class="span-2">节点名称<input v-model="draft.name" required maxlength="256" data-field="/name" autofocus /></label><label>协议<select :value="draft.protocol" data-field="/protocol" @change="protocolChanged"><option v-for="protocol in protocols" :key="protocol.value" :value="protocol.value">{{ protocol.label }}</option></select></label><label>标签<input v-model="draft.tags" data-field="/tags" placeholder="例如：香港, 常用" /><span class="hint">使用逗号分隔，每个标签最多 64 个字符。</span></label><label>服务器地址<input v-model="draft.host" required maxlength="253" data-field="/endpoint/host" placeholder="proxy.example.com" autocapitalize="none" spellcheck="false" /><span class="hint">小写域名或不带方括号的 IP 地址。</span></label><label>端口<input v-model.number="draft.port" type="number" required min="1" max="65535" step="1" data-field="/endpoint/port" /></label></div>
+      <div class="form-grid"><label class="span-2">节点名称<input v-model="draft.name" required maxlength="256" data-field="/name" autofocus /></label><label>协议<select :value="draft.protocol" :disabled="bound" data-field="/protocol" @change="protocolChanged"><option v-for="protocol in protocols" :key="protocol.value" :value="protocol.value">{{ protocol.label }}</option></select><span v-if="bound" class="hint">绑定来源的节点不能覆盖协议。</span></label><label>标签<input v-model="draft.tags" data-field="/tags" placeholder="例如：香港, 常用" /><span class="hint">使用逗号分隔，每个标签最多 64 个字符。</span></label><label>服务器地址<input v-model="draft.host" required maxlength="253" data-field="/endpoint/host" placeholder="proxy.example.com" autocapitalize="none" spellcheck="false" /><span class="hint">小写域名或不带方括号的 IP 地址。</span></label><label>端口<input v-model.number="draft.port" type="number" required min="1" max="65535" step="1" data-field="/endpoint/port" /></label></div>
       <label class="checkbox-label"><input v-model="draft.enabled" type="checkbox" />启用节点</label>
     </fieldset>
     <fieldset :disabled="busy || blocked">

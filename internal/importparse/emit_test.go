@@ -1,6 +1,8 @@
 package importparse
 
 import (
+	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/Runarry/ProxyLoom/internal/ir"
@@ -32,8 +34,11 @@ func TestEncodeURIRoundTripSixProtocols(t *testing.T) {
 		if got.Node.Protocol != test.node.Protocol || got.Node.Endpoint != test.node.Endpoint {
 			t.Fatalf("%s connection semantics changed: %#v vs %#v", test.name, got.Node.Endpoint, test.node.Endpoint)
 		}
-		if test.name != "vmess" && got.Name != test.name {
+		if got.Name != test.name {
 			t.Fatalf("%s name lost: %q", test.name, got.Name)
+		}
+		if !reflect.DeepEqual(got.Node.Auth, test.node.Auth) || !reflect.DeepEqual(got.Node.Transport, test.node.Transport) || !reflect.DeepEqual(got.Node.Security, test.node.Security) {
+			t.Fatalf("%s authentication, transport or security changed", test.name)
 		}
 	}
 }
@@ -41,8 +46,29 @@ func TestEncodeURIRoundTripSixProtocols(t *testing.T) {
 func TestEncodeURIRejectsInsecureTLS(t *testing.T) {
 	verify := false
 	node := ir.Node{SchemaVersion: 1, Protocol: ir.Trojan, Endpoint: ir.Endpoint{Host: "trojan.example.invalid", Port: 443}, Auth: &ir.PasswordAuth{Kind: ir.AuthPassword, Password: "secret"}, Transport: &ir.NativeTCPTransport{Kind: ir.NativeTCP}, Security: &ir.TLSSecurity{Mode: ir.TLS, ServerName: "trojan.example.invalid", VerifyCertificate: &verify}}
-	if _, err := EncodeURI("x", node); err == nil {
+	_, err := EncodeURI("x", node)
+	var diagnostic *ExportError
+	if !errors.As(err, &diagnostic) || diagnostic.FieldPath != "/node/security/verify_certificate" {
 		t.Fatal("insecure TLS URI was emitted")
+	}
+}
+
+func TestEncodeURIPreservesExplicitFeaturePresence(t *testing.T) {
+	disabled := false
+	node := ir.Node{SchemaVersion: 1, Protocol: ir.HTTP, Endpoint: ir.Endpoint{Host: "export.example.invalid", Port: 8080},
+		Auth: &ir.NoAuth{Kind: ir.AuthNone}, Transport: &ir.NativeTCPTransport{Kind: ir.NativeTCP}, Security: &ir.NoSecurity{Mode: ir.SecurityNone}}
+	for _, field := range []string{"udp", "multiplex"} {
+		node.Features = ir.Features{}
+		if field == "udp" {
+			node.Features.UDP = &disabled
+		} else {
+			node.Features.Multiplex = &disabled
+		}
+		_, err := EncodeURI("node", node)
+		var diagnostic *ExportError
+		if !errors.As(err, &diagnostic) || diagnostic.FieldPath != "/node/features/"+field {
+			t.Fatal("explicit false was silently dropped")
+		}
 	}
 }
 

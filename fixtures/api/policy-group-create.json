@@ -1,0 +1,11 @@
+{
+  "name": "Example policy",
+  "policy_group": {
+    "schema_version": 1,
+    "strategy": "manual_select",
+    "members": [{"type": "resource_ref", "kind": "node", "resource_id": "10000000-0000-4000-8000-000000000001"}],
+    "default_member": {"type": "resource_ref", "kind": "node", "resource_id": "10000000-0000-4000-8000-000000000001"},
+    "health_check": {"enabled": false},
+    "on_unavailable": "fail_closed"
+  }
+}

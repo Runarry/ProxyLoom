@@ -154,6 +154,18 @@ func (t *catalogTx) StoreOrigin(ctx context.Context, binding override.Binding) e
 }
 
 func (t *catalogTx) LoadSourceBaseline(ctx context.Context, itemID ir.ID) (ir.Node, string, override.Item, error) {
+	return t.loadSourceBaseline(ctx, itemID, true)
+}
+
+func (t *catalogTx) LoadSourceCandidate(ctx context.Context, itemID ir.ID) (ir.Node, string, override.Item, error) {
+	return t.loadSourceBaseline(ctx, itemID, false)
+}
+
+func (t *catalogTx) ApplySourceBaseline(ctx context.Context, itemID ir.ID) error {
+	return t.runLocked(func() error { return applySourceItemBaseline(ctx, t, itemID) })
+}
+
+func (t *catalogTx) loadSourceBaseline(ctx context.Context, itemID ir.ID, applied bool) (ir.Node, string, override.Item, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if !t.active {
@@ -162,7 +174,13 @@ func (t *catalogTx) LoadSourceBaseline(ctx context.Context, itemID ir.ID) (ir.No
 	if t.failed != nil {
 		return ir.Node{}, "", override.Item{}, t.failed
 	}
-	row, err := t.q.GetSourceItem(ctx, dbgen.GetSourceItemParams{ScopeID: dbID(t.scope), ID: dbID(itemID)})
+	var row dbgen.GetSourceItemRow
+	err := t.tx.QueryRow(ctx, `SELECT id,source_id,external_key,
+		CASE WHEN $3 THEN COALESCE(applied_envelope,envelope) ELSE envelope END,
+		CASE WHEN $3 THEN COALESCE(applied_wrapping,wrapping) ELSE wrapping END,
+		CASE WHEN $3 THEN COALESCE(applied_revision,base_revision) ELSE base_revision END,
+		last_seen_at,state FROM public.source_items WHERE scope_id=$1 AND id=$2`, dbID(t.scope), dbID(itemID), applied).Scan(
+		&row.ID, &row.SourceID, &row.ExternalKey, &row.Envelope, &row.Wrapping, &row.BaseRevision, &row.LastSeenAt, &row.State)
 	if err != nil {
 		return ir.Node{}, "", override.Item{}, catalogError(err)
 	}
@@ -243,7 +261,21 @@ func (t *catalogTx) saveBinding(ctx context.Context, binding override.Binding) e
 			return err
 		}
 	}
-	_, err = t.q.GetNodeBindingByNode(ctx, dbgen.GetNodeBindingByNodeParams{ScopeID: dbID(t.scope), NodeID: dbID(binding.NodeID)})
+	item, err := t.q.GetSourceItem(ctx, dbgen.GetSourceItemParams{ScopeID: dbID(t.scope), ID: dbID(binding.SourceItemID)})
+	if err != nil {
+		return catalogError(err)
+	}
+	if binding.SourceResourceID != irID(item.SourceID) {
+		return catalog.ErrInvalidInput
+	}
+	owner, err := t.q.GetNodeBindingByItem(ctx, dbgen.GetNodeBindingByItemParams{ScopeID: dbID(t.scope), SourceItemID: dbID(binding.SourceItemID)})
+	if err == nil && irID(owner.NodeID) != binding.NodeID {
+		return catalog.ErrRevisionConflict
+	}
+	if err != nil && !errors.Is(catalogError(err), catalog.ErrNotFound) {
+		return catalogError(err)
+	}
+	old, err := t.q.GetNodeBindingByNode(ctx, dbgen.GetNodeBindingByNodeParams{ScopeID: dbID(t.scope), NodeID: dbID(binding.NodeID)})
 	if errors.Is(catalogError(err), catalog.ErrNotFound) {
 		if err := t.q.InsertNodeBinding(ctx, dbgen.InsertNodeBindingParams{
 			NodeID: dbID(binding.NodeID), ScopeID: dbID(t.scope), SourceItemID: dbID(binding.SourceItemID),
@@ -258,9 +290,15 @@ func (t *catalogTx) saveBinding(ctx context.Context, binding override.Binding) e
 	if err != nil {
 		return err
 	}
+	if irID(old.SourceID) != binding.SourceResourceID {
+		return catalog.ErrInvalidInput
+	}
+	if old.BindingRevision+1 != binding.Revision {
+		return catalog.ErrRevisionConflict
+	}
 	if err := t.q.UpdateNodeBinding(ctx, dbgen.UpdateNodeBindingParams{
 		BindingRevision: binding.Revision, MatchMethod: string(binding.Method), State: string(binding.State),
-		OverrideEnvelope: envelope, Wrapping: wrapping, ScopeID: dbID(t.scope), NodeID: dbID(binding.NodeID),
+		OverrideEnvelope: envelope, Wrapping: wrapping, ScopeID: dbID(t.scope), NodeID: dbID(binding.NodeID), SourceItemID: dbID(binding.SourceItemID),
 	}); err != nil {
 		return err
 	}

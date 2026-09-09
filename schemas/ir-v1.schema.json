@@ -6,6 +6,7 @@
   "oneOf": [
     { "$ref": "#/$defs/node" },
     { "$ref": "#/$defs/chain" },
+    { "$ref": "#/$defs/policy_group" },
     { "$ref": "#/$defs/target_ref" },
     { "$ref": "#/$defs/resource" },
     { "$ref": "#/$defs/frozen_input" }
@@ -150,6 +151,38 @@
       "type": "object", "additionalProperties": false, "required": ["schema_version", "hops", "failure_policy"],
       "properties": { "schema_version": { "$ref": "#/$defs/version" }, "hops": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/node_ref" } }, "failure_policy": { "const": "fail_closed" } }
     },
+    "member_ref": {
+      "type": "object", "additionalProperties": false, "required": ["type", "kind", "resource_id"],
+      "properties": { "type": { "const": "resource_ref" }, "kind": { "enum": ["node", "chain"] }, "resource_id": { "$ref": "#/$defs/uuid" } }
+    },
+    "policy_strategy": { "enum": ["fixed", "manual_select", "latency_best", "round_robin"] },
+    "policy_health_check": {
+      "type": "object", "additionalProperties": false, "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "url": { "type": "string", "format": "uri", "maxLength": 2048, "pattern": "^https://[^\\s\u0040#]+$" },
+        "interval_ms": { "type": "integer", "minimum": 1000, "maximum": 86400000 },
+        "timeout_ms": { "type": "integer", "minimum": 100, "maximum": 60000 },
+        "tolerance_ms": { "type": "integer", "minimum": 0, "maximum": 60000 }
+      },
+      "allOf": [{ "if": { "properties": { "enabled": { "const": true } } }, "then": { "required": ["url", "interval_ms", "timeout_ms", "tolerance_ms"] } }]
+    },
+    "policy_group": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "strategy", "members", "default_member", "health_check", "on_unavailable"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/version" }, "strategy": { "$ref": "#/$defs/policy_strategy" },
+        "members": { "type": "array", "minItems": 1, "maxItems": 200, "uniqueItems": true, "items": { "$ref": "#/$defs/member_ref" } },
+        "default_member": { "$ref": "#/$defs/member_ref" }, "health_check": { "$ref": "#/$defs/policy_health_check" },
+        "on_unavailable": { "const": "fail_closed" }
+      }
+    },
+    "policy_override": {
+      "type": "object", "additionalProperties": false, "required": ["policy_group_id"], "minProperties": 2,
+      "properties": {
+        "policy_group_id": { "$ref": "#/$defs/uuid" }, "strategy": { "$ref": "#/$defs/policy_strategy" },
+        "default_member": { "$ref": "#/$defs/member_ref" }, "health_check": { "$ref": "#/$defs/policy_health_check" }
+      }
+    },
     "metadata": {
       "type": "object", "additionalProperties": false, "required": ["resource_id", "scope_id", "kind", "revision", "schema_version", "name", "tags", "enabled", "security_epoch"],
       "properties": {
@@ -161,14 +194,15 @@
       "type": "object", "additionalProperties": false, "required": ["metadata", "payload"],
       "properties": { "metadata": { "$ref": "#/$defs/metadata" }, "payload": { "type": "object" } },
       "allOf": [
-        { "properties": { "metadata": { "properties": { "kind": { "enum": ["node", "chain"] } } } } },
+        { "properties": { "metadata": { "properties": { "kind": { "enum": ["node", "chain", "policy_group"] } } } } },
         { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "node" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/node" } } } },
-        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "chain" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/chain" } } } }
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "chain" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/chain" } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "policy_group" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/policy_group" } } } }
       ]
     },
     "frozen_ref": {
       "type": "object", "additionalProperties": false, "required": ["resource_id", "kind", "revision", "security_epoch"],
-      "properties": { "resource_id": { "$ref": "#/$defs/uuid" }, "kind": { "enum": ["node", "chain"] }, "revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" } }
+      "properties": { "resource_id": { "$ref": "#/$defs/uuid" }, "kind": { "enum": ["node", "chain", "policy_group"] }, "revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" } }
     },
     "target": {
       "type": "object", "additionalProperties": false,

@@ -57,16 +57,17 @@ type FetchLimits struct {
 }
 
 type Config struct {
-	SchemaVersion   int                       `json:"schema_version"`
-	URL             ir.Secret                 `json:"url"`
-	Format          Format                    `json:"format"`
-	Auth            Auth                      `json:"auth"`
-	RefreshPolicy   RefreshPolicy             `json:"refresh_policy"`
-	FetchLimits     FetchLimits               `json:"fetch_limits"`
-	BindingRevision int64                     `json:"binding_revision"`
-	LastSuccessAt   *time.Time                `json:"last_success_at,omitempty"`
-	LastJobID       ir.ID                     `json:"last_job_id,omitempty"`
-	LastError       *runnerprotocol.SafeError `json:"last_error,omitempty"`
+	SchemaVersion        int                       `json:"schema_version"`
+	URL                  ir.Secret                 `json:"url"`
+	Format               Format                    `json:"format"`
+	Auth                 Auth                      `json:"auth"`
+	RefreshPolicy        RefreshPolicy             `json:"refresh_policy"`
+	FetchLimits          FetchLimits               `json:"fetch_limits"`
+	BindingRevision      int64                     `json:"binding_revision"`
+	LastSuccessAt        *time.Time                `json:"last_success_at,omitempty"`
+	LastJobID            ir.ID                     `json:"last_job_id,omitempty"`
+	LatestPreviewBatchID ir.ID                     `json:"latest_preview_batch_id,omitempty"`
+	LastError            *runnerprotocol.SafeError `json:"last_error,omitempty"`
 }
 
 type Document struct {

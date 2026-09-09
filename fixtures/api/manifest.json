@@ -46,6 +46,26 @@
     "valid": false
   },
   {
+    "file": "policy-group-create.json",
+    "schema": "PolicyGroupCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "source-preview-commit.json",
+    "schema": "ImportCommitRequest",
+    "valid": true
+  },
+  {
+    "file": "export-base64.json",
+    "schema": "ExportRequest",
+    "valid": true
+  },
+  {
+    "file": "invalid-source-secret-diff.json",
+    "schema": "SourceFieldChange",
+    "valid": false
+  },
+  {
     "file": "auth-session.json",
     "schema": "SessionResponse",
     "valid": true

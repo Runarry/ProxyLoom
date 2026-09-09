@@ -22,7 +22,7 @@ func pageLimit(limit int) (int, error) {
 
 func (c *Catalog) List(ctx context.Context, scope ir.ID, options catalog.ListOptions) (catalog.Page, error) {
 	limit, err := pageLimit(options.Limit)
-	if err != nil || scope.Validate() != nil || (options.Kind != "" && options.Kind != ir.KindNode && options.Kind != ir.KindChain) ||
+	if err != nil || scope.Validate() != nil || (options.Kind != "" && options.Kind != ir.KindNode && options.Kind != ir.KindChain && options.Kind != ir.KindPolicyGroup) ||
 		!utf8.ValidString(options.Tag) || utf8.RuneCountInString(options.Tag) > 64 {
 		return catalog.Page{}, catalog.ErrInvalidInput
 	}
@@ -106,7 +106,7 @@ func (c *Catalog) References(ctx context.Context, scope, target ir.ID, options c
 		rows = rows[:limit]
 	}
 	for _, row := range rows {
-		ref := catalog.Reference{SourceID: irID(row.ResourceID), SourceRevision: row.Revision,
+		ref := catalog.Reference{SourceID: irID(row.ResourceID), SourceKind: ir.ResourceKind(row.SourceKind), SourceRevision: row.Revision,
 			TargetID: irID(row.TargetResourceID), ExpectedKind: ir.ResourceKind(row.ExpectedKind), Path: row.RefPath, Current: row.Current.Bool}
 		if row.TargetRevision.Valid {
 			value := row.TargetRevision.Int64

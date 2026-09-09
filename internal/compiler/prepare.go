@@ -103,6 +103,12 @@ func (c *Compiler) Prepare(input ir.FrozenInput, target ir.Target) (Graph, []ir.
 			seenChain[member.ResourceID] = struct{}{}
 			chains = append(chains, resource)
 			items = append(items, chainLabelItem(resource.Metadata.ResourceID, resource.Metadata.Revision))
+		case *ir.PolicyGroup:
+			// Strategy adapters are delivered separately. Never approximate manual
+			// selection, latency selection or round robin with a fixed outbound.
+			d := compileIssue(ir.CapabilityUnsupported, "/payload/strategy", target.Key, member.ResourceID)
+			d.SuggestedAction = "This target has no implemented policy strategy adapter."
+			return Graph{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 		default:
 			d := compileIssue(ir.InvalidUnion, "/members", target.Key, member.ResourceID)
 			return Graph{}, []ir.Diagnostic{d}, ir.Diagnostics{d}

@@ -1674,15 +1674,21 @@ export interface components {
             expires_at: components["schemas"]["Timestamp"];
             job_id: components["schemas"]["UUID"];
             revision: components["schemas"]["Revision"];
+            snapshot_id?: components["schemas"]["UUID"];
             source_id?: components["schemas"]["UUID"];
             source_revision?: components["schemas"]["Revision"];
             /** @enum {string} */
-            state: "queued" | "parsing" | "ready" | "failed" | "committed" | "expired";
+            state: "queued" | "parsing" | "ready" | "failed" | "committed" | "expired" | "superseded";
         };
         ImportCandidate: {
+            auto_applied?: boolean;
+            binding_revision?: components["schemas"]["Revision"];
             candidate_id: components["schemas"]["UUID"];
+            /** @enum {string} */
+            change_kind?: "new" | "modified" | "missing" | "conflict" | "unchanged";
             changed_fields?: components["schemas"]["SafeFieldPath"][];
             diagnostics: components["schemas"]["Diagnostics"];
+            effective_changes?: components["schemas"]["SourceFieldChange"][];
             existing_resource_id?: components["schemas"]["UUID"];
             existing_revision?: components["schemas"]["Revision"];
             index: number;
@@ -1690,8 +1696,10 @@ export interface components {
             match_method?: "stable_external_key" | "manual_binding" | "exact_fingerprint" | "suggestion";
             name?: components["schemas"]["Name"];
             node?: components["schemas"]["NodeRedacted"];
+            source_item_id?: components["schemas"]["UUID"];
             /** @enum {string} */
             state: "new" | "matched" | "conflict" | "invalid";
+            upstream_changes?: components["schemas"]["SourceFieldChange"][];
         };
         ImportCommit: {
             batch_id: components["schemas"]["UUID"];
@@ -1705,7 +1713,7 @@ export interface components {
             /** @enum {string} */
             status: "created" | "updated" | "skipped" | "bound";
         };
-        /** @description The preview ETag is supplied in If-Match. Source-backed commits additionally require matching source_revision and binding_revision. Selected writes and binding changes are one transaction; conflicts never silently overwrite. */
+        /** @description The preview ETag is supplied in If-Match. Source-backed commits require source_revision and each bound decision's expected_binding_revision. Top-level binding_revision remains reserved and rejected. New successful refreshes or source edits supersede pending previews. Selected writes and bindings are atomic and idempotent; confirmation never fetches the source again. */
         ImportCommitRequest: {
             binding_revision?: components["schemas"]["Revision"];
             decisions: components["schemas"]["ImportDecision"][];
@@ -1725,6 +1733,7 @@ export interface components {
             /** @enum {string} */
             action: "create" | "update" | "skip" | "bind";
             candidate_id: components["schemas"]["UUID"];
+            expected_binding_revision?: components["schemas"]["Revision"];
             expected_revision?: components["schemas"]["Revision"];
             override?: components["schemas"]["NodePatchRequest"];
             resource_id?: components["schemas"]["UUID"];
@@ -2236,7 +2245,7 @@ export interface components {
         RequestID: string;
         ResourceExportRequest: {
             /** @enum {string} */
-            format: "proxyloom_json" | "uri_list";
+            format: "proxyloom_json" | "uri_list" | "base64_uri_list";
             include_secrets: boolean;
             resources: components["schemas"]["ExportResourceRef"][];
             /** @constant */
@@ -2631,6 +2640,14 @@ export interface components {
             max_redirects: number;
             timeout_ms: number;
         };
+        /** @description Only typed node/name field paths. Secret changes expose no before or after values. */
+        SourceFieldChange: {
+            after?: unknown;
+            before?: unknown;
+            field_path: components["schemas"]["SafeFieldPath"];
+            /** @constant */
+            secret_changed?: true;
+        } & unknown;
         SourceItem: {
             external_key?: string;
             id: components["schemas"]["UUID"];
@@ -2672,6 +2689,7 @@ export interface components {
             last_error?: components["schemas"]["SafeError"];
             last_job_id?: components["schemas"]["UUID"];
             last_success_at?: components["schemas"]["Timestamp"];
+            latest_preview_batch_id?: components["schemas"]["UUID"];
             refresh_policy: components["schemas"]["SourceRefreshPolicy"];
             schema_version: components["schemas"]["SchemaVersion"];
             /**
