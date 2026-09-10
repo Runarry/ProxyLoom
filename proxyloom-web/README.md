@@ -1,7 +1,7 @@
 # ProxyLoom 前端
 
 Vue 3、TypeScript、Vite、Vue Router 和 Pinia，使用 `src/api/schema.d.ts` 中的 OpenAPI 生成类型。
-当前交付 T-047 和 T-048 的节点、文本与文件导入部分；来源刷新差异、覆盖管理、真实内核兼容检查和发布向导仍属于后续切片。
+当前接入 T-047 通用界面及 T-048 的节点、文本／文件导入、来源刷新差异、覆盖恢复和节点导出。T-048 仍为 `in_review`；真实内核兼容检查、发布向导和链／策略组编排界面属于后续切片。
 
 ## 功能
 
@@ -14,6 +14,8 @@ Vue 3、TypeScript、Vite、Vue Router 和 Pinia，使用 `src/api/schema.d.ts` 
 - 文本与 multipart 文件导入支持自动、URI 列表和 Base64 URI 列表；轮询持久批次状态，刷新 URL 可恢复脱敏预览。逐项呈现不支持、无效和重复诊断。
 - 候选每页 200 项，跨页保留选择，最多 5000 项在一次请求中原子提交。匹配和重复项默认跳过，明确选择创建或更新；提交携带 `If-Match` 与幂等键。网络结果不确定且选择未变时，重试复用原键。
 - 412 不覆盖节点草稿，必须读取最新版本、比较并确认修订后才能再次保存。所有保存/解析状态均与“兼容性未验证”分开展示。
+- 来源创建／编辑、手动与周期刷新、最新差异预览和绑定节点覆盖恢复；默认手动确认、保留缺失节点、关闭周期刷新，来源 URL 与认证默认保留已保存值。
+- 所选节点按明确修订导出 URI、Base64 URI 或 ProxyLoom JSON；需要近期重认证，下载完成后释放内存 Blob URL，不能表达的字段由 API 明确拒绝。
 
 应用不使用 localStorage、sessionStorage、IndexedDB、Service Worker 或持久化 Pinia 插件。
 密码、初始化凭据、导入原文、编辑草稿和 CSRF 只保留在当前页面/会话的内存中；请求不缓存、不记录正文、不自动重放写操作。
@@ -40,7 +42,8 @@ pnpm check:api
 ```sh
 pnpm test
 pnpm test:ui
-pnpm test:e2e
+# 配置下文真实 API 和合成管理员后，仅运行管理套件：
+pnpm test:e2e -- tests/e2e/management.spec.ts
 ```
 
 `test` 检查秘密三态、协议切换的字段隔离、遮罩拒绝、草稿清理和可选字段保留语义。
@@ -49,7 +52,7 @@ Windows 下测试脚本直接启动并关闭自身 Node 子进程，避免 shell
 
 Playwright 精确锁定 `1.58.2`。可先执行 `pnpm exec playwright install chromium`，或设置 `PROXYLOOM_E2E_BROWSER=chrome` 使用已安装的 Chrome。
 
-真实 E2E 必须配置以下环境变量；缺失时命令失败，不会以跳过方式返回通过：
+管理真实 E2E 必须配置真实 API 地址和合成管理员；来源套件还依赖专用夹具。缺少必要条件时执行失败，不会以跳过方式返回通过：
 
 | 变量 | 含义 |
 | --- | --- |
@@ -58,10 +61,39 @@ Playwright 精确锁定 `1.58.2`。可先执行 `pnpm exec playwright install ch
 | `PROXYLOOM_E2E_PASSWORD` | 对应合成管理员密码，经受控环境注入 |
 | `PROXYLOOM_E2E_SETUP_TOKEN` | 可选；仅全新未初始化工作空间传入，首项测试验证初始化 |
 | `PROXYLOOM_E2E_BROWSER` | 可选 Playwright 浏览器 channel，如 `chrome` |
+| `PROXYLOOM_E2E_SOURCE_FIXTURE_URL` | 运行来源套件时必需；由下文 Go 验收入口自动注入的 `http://127.0.0.1:<port>` 专用来源夹具，不能替换成任意 HTTPS 订阅地址 |
 
-真实用例覆盖认证、六协议创建、保留秘密编辑、克隆、修订/引用、批量标签/启停、并发修订冲突、重认证查看、205 个有效候选的跨页原子提交与 Base64 文件导入。
-用例操作随机命名的合成节点并在结束时删除；应只运行在专用验收工作空间。
-真实测试在工作进程内存中复用会话 Cookie，整套只执行两次登录和一次重认证，以遵守管理员认证限流；结束时撤销共享会话，不写入会话文件。
+`management.spec.ts` 覆盖认证、六协议创建、保留秘密编辑、克隆、修订/引用、批量标签/启停、并发修订冲突、重认证查看、205 个有效候选的跨页原子提交与 Base64 文件导入；它清理自身创建的测试节点。`source-window.spec.ts` 覆盖来源刷新、差异确认、绑定覆盖／恢复、409／412 和重认证 Base64 导出。它没有逐资源删除所有来源／绑定节点，依靠 Go 验收入口整体删除临时数据库；两个套件均应使用专用验收环境。
+
+直接执行不带文件过滤的 `pnpm test:e2e` 会包含两个套件。Playwright 配置目前只提前检查 API 地址与管理员变量；缺失或不匹配的来源夹具会在来源套件 `beforeAll` 中失败。普通开发 Compose 不放行来源夹具所需的回环地址，不应直接把该套件指向现有开发工作空间。
+
+来源真实验收从仓库根目录运行以下命令（先安装锁定前端依赖，使用单独 PowerShell 会话及已安装的 Chrome）：
+
+```powershell
+pnpm --dir proxyloom-web build
+if ($LASTEXITCODE -ne 0) { throw '前端构建失败' }
+$acceptance = node scripts/acceptance-db.mjs start | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or -not $acceptance.id) { throw '临时数据库启动失败' }
+try {
+    $env:PROXYLOOM_SOURCE_WINDOW_BROWSER_TEST = 'true'
+    $env:PROXYLOOM_REQUIRE_POSTGRES_TESTS = 'true'
+    $env:PROXYLOOM_TEST_DATABASE_DSN_FILE = Join-Path $acceptance.secrets 'database_dsn'
+    $env:PROXYLOOM_TEST_MIGRATION_DSN_FILE = Join-Path $acceptance.secrets 'migration_dsn'
+    $env:PROXYLOOM_TEST_ADMIN_DSN_FILE = Join-Path $acceptance.secrets 'admin_dsn'
+    $env:PROXYLOOM_E2E_BROWSER = 'chrome'
+    go test -mod=readonly ./internal/storage -run '^TestSourceWindowBrowserAcceptance$' -count=1 -timeout=8m -v
+    if ($LASTEXITCODE -ne 0) { throw '来源真实浏览器验收失败' }
+} finally {
+    node scripts/acceptance-db.mjs stop $acceptance.id
+    if ($LASTEXITCODE -ne 0) { throw '临时数据库资源清理失败，请按运行 ID 检查' }
+}
+```
+
+该入口自动创建临时数据库、合成管理员、API／Worker 和来源夹具，只在测试用 SafeFetcher 中许可回环访问；结束时关闭服务并删除测试库，`stop` 按所有权标签移除本次容器和网络。忽略目录 `.cache/acceptance-db/<id>/` 下的凭据和状态文件会保留，不能把它们作为测试附件归档。`PROXYLOOM_REQUIRE_POSTGRES_TESTS=true` 确保缺少实库条件时报错；不显式启用浏览器入口时，普通 Go 单测的 skip 不能算来源验收通过。
+
+真实测试在工作进程内存中复用会话 Cookie，结束时撤销共享会话，不写入会话文件。
 截图、视频、trace 默认关闭；UI 与真实测试的诊断目录分别为 `test-results/ui/`、`test-results/e2e/`，均不提交。
+
+结果按受测代码状态记录：[节点／导入独立验收](../docs/evidence/T-048/independent-acceptance.md)、[来源闭环独立验收](../docs/evidence/T-048/source-window/independent-acceptance.md)、[2026-09-10 开发 Compose 网页补充测试](../docs/evidence/T-048/manual-web-2026-09-10.md)。最后一份仅覆盖其中列出的实际操作，未重跑完整真实 E2E。
 
 依赖采用精确版本，传递依赖及完整性摘要保存在 `pnpm-lock.yaml`。更新契约后由仓库生成脚本更新类型，不手工修改生成文件。

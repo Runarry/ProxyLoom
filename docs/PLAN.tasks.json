@@ -936,7 +936,7 @@
       "status": "in_review",
       "review_record": "docs/reviews/2026-09-08-m1-input-exit.md",
       "progress_note": "新增来源管理、刷新差异确认、覆盖恢复与节点导出，进入联合验收；真实浏览器结果见source-window证据，整项不自动done。",
-      "evidence": ["docs/evidence/T-048/source-window/acceptance.md"]
+      "evidence": ["docs/evidence/T-048/source-window/acceptance.md", "docs/evidence/T-048/manual-web-2026-09-10.md"]
     },
     {
       "id": "T-049",
