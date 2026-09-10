@@ -1,0 +1,16 @@
+=== RUN   TestOrchestrationBrowserAcceptance
+    orchestration_browser_test.go:131: Running 4 tests using 1 worker
+        
+        (node:22036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+        (Use `node --trace-warnings ...` to show where the warning was created)
+        (node:22036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+        (Use `node --trace-warnings ...` to show where the warning was created)
+          ok 1 tests\e2e\orchestration.spec.ts:78:1 › chain swap persists client order and leaves referenced nodes unchanged (793ms)
+          ok 2 tests\e2e\orchestration.spec.ts:101:1 › policy group preserves round robin semantics and 412 keeps its draft until comparison (1.3s)
+          ok 3 tests\e2e\orchestration.spec.ts:139:1 › rule text locates its CIDR error and ordered routing persists after edit (1.4s)
+          ok 4 tests\e2e\orchestration.spec.ts:197:1 › DNS persists explicit resolvers, rejects a server-side cycle, and exposes five read-only presets (843ms)
+        
+          4 passed (9.8s)
+--- PASS: TestOrchestrationBrowserAcceptance (12.93s)
+PASS
+ok  	github.com/Runarry/ProxyLoom/internal/storage	13.059s

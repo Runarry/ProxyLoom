@@ -68,8 +68,8 @@ func TestEmitIndependentHasNoDialer(t *testing.T) {
 	}
 }
 
-func TestEmitRejectsUnmappedProtocol(t *testing.T) {
-	if _, _, err := Emit(independentInput(t, "n_ss", "positive/shadowsocks-aead.json")); !hasCode(err, ir.CompileUnmappedField) {
+func TestEmitMapsShadowsocks(t *testing.T) {
+	if _, _, err := Emit(independentInput(t, "n_ss", "positive/shadowsocks-aead.json")); err != nil {
 		t.Fatalf("shadowsocks: %v", err)
 	}
 }

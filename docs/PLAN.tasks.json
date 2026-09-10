@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-10 来源闭环与策略组窗口：累计21项done；T008/T012～T019/T048共10项in_review；其余29项not_started。实现进入联合验收，具体运行结果见证据。G1未关闭，能力unverified。",
+  "status_note": "2026-09-10 M1/G1收口：累计36项done，剩余24项not_started。用户已批准sing-box IP解析目标限制；最终13项门禁、57项实库及原生/浏览器验收通过。G1按批准范围关闭，M2未启动；未验架构/客户端及宽泛能力保持unverified。",
   "tasks": [
     {
       "id": "T-001",
@@ -152,8 +152,9 @@
         "T-007"
       ],
       "acceptance": "失败测试阻止合并；生成文件可重建；无证据的任务不能自动标完成；高级流水线交由 T-059 汇总。\nNFR-12；CI 自检",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-008/summary.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-008/summary.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-009",
@@ -233,8 +234,9 @@
         "T-011"
       ],
       "acceptance": "改名不破坏引用；同名异节点不静默合并；无可靠匹配的认证变更进入冲突处理。\nAC-04、AC-05",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-012/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-012/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-013",
@@ -253,8 +255,9 @@
         "T-007"
       ],
       "acceptance": "私网、IPv4 映射 IPv6、重绑定及恶意重定向受阻；保留 Host／SNI；不继承环境代理。\nAC-20；SafeFetcher 专项",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-013/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-013/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-014",
@@ -274,8 +277,9 @@
         "T-039"
       ],
       "acceptance": "同来源只有一个有效提交；重启后调度可恢复；超时、空响应、解析失败不空覆盖旧数据。\nAC-04、AC-05",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-014/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-014/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-015",
@@ -293,8 +297,9 @@
         "T-014"
       ],
       "acceptance": "刷新保留人工名称；凭证变更走安全更新；模糊匹配须确认；来源恢复可识别原绑定。\nAC-04、AC-05、AC-17",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-015/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-015/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-016",
@@ -313,8 +318,9 @@
         "T-017"
       ],
       "acceptance": "往返解析保留连接语义；链／路由方案直接转 URI 被拒；独立“仅导出原始节点”需明确确认。\nAC-03；节点导出专项",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-016/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-016/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-017",
@@ -332,8 +338,9 @@
         "T-011"
       ],
       "acceptance": "A→B 与 B→A 独立；A→A、三跳、策略组作链跳拒绝；原节点修订不被链编辑修改。\nAC-07、AC-08",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-017/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-017/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-018",
@@ -351,8 +358,9 @@
         "T-017"
       ],
       "acceptance": "缺失、跨 scope、错类型、循环、超限均定位；显式排除必要依赖产生错误而非漏项。\nAC-08、AC-12、AC-13",
-      "status": "in_review",
-      "evidence": "docs/evidence/T-018/acceptance.md"
+      "status": "done",
+      "evidence": "docs/evidence/T-018/acceptance.md",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-019",
@@ -370,9 +378,12 @@
         "T-018"
       ],
       "acceptance": "空组、嵌套、非法默认项拒绝；不把手动选择变成固定，不把轮询变成低延迟选优。\nAC-10、AC-11",
-      "status": "in_review",
-      "progress_note": "类型化策略、覆盖纯校验、CRUD、修订与依赖闭包已接入，进入联合验收。真实内核策略映射仍属T029。",
-      "evidence": ["docs/evidence/T-019/acceptance.md"]
+      "status": "done",
+      "progress_note": "前置任务工程评审及补验收口；历史证据边界与本窗修复见review_record，不外推T029映射或G1。",
+      "evidence": [
+        "docs/evidence/T-019/acceptance.md"
+      ],
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md"
     },
     {
       "id": "T-020",
@@ -390,7 +401,10 @@
         "T-019"
       ],
       "acceptance": "不同字段 AND／同字段 OR；首匹配顺序一致；非法 CIDR 有行号；无默认出口不可发布。\nAC-12",
-      "status": "not_started"
+      "status": "done",
+      "progress_note": "按用户批准范围完成实现和最终验收；sing-box IP解析限制及原生反例有明确范围批准，G1收口，不启动M2。",
+      "review_record": "docs/reviews/2026-09-10-g1-decision.md",
+      "evidence": "docs/evidence/T-020/acceptance.md"
     },
     {
       "id": "T-021",
@@ -408,7 +422,10 @@
         "T-020"
       ],
       "acceptance": "DNS 自环／间接环拒绝；不隐式增加解析服务；解析验证与 HTTP 测试结论分开。\nAC-12；DNS 专项",
-      "status": "not_started"
+      "status": "done",
+      "progress_note": "按用户批准范围完成实现和最终验收；sing-box IP解析限制及原生反例有明确范围批准，G1收口，不启动M2。",
+      "review_record": "docs/reviews/2026-09-10-g1-decision.md",
+      "evidence": "docs/evidence/T-021/acceptance.md"
     },
     {
       "id": "T-022",
@@ -427,7 +444,10 @@
         "T-021"
       ],
       "acceptance": "未做客户端测试只显示内核状态；不能注入任意监听、文件、自动下载或覆盖系统标签。\nAC-11、AC-23；预设安全专项",
-      "status": "not_started"
+      "status": "done",
+      "progress_note": "按用户批准范围完成实现和最终验收；sing-box IP解析限制及原生反例有明确范围批准，G1收口，不启动M2。",
+      "review_record": "docs/reviews/2026-09-10-g1-decision.md",
+      "evidence": "docs/evidence/T-022/acceptance.md"
     },
     {
       "id": "T-023",
@@ -565,7 +585,10 @@
         "T-027"
       ],
       "acceptance": "所有承诺组合有正负 Golden／内核测试；组不误选中间跳；策略全故障无直连；不支持差异明确可见。\nAC-10～AC-12；全部承诺组合",
-      "status": "not_started"
+      "status": "done",
+      "progress_note": "按用户批准范围完成实现和最终验收；sing-box IP解析限制及原生反例有明确范围批准，G1收口，不启动M2。",
+      "review_record": "docs/reviews/2026-09-10-g1-decision.md",
+      "evidence": "docs/evidence/T-029/summary.md"
     },
     {
       "id": "T-030",
@@ -933,10 +956,13 @@
         "T-047"
       ],
       "acceptance": "隐藏旧字段不误提交；遮罩不回写；412 保留草稿；导入确认前不改库；秘密复制须明确授权。\nAC-02～AC-06、AC-23",
-      "status": "in_review",
-      "review_record": "docs/reviews/2026-09-08-m1-input-exit.md",
-      "progress_note": "新增来源管理、刷新差异确认、覆盖恢复与节点导出，进入联合验收；真实浏览器结果见source-window证据，整项不自动done。",
-      "evidence": ["docs/evidence/T-048/source-window/acceptance.md", "docs/evidence/T-048/manual-web-2026-09-10.md"]
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-10-m1-prerequisite-closeout.md",
+      "progress_note": "前置任务工程评审及补验收口；历史证据边界与本窗修复见review_record，不外推T029映射或G1。",
+      "evidence": [
+        "docs/evidence/T-048/source-window/acceptance.md",
+        "docs/evidence/T-048/manual-web-2026-09-10.md"
+      ]
     },
     {
       "id": "T-049",
@@ -958,7 +984,13 @@
         "T-047"
       ],
       "acceptance": "第一跳／最终出口用文字标注；不支持策略无误导；链结果与独立节点结果不混用。\nAC-07、AC-08、AC-11、AC-12",
-      "status": "not_started"
+      "status": "done",
+      "progress_note": "按用户批准范围完成实现和最终验收；sing-box IP解析限制及原生反例有明确范围批准，G1收口，不启动M2。",
+      "review_record": "docs/reviews/2026-09-10-g1-decision.md",
+      "evidence": [
+        "docs/evidence/T-049/frontend.md",
+        "docs/evidence/T-049/browser-acceptance.md"
+      ]
     },
     {
       "id": "T-050",

@@ -44,7 +44,7 @@ func (t *catalogTx) readHead(ctx context.Context, id ir.ID, latchMissing bool) (
 		}
 		return ir.Resource{}, mapped
 	}
-	if index.DeletedAt.Valid || (index.Kind != string(ir.KindNode) && index.Kind != string(ir.KindChain) && index.Kind != string(ir.KindPolicyGroup)) {
+	if index.DeletedAt.Valid || !typedCatalogKind(ir.ResourceKind(index.Kind)) {
 		if latchMissing {
 			t.failed = catalog.ErrNotFound
 		}

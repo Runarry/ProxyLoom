@@ -193,6 +193,16 @@ func DecodePolicyOverride(data []byte) (PolicyOverride, error) {
 	return value, safeDecodeError(err)
 }
 
+func (v PolicyOverride) Clone() PolicyOverride {
+	v.Strategy = clonePointer(v.Strategy)
+	v.DefaultMember = clonePointer(v.DefaultMember)
+	if v.HealthCheck != nil {
+		health := v.HealthCheck.Clone()
+		v.HealthCheck = &health
+	}
+	return v
+}
+
 // MergePolicyOverride returns an independent validated payload. Neither the
 // resource revision nor either caller-owned input is modified.
 func MergePolicyOverride(base Resource, override PolicyOverride) (PolicyGroup, error) {

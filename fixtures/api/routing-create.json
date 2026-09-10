@@ -1,0 +1,16 @@
+{
+  "name": "有序路由样例",
+  "routing_profile": {
+    "schema_version": 1,
+    "rules": [
+      {
+        "match": {"domain_suffix": ["example.invalid"], "network": ["tcp"]},
+        "action": {"type": "builtin", "builtin": "reject"},
+        "enabled": true,
+        "comment": "域名条件与网络条件同时匹配"
+      }
+    ],
+    "final": {"type": "resource_ref", "kind": "chain", "resource_id": "33333333-3333-4333-8333-333333333333"},
+    "domain_resolution_mode": "preserve_domain"
+  }
+}

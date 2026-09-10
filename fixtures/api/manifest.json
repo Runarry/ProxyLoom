@@ -1,5 +1,20 @@
 [
   {
+    "file": "routing-create.json",
+    "schema": "RoutingProfileCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "dns-create.json",
+    "schema": "DNSProfileCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "rule-set-create.json",
+    "schema": "RuleSetCreateRequest",
+    "valid": true
+  },
+  {
     "file": "chain-create.json",
     "schema": "ChainCreateRequest",
     "valid": true

@@ -1,0 +1,35 @@
+[
+  {
+    "and_fields": "pass",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "family": "xray",
+    "first_match": "pass",
+    "or_values": "pass",
+    "suffix_apex": "pass",
+    "suffix_boundary": "pass",
+    "unmatched_final": "reject"
+  },
+  {
+    "and_fields": "pass",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "family": "sing-box",
+    "first_match": "pass",
+    "or_values": "pass",
+    "suffix_apex": "pass",
+    "suffix_boundary": "pass",
+    "unmatched_final": "reject"
+  },
+  {
+    "and_fields": "pass",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "family": "mihomo",
+    "first_match": "pass",
+    "or_values": "pass",
+    "suffix_apex": "pass",
+    "suffix_boundary": "pass",
+    "unmatched_final": "reject"
+  }
+]

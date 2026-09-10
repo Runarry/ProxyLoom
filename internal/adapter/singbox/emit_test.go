@@ -59,7 +59,7 @@ func TestDialFieldConflictRejectsIgnoredDialOptions(t *testing.T) {
 }
 
 func TestEmitRejectsUnmappedAndKeepsVerify(t *testing.T) {
-	if _, _, err := Emit(independentInput(t, "n_ss", "positive/shadowsocks-aead.json")); !hasCode(err, ir.CompileUnmappedField) {
+	if _, _, err := Emit(independentInput(t, "n_ss", "positive/shadowsocks-aead.json")); err != nil {
 		t.Fatalf("shadowsocks: %v", err)
 	}
 	artifact, _, err := Emit(independentInput(t, "n_a", "positive/trojan-a.json"))

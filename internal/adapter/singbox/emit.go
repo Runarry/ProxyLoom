@@ -23,7 +23,6 @@ var dialConflictFields = []string{
 	"tcp_fast_open",
 	"tcp_multi_path",
 	"udp_fragment",
-	"domain_resolver",
 	"domain_strategy",
 	"network_strategy",
 	"network_type",
@@ -32,10 +31,12 @@ var dialConflictFields = []string{
 }
 
 type document struct {
-	Log       logConfig  `json:"log"`
-	Inbounds  []inbound  `json:"inbounds"`
-	Outbounds []outbound `json:"outbounds"`
-	Route     route      `json:"route"`
+	Log          logConfig     `json:"log"`
+	Inbounds     []inbound     `json:"inbounds"`
+	Outbounds    []outbound    `json:"outbounds"`
+	Route        route         `json:"route"`
+	DNS          *dnsConfig    `json:"dns,omitempty"`
+	Experimental *experimental `json:"experimental,omitempty"`
 }
 
 type logConfig struct {
@@ -51,14 +52,24 @@ type inbound struct {
 }
 
 type outbound struct {
-	Type       string `json:"type"`
-	Tag        string `json:"tag"`
-	Server     string `json:"server,omitempty"`
-	ServerPort int    `json:"server_port,omitempty"`
-	Password   string `json:"password,omitempty"`
-	Network    string `json:"network,omitempty"`
-	TLS        *tls   `json:"tls,omitempty"`
-	Detour     string `json:"detour,omitempty"`
+	Type           string       `json:"type"`
+	Tag            string       `json:"tag"`
+	Server         string       `json:"server,omitempty"`
+	ServerPort     int          `json:"server_port,omitempty"`
+	Password       string       `json:"password,omitempty"`
+	Network        string       `json:"network,omitempty"`
+	TLS            *tls         `json:"tls,omitempty"`
+	Detour         string       `json:"detour,omitempty"`
+	Method         string       `json:"method,omitempty"`
+	UUID           string       `json:"uuid,omitempty"`
+	Security       string       `json:"security,omitempty"`
+	Flow           string       `json:"flow,omitempty"`
+	Username       string       `json:"username,omitempty"`
+	Version        string       `json:"version,omitempty"`
+	Transport      *wsTransport `json:"transport,omitempty"`
+	DomainResolver string       `json:"domain_resolver,omitempty"`
+	Outbounds      []string     `json:"outbounds,omitempty"`
+	Default        string       `json:"default,omitempty"`
 }
 
 type tls struct {
@@ -67,6 +78,18 @@ type tls struct {
 	Insecure   bool     `json:"insecure"`
 	ALPN       []string `json:"alpn,omitempty"`
 	UTLS       *utls    `json:"utls,omitempty"`
+	Reality    *reality `json:"reality,omitempty"`
+}
+
+type wsTransport struct {
+	Type    string            `json:"type"`
+	Path    string            `json:"path"`
+	Headers map[string]string `json:"headers,omitempty"`
+}
+type reality struct {
+	Enabled   bool   `json:"enabled"`
+	PublicKey string `json:"public_key"`
+	ShortID   string `json:"short_id"`
 }
 
 type utls struct {
@@ -76,12 +99,21 @@ type utls struct {
 
 type route struct {
 	Rules []routeRule `json:"rules"`
-	Final string      `json:"final"`
+	Final string      `json:"final,omitempty"`
 }
 
 type routeRule struct {
-	Inbound  []string `json:"inbound"`
-	Outbound string   `json:"outbound"`
+	Inbound      []string    `json:"inbound,omitempty"`
+	Outbound     string      `json:"outbound,omitempty"`
+	Type         string      `json:"type,omitempty"`
+	Mode         string      `json:"mode,omitempty"`
+	Rules        []routeRule `json:"rules,omitempty"`
+	Domain       []string    `json:"domain,omitempty"`
+	DomainSuffix []string    `json:"domain_suffix,omitempty"`
+	IPCIDR       []string    `json:"ip_cidr,omitempty"`
+	PortRange    []string    `json:"port_range,omitempty"`
+	Network      []string    `json:"network,omitempty"`
+	Action       string      `json:"action,omitempty"`
 }
 
 func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
@@ -91,18 +123,25 @@ func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
 	}
 	outbounds := make([]outbound, 0, len(refs))
 	for _, ref := range refs {
-		mapped, mapErr := adapter.MapTrojanNativeTLS(ref.Resource, ref.FieldPath, input.TargetKey)
+		mapped, mapErr := adapter.MapNode(ref.Resource, ref.FieldPath, input.TargetKey)
 		if mapErr != nil {
 			return adapter.Artifact{}, asDiagnostics(mapErr), mapErr
 		}
-		item := trojanOutbound(ref.Tag, mapped, ref.DialerTag)
+		item := nodeOutbound(ref.Tag, mapped, ref.DialerTag)
+		if input.DNS != nil && mapped.Node.NeedsBootstrap() {
+			if len(input.DNS.Profile.Bootstrap) == 0 {
+				d := adapter.CompileIssue(ir.CompileDialConflict, ref.FieldPath+"/endpoint/host", input.TargetKey, ref.Resource.Metadata.ResourceID)
+				return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
+			}
+			item.DomainResolver = input.DNS.Profile.Bootstrap[0].ResolverID
+		}
 		if conflict := DialFieldConflict(item); conflict != "" {
 			d := adapter.CompileIssue(ir.CompileDialConflict, ref.FieldPath+"/"+conflict, input.TargetKey, ref.Resource.Metadata.ResourceID)
 			return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 		}
 		outbounds = append(outbounds, item)
 	}
-	payload, err := adapter.EncodeJSON(document{
+	doc := document{
 		Log: logConfig{Level: "warning", Timestamp: false},
 		Inbounds: []inbound{{
 			Type:       "socks",
@@ -115,7 +154,18 @@ func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
 			Rules: []routeRule{{Inbound: []string{adapter.InboundTag}, Outbound: exit}},
 			Final: exit,
 		},
-	})
+	}
+	if err := applyOrchestration(&doc, input); err != nil {
+		return adapter.Artifact{}, asDiagnostics(err), err
+	}
+	rules := len(doc.Route.Rules)
+	if doc.DNS != nil {
+		rules += len(doc.DNS.Rules)
+	}
+	if err := adapter.CheckNativeCounts(input, len(doc.Outbounds), rules); err != nil {
+		return adapter.Artifact{}, asDiagnostics(err), err
+	}
+	payload, err := adapter.EncodeJSON(doc)
 	if err != nil {
 		d := adapter.CompileIssue(ir.InvalidSnapshot, "", input.TargetKey, "")
 		return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}

@@ -1,0 +1,14 @@
+{
+  "all_unavailable": "fail_closed",
+  "artifact_sha256": "22044bdea07670921a708bf68b4f99cffae6b779702ed2218ad6d8f9b3bb4963",
+  "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+  "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+  "direct_bypass": "none",
+  "family": "mihomo",
+  "health_destination": "local TLS fixture only",
+  "health_interval_ms": 1000,
+  "health_timeout_ms": 900,
+  "health_tolerance_ms": 5,
+  "latency_best": "fast member selected over default slow member",
+  "requests_through_fast_member": 3
+}

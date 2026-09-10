@@ -19,6 +19,7 @@ const (
 	RequiredField            DiagnosticCode = "IR_REQUIRED"
 	InvalidType              DiagnosticCode = "IR_INVALID_TYPE"
 	InvalidValue             DiagnosticCode = "IR_INVALID_VALUE"
+	InputLimitExceeded       DiagnosticCode = "INPUT_LIMIT_EXCEEDED"
 	UnsupportedVersion       DiagnosticCode = "IR_UNSUPPORTED_VERSION"
 	InvalidUnion             DiagnosticCode = "IR_INVALID_UNION"
 	InvalidSnapshot          DiagnosticCode = "IR_INVALID_SNAPSHOT"
@@ -28,6 +29,7 @@ const (
 	ReferenceKind            DiagnosticCode = "IR_REFERENCE_KIND"
 	ReferenceRevision        DiagnosticCode = "IR_REFERENCE_REVISION"
 	ReferenceEpoch           DiagnosticCode = "IR_REFERENCE_EPOCH"
+	ReferenceCycle           DiagnosticCode = "IR_REFERENCE_CYCLE"
 	ScopeMismatch            DiagnosticCode = "IR_SCOPE_MISMATCH"
 	ResourceDisabled         DiagnosticCode = "IR_RESOURCE_DISABLED"
 	UnreachableResource      DiagnosticCode = "IR_UNREACHABLE_RESOURCE"
@@ -83,6 +85,8 @@ func diagnosticMessage(code DiagnosticCode) string {
 		return "A required field is missing."
 	case InvalidType:
 		return "The field has an invalid JSON type."
+	case InputLimitExceeded:
+		return "The input or expanded configuration exceeds the configured resource limit."
 	case UnsupportedVersion:
 		return "Only IR schema version 1 is accepted."
 	case InvalidUnion:
@@ -101,12 +105,14 @@ func diagnosticMessage(code DiagnosticCode) string {
 		return "The reference does not match the frozen resource revision."
 	case ReferenceEpoch:
 		return "The reference does not match the frozen security epoch."
+	case ReferenceCycle:
+		return "The reference forms a dependency cycle."
 	case ScopeMismatch:
 		return "All frozen resources must belong to the snapshot scope."
 	case ResourceDisabled:
 		return "Disabled resources cannot enter a compile snapshot."
 	case UnreachableResource:
-		return "The snapshot contains a resource outside the member dependency closure."
+		return "The snapshot contains a resource outside the declared root dependency closure."
 	case CapabilityUnsupported:
 		return "This capability is not adapted for the target and cannot be substituted."
 	case CapabilityUnverified:

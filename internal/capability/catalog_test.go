@@ -178,6 +178,18 @@ func TestEmbeddedLockPinsSixUnverifiedBuilds(t *testing.T) {
 	}
 	seen := map[string]bool{}
 	for _, build := range builds {
+		capabilityKeys := map[string]bool{}
+		for _, record := range build.Capabilities {
+			if capabilityKeys[record.Key] {
+				t.Fatalf("duplicate capability %s for %s/%s", record.Key, build.Family, build.Arch)
+			}
+			capabilityKeys[record.Key] = true
+		}
+		if build.Family == ir.SingBox {
+			if err := catalog.RequireVerified(build.ID, "policy.round_robin"); err != ErrUnsupported {
+				t.Fatalf("family rejection masked for %s: %v", build.Arch, err)
+			}
+		}
 		if err := build.ID.Validate(); err != nil {
 			t.Fatal(err)
 		}

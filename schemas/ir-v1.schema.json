@@ -7,6 +7,10 @@
     { "$ref": "#/$defs/node" },
     { "$ref": "#/$defs/chain" },
     { "$ref": "#/$defs/policy_group" },
+    { "$ref": "#/$defs/routing_profile" },
+    { "$ref": "#/$defs/dns_profile" },
+    { "$ref": "#/$defs/rule_set" },
+    { "$ref": "#/$defs/client_preset" },
     { "$ref": "#/$defs/target_ref" },
     { "$ref": "#/$defs/resource" },
     { "$ref": "#/$defs/frozen_input" }
@@ -183,6 +187,122 @@
         "default_member": { "$ref": "#/$defs/member_ref" }, "health_check": { "$ref": "#/$defs/policy_health_check" }
       }
     },
+    "domain_name": { "type": "string", "format": "hostname", "maxLength": 253, "pattern": "^[a-z0-9][a-z0-9.-]*$" },
+    "cidr": { "type": "string", "maxLength": 64, "pattern": "^[0-9a-fA-F:.]+/(?:[0-9]|[1-9][0-9]|1[01][0-9]|12[0-8])$" },
+    "port_range": {
+      "type": "object", "additionalProperties": false, "required": ["from", "to"],
+      "properties": { "from": { "type": "integer", "minimum": 1, "maximum": 65535 }, "to": { "type": "integer", "minimum": 1, "maximum": 65535 } }
+    },
+    "domain_match": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {
+        "domain_exact": { "type": "array", "minItems": 1, "maxItems": 1000, "uniqueItems": true, "items": { "$ref": "#/$defs/domain_name" } },
+        "domain_suffix": { "type": "array", "minItems": 1, "maxItems": 1000, "uniqueItems": true, "items": { "$ref": "#/$defs/domain_name" } },
+        "rule_set_ids": { "type": "array", "minItems": 1, "maxItems": 100, "uniqueItems": true, "items": { "$ref": "#/$defs/uuid" } }
+      }
+    },
+    "route_match": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {
+        "domain_exact": { "type": "array", "minItems": 1, "maxItems": 1000, "uniqueItems": true, "items": { "$ref": "#/$defs/domain_name" } },
+        "domain_suffix": { "type": "array", "minItems": 1, "maxItems": 1000, "uniqueItems": true, "items": { "$ref": "#/$defs/domain_name" } },
+        "rule_set_ids": { "type": "array", "minItems": 1, "maxItems": 100, "uniqueItems": true, "items": { "$ref": "#/$defs/uuid" } },
+        "ip_cidrs": { "type": "array", "minItems": 1, "maxItems": 1000, "uniqueItems": true, "items": { "$ref": "#/$defs/cidr" } },
+        "destination_ports": { "type": "array", "minItems": 1, "maxItems": 100, "items": { "$ref": "#/$defs/port_range" } },
+        "network": { "type": "array", "minItems": 1, "maxItems": 2, "uniqueItems": true, "items": { "enum": ["tcp", "udp"] } }
+      },
+      "description": "Fields combine with AND and entries within a field with OR. CIDRs must be canonical networks; range bounds must be ordered."
+    },
+    "routing_rule": {
+      "type": "object", "additionalProperties": false, "required": ["match", "action", "enabled", "comment"],
+      "properties": { "match": { "$ref": "#/$defs/route_match" }, "action": { "$ref": "#/$defs/target_ref" }, "enabled": { "type": "boolean" }, "comment": { "$ref": "#/$defs/comment" } }
+    },
+    "comment": { "type": "string", "maxLength": 500, "pattern": "^[^\\x00-\\x1f\\x7f]*$" },
+    "routing_profile": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "rules", "final", "domain_resolution_mode"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/version" },
+        "rules": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/routing_rule" } },
+        "final": { "$ref": "#/$defs/target_ref" }, "domain_resolution_mode": { "enum": ["preserve_domain", "resolve_for_ip_rules"] }
+      },
+      "description": "Ordered first enabled match wins; final is mandatory."
+    },
+    "target_key": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+    "ip_address": { "type": "string", "anyOf": [{ "format": "ipv4" }, { "format": "ipv6" }] },
+    "https_url": { "type": "string", "format": "uri", "maxLength": 2048, "pattern": "^https://[^\\s@#]+$" },
+    "local_bootstrap_resolver": {
+      "type": "object", "additionalProperties": false, "required": ["resolver_id", "kind"],
+      "properties": { "resolver_id": { "$ref": "#/$defs/target_key" }, "kind": { "const": "local" } }
+    },
+    "udp_bootstrap_resolver": {
+      "type": "object", "additionalProperties": false, "required": ["resolver_id", "kind", "address", "port"],
+      "properties": { "resolver_id": { "$ref": "#/$defs/target_key" }, "kind": { "const": "udp" }, "address": { "$ref": "#/$defs/ip_address" }, "port": { "type": "integer", "minimum": 1, "maximum": 65535 } }
+    },
+    "bootstrap_resolver": { "oneOf": [{ "$ref": "#/$defs/local_bootstrap_resolver" }, { "$ref": "#/$defs/udp_bootstrap_resolver" }] },
+    "local_dns_resolver": { "$ref": "#/$defs/local_bootstrap_resolver" },
+    "udp_dns_resolver": {
+      "type": "object", "additionalProperties": false, "required": ["resolver_id", "kind", "address", "port", "outbound"],
+      "properties": { "resolver_id": { "$ref": "#/$defs/target_key" }, "kind": { "const": "udp" }, "address": { "$ref": "#/$defs/ip_address" }, "port": { "type": "integer", "minimum": 1, "maximum": 65535 }, "outbound": { "$ref": "#/$defs/target_ref" } }
+    },
+    "https_dns_resolver": {
+      "type": "object", "additionalProperties": false, "required": ["resolver_id", "kind", "url", "bootstrap_resolver_id", "outbound"],
+      "properties": { "resolver_id": { "$ref": "#/$defs/target_key" }, "kind": { "const": "https" }, "url": { "$ref": "#/$defs/https_url" }, "bootstrap_resolver_id": { "$ref": "#/$defs/target_key" }, "outbound": { "$ref": "#/$defs/target_ref" } }
+    },
+    "dns_resolver": { "oneOf": [{ "$ref": "#/$defs/local_dns_resolver" }, { "$ref": "#/$defs/udp_dns_resolver" }, { "$ref": "#/$defs/https_dns_resolver" }] },
+    "dns_rule": {
+      "type": "object", "additionalProperties": false, "required": ["match", "resolver_id", "enabled", "comment"],
+      "properties": { "match": { "$ref": "#/$defs/domain_match" }, "resolver_id": { "$ref": "#/$defs/target_key" }, "enabled": { "type": "boolean" }, "comment": { "$ref": "#/$defs/comment" } }
+    },
+    "dns_profile": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "bootstrap", "resolvers", "rules", "final_resolver"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/version" },
+        "bootstrap": { "type": "array", "minItems": 1, "maxItems": 32, "items": { "$ref": "#/$defs/bootstrap_resolver" } },
+        "resolvers": { "type": "array", "minItems": 1, "maxItems": 32, "items": { "$ref": "#/$defs/dns_resolver" } },
+        "rules": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/dns_rule" } }, "final_resolver": { "$ref": "#/$defs/target_key" }
+      }
+    },
+    "domain_rule_set_entry": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "domain", "match"],
+      "properties": { "kind": { "const": "domain" }, "domain": { "$ref": "#/$defs/domain_name" }, "match": { "enum": ["exact", "suffix"] } }
+    },
+    "cidr_rule_set_entry": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "cidr"],
+      "properties": { "kind": { "const": "cidr" }, "cidr": { "$ref": "#/$defs/cidr" } }
+    },
+    "rule_set_entry": { "oneOf": [{ "$ref": "#/$defs/domain_rule_set_entry" }, { "$ref": "#/$defs/cidr_rule_set_entry" }] },
+    "rule_set_write": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "format", "entries"],
+      "properties": { "schema_version": { "$ref": "#/$defs/version" }, "format": { "const": "domain_cidr_text" }, "entries": { "type": "array", "minItems": 1, "maxItems": 50000, "items": { "$ref": "#/$defs/rule_set_entry" } } }
+    },
+    "rule_set": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "format", "entries", "content_hash"],
+      "properties": { "schema_version": { "$ref": "#/$defs/version" }, "format": { "const": "domain_cidr_text" }, "entries": { "type": "array", "minItems": 1, "maxItems": 50000, "items": { "$ref": "#/$defs/rule_set_entry" } }, "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+    },
+    "local_listener": {
+      "type": "object", "additionalProperties": false, "required": ["protocol", "listen", "port"],
+      "properties": { "protocol": { "enum": ["socks5", "http", "mixed"] }, "listen": { "enum": ["127.0.0.1", "::1"] }, "port": { "type": "integer", "minimum": 1, "maximum": 65535 } }
+    },
+    "control_api_preset": {
+      "type": "object", "additionalProperties": false, "required": ["enabled"],
+      "properties": { "enabled": { "type": "boolean" }, "listen": { "enum": ["127.0.0.1", "::1"] }, "port": { "type": "integer", "minimum": 1, "maximum": 65535 } },
+      "allOf": [{ "if": { "properties": { "enabled": { "const": true } } }, "then": { "required": ["listen", "port"], "properties": { "listen": { "const": "127.0.0.1" }, "port": { "enum": [17812, 17813] } } }, "else": { "not": { "anyOf": [{ "required": ["listen"] }, { "required": ["port"] }] } } }],
+      "description": "Enabled control uses reviewed loopback ports only. ClientPreset domain validation binds each port to its core family and fixed SOCKS listener."
+    },
+    "client_preset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "core_family", "platform", "format", "local_listener", "dns_mode", "control_api", "import_method", "review_status", "reviewed_at"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/version" }, "core_family": { "enum": ["xray", "sing-box", "mihomo"] }, "platform": { "const": "linux" }, "format": { "enum": ["xray_json", "singbox_json", "mihomo_yaml"] },
+        "local_listener": { "allOf": [{ "$ref": "#/$defs/local_listener" }, { "properties": { "protocol": { "const": "socks5" }, "listen": { "const": "127.0.0.1" }, "port": { "const": 1080 } } }] }, "dns_mode": { "const": "profile" }, "control_api": { "$ref": "#/$defs/control_api_preset" },
+        "import_method": { "const": "file" }, "review_status": { "const": "approved" }, "reviewed_at": { "type": "string", "format": "date-time" }
+      },
+      "allOf": [
+        { "if": { "properties": { "core_family": { "const": "xray" } } }, "then": { "properties": { "format": { "const": "xray_json" } } } },
+        { "if": { "properties": { "core_family": { "const": "sing-box" } } }, "then": { "properties": { "format": { "const": "singbox_json" } } } },
+        { "if": { "properties": { "core_family": { "const": "mihomo" } } }, "then": { "properties": { "format": { "const": "mihomo_yaml" } } } }
+      ]
+    },
     "metadata": {
       "type": "object", "additionalProperties": false, "required": ["resource_id", "scope_id", "kind", "revision", "schema_version", "name", "tags", "enabled", "security_epoch"],
       "properties": {
@@ -194,15 +314,19 @@
       "type": "object", "additionalProperties": false, "required": ["metadata", "payload"],
       "properties": { "metadata": { "$ref": "#/$defs/metadata" }, "payload": { "type": "object" } },
       "allOf": [
-        { "properties": { "metadata": { "properties": { "kind": { "enum": ["node", "chain", "policy_group"] } } } } },
+        { "properties": { "metadata": { "properties": { "kind": { "enum": ["node", "chain", "policy_group", "routing_profile", "dns_profile", "rule_set", "client_preset"] } } } } },
         { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "node" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/node" } } } },
         { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "chain" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/chain" } } } },
-        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "policy_group" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/policy_group" } } } }
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "policy_group" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/policy_group" } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "routing_profile" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/routing_profile" } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "dns_profile" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/dns_profile" } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "rule_set" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/rule_set" } } } },
+        { "if": { "properties": { "metadata": { "properties": { "kind": { "const": "client_preset" } } } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/client_preset" } } } }
       ]
     },
     "frozen_ref": {
       "type": "object", "additionalProperties": false, "required": ["resource_id", "kind", "revision", "security_epoch"],
-      "properties": { "resource_id": { "$ref": "#/$defs/uuid" }, "kind": { "enum": ["node", "chain", "policy_group"] }, "revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" } }
+      "properties": { "resource_id": { "$ref": "#/$defs/uuid" }, "kind": { "enum": ["node", "chain", "policy_group", "routing_profile", "dns_profile", "rule_set", "client_preset"] }, "revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" } }
     },
     "target": {
       "type": "object", "additionalProperties": false,
@@ -210,7 +334,8 @@
       "properties": {
         "key": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" }, "core_family": { "enum": ["xray", "sing-box", "mihomo"] }, "core_build_id": { "$ref": "#/$defs/uuid" },
         "core_build_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "adapter_version": { "$ref": "#/$defs/text" },
-        "client_preset_id": { "$ref": "#/$defs/uuid" }, "client_preset_revision": { "$ref": "#/$defs/revision" }, "format": { "enum": ["xray_json", "singbox_json", "mihomo_yaml"] }
+        "client_preset_id": { "$ref": "#/$defs/uuid" }, "client_preset_revision": { "$ref": "#/$defs/revision" }, "format": { "enum": ["xray_json", "singbox_json", "mihomo_yaml"] },
+        "policy_overrides": { "type": "array", "maxItems": 200, "items": { "$ref": "#/$defs/policy_override" } }
       },
       "allOf": [
         { "if": { "properties": { "core_family": { "const": "xray" } } }, "then": { "properties": { "format": { "const": "xray_json" } } } },
@@ -224,8 +349,10 @@
       "properties": {
         "schema_version": { "$ref": "#/$defs/version" }, "snapshot_id": { "$ref": "#/$defs/uuid" }, "scope_id": { "$ref": "#/$defs/uuid" },
         "catalog_revision": { "$ref": "#/$defs/revision" }, "security_epoch": { "$ref": "#/$defs/revision" },
-        "resources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/resource" } },
-        "members": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/frozen_ref" } },
+        "resources": { "type": "array", "minItems": 1, "maxItems": 2000, "items": { "$ref": "#/$defs/resource" } },
+        "members": { "type": "array", "minItems": 1, "maxItems": 2000, "uniqueItems": true, "items": { "allOf": [{ "$ref": "#/$defs/frozen_ref" }, { "properties": { "kind": { "enum": ["node", "chain", "policy_group"] } } }] } },
+        "routing_profile": { "allOf": [{ "$ref": "#/$defs/frozen_ref" }, { "properties": { "kind": { "const": "routing_profile" } } }] },
+        "dns_profile": { "allOf": [{ "$ref": "#/$defs/frozen_ref" }, { "properties": { "kind": { "const": "dns_profile" } } }] },
         "targets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/target" } }
       }
     }

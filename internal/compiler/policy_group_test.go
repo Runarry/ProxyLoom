@@ -9,8 +9,11 @@ import (
 
 func TestCompilePolicyStrategiesAreExplicitlyUnsupported(t *testing.T) {
 	compiler := mustCompiler(t)
-	for _, strategy := range []ir.PolicyStrategy{ir.PolicyFixed, ir.PolicyManualSelect, ir.PolicyLatencyBest, ir.PolicyRoundRobin} {
+	for _, strategy := range []ir.PolicyStrategy{ir.PolicyManualSelect, ir.PolicyRoundRobin} {
 		for _, family := range []ir.CoreFamily{ir.Xray, ir.SingBox, ir.Mihomo} {
+			if strategy == ir.PolicyRoundRobin && family != ir.SingBox {
+				continue
+			}
 			t.Run(string(strategy)+"/"+string(family), func(t *testing.T) {
 				spec := mustFrozen(t, "frozen-chain-a-b.json").Spec()
 				var chain ir.Resource

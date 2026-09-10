@@ -2,8 +2,13 @@
 import { APIError, errorMessage } from '../api/client'
 defineProps<{ error: unknown }>()
 function focusField(path: string) {
-  const control = document.querySelector<HTMLElement>(`[data-field="${CSS.escape(path)}"]`)
-    ?? document.querySelector<HTMLElement>(`[data-field="${CSS.escape(path.replace(/^\/node\//, '/'))}"]`)
+  const paths = [path, path.replace(/^\/node\//, '/')]
+  const controls = [...document.querySelectorAll<HTMLElement>('[data-field]')]
+  // A single select or textarea can represent a nested reference or an array.
+  const control = controls.find(item => paths.includes(item.dataset.field!))
+    ?? controls.filter(item => paths.some(value => value.startsWith(`${item.dataset.field}/`)))
+      .sort((left, right) => right.dataset.field!.length - left.dataset.field!.length)[0]
+    ?? controls.find(item => paths.some(value => item.dataset.field!.startsWith(`${value}/`)))
   control?.focus()
   control?.scrollIntoView({ block: 'center', behavior: 'smooth' })
 }

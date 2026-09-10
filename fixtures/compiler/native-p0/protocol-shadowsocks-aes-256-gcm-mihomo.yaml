@@ -1,0 +1,21 @@
+mixed-port: 17803
+bind-address: 127.0.0.1
+allow-lan: false
+mode: rule
+log-level: silent
+external-controller: ""
+ipv6: false
+geodata-mode: false
+geo-auto-update: false
+find-process-mode: "off"
+proxies:
+  - name: n_513d3e89
+    type: ss
+    server: 192.0.2.10
+    port: 443
+    password: EXAMPLE_ONLY_SS
+    skip-cert-verify: false
+    udp: false
+    cipher: aes-256-gcm
+rules:
+  - MATCH,n_513d3e89

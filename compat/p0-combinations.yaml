@@ -64,6 +64,20 @@ combinations:
     security: tls_or_none
     state: unverified
 shared_capabilities:
+  - key: routing.ordered
+    state: unverified
+  - key: rule_set.inline
+    state: unverified
+  - key: dns.profile
+    state: unverified
+  - key: policy.fixed
+    state: unverified
+  - key: policy.manual_select
+    state: unverified
+  - key: policy.latency_best
+    state: unverified
+  - key: policy.round_robin
+    state: unverified
   - key: chain.two_hop.tcp
     state: unverified
     fixture_ids:

@@ -179,6 +179,32 @@ func TestFrozenInputReferenceAndIdentityFailures(t *testing.T) {
 	}
 }
 
+func TestFrozenInputBoundsCompleteResourceClosure(t *testing.T) {
+	spec := mustSpec(t)
+	seed := spec.Resources[0]
+	spec.Resources = nil
+	spec.Members = nil
+	for i := 0; i <= ir.MaxFrozenResources; i++ {
+		resource := seed
+		resource.Metadata.ResourceID = ir.ID(fmt.Sprintf("10000000-0000-4000-8000-%012d", i))
+		spec.Resources = append(spec.Resources, resource)
+		spec.Members = append(spec.Members, ir.FrozenRef{ResourceID: resource.Metadata.ResourceID,
+			Kind: resource.Metadata.Kind, Revision: resource.Metadata.Revision, SecurityEpoch: resource.Metadata.SecurityEpoch})
+	}
+	boundary := spec
+	boundary.Resources = spec.Resources[:ir.MaxFrozenResources]
+	boundary.Members = spec.Members[:ir.MaxFrozenResources]
+	if _, err := ir.NewFrozenInput(boundary); err != nil {
+		t.Fatalf("valid boundary rejected: %v", err)
+	}
+	_, err := ir.NewFrozenInput(spec)
+	hasDiagnostic(t, err, ir.InputLimitExceeded, "/resources")
+	hasDiagnostic(t, spec.Validate(), ir.InputLimitExceeded, "/resources")
+	if _, err := ir.DecodeFrozenInput(mustJSON(t, spec)); err == nil {
+		t.Fatal("JSON construction bypassed the frozen closure limit")
+	}
+}
+
 func TestFreezeSortsOnlySetsAndPreservesDirection(t *testing.T) {
 	spec := mustSpec(t)
 	spec.Resources[0].Metadata.Tags = []string{"zeta", "alpha"}

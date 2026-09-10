@@ -106,6 +106,26 @@ try {
     Assert-Step 'explicit reauthentication succeeds' ($reauth.StatusCode -eq 200)
     $currentAdmin = Read-AuthResult $reauth
 
+    $presetResponse = Invoke-SmokeAuth '/api/v1/client-presets'
+    Assert-Step 'startup provisions five reviewed presets' ($presetResponse.StatusCode -eq 200)
+    $presetPage = $presetResponse.Content | ConvertFrom-Json
+    $presetItems = @($presetPage.data)
+    $badPresets = @($presetItems | Where-Object {
+        $_.preset.platform -ne 'linux' -or $_.preset.import_method -ne 'file' -or
+        $_.preset.local_listener.protocol -ne 'socks5' -or $_.preset.local_listener.listen -ne '127.0.0.1' -or
+        $_.preset.local_listener.port -ne 1080 -or $_.preset.dns_mode -ne 'profile'
+    })
+    Assert-Step 'all five presets use reviewed Linux file constraints' ($presetItems.Count -eq 5 -and $badPresets.Count -eq 0 -and -not $presetPage.page.next_cursor)
+    $disabledControls = @($presetItems | Where-Object { -not $_.preset.control_api.enabled })
+    $enabledControls = @($presetItems | Where-Object { $_.preset.control_api.enabled })
+    $badControls = @($enabledControls | Where-Object {
+        $_.preset.control_api.listen -ne '127.0.0.1' -or
+        -not (($_.preset.core_family -eq 'sing-box' -and $_.preset.control_api.port -eq 17812) -or
+              ($_.preset.core_family -eq 'mihomo' -and $_.preset.control_api.port -eq 17813))
+    })
+    Assert-Step 'original presets stay disabled and controlled variants are explicit' ($disabledControls.Count -eq 3 -and $enabledControls.Count -eq 2 -and $badControls.Count -eq 0)
+    $presetBaseline = $presetItems | Sort-Object { $_.metadata.resource_id } | ConvertTo-Json -Depth 16 -Compress
+
     Invoke-Compose -Arguments @('run','--rm','--no-deps','migrate')
     Invoke-Compose -Arguments @('run','--rm','--no-deps','migrate','migrate','up')
     $migrationStatus = Invoke-Compose -Arguments @('run','--rm','--no-deps','migrate','migrate','status') -Capture
@@ -163,6 +183,11 @@ try {
     $restoredAuth = Invoke-SmokeAuth '/api/v1/auth/me'
     Assert-Step 'API restart preserves the database session' ($restoredAuth.StatusCode -eq 200)
     $currentAdmin = Read-AuthResult $restoredAuth
+    $restartedPresets = Invoke-SmokeAuth '/api/v1/client-presets'
+    Assert-Step 'restarted API can read presets' ($restartedPresets.StatusCode -eq 200)
+    $restartedPage = $restartedPresets.Content | ConvertFrom-Json
+    $restartedBaseline = @($restartedPage.data) | Sort-Object { $_.metadata.resource_id } | ConvertTo-Json -Depth 16 -Compress
+    Assert-Step 'API restart preserves preset identities revisions and values' ($restartedBaseline -ceq $presetBaseline)
     $logout = Invoke-SmokeAuth '/api/v1/auth/logout' 'POST' '{}' $currentAdmin.data.csrf_token
     Assert-Step 'logout revokes the session' ($logout.StatusCode -eq 200)
     $afterLogout = Invoke-SmokeAuth '/api/v1/auth/me'
@@ -202,7 +227,7 @@ try {
         $cleanupResult = if ($cleanupFailed) { 'fail' } else { 'pass' }
     } elseif ($ownsProject) { $cleanupResult = 'retained_by_request' }
     if ($cleanupFailed) { $completed = $false }
-    $report = @{started_at=$startedAt; ended_at=[DateTime]::UtcNow.ToString('o'); project=$ProjectName; platform=$platform; completed=$completed; cleanup=$cleanupResult; image_ids=$imageIDs; checks=@($steps.ToArray()); scope='T-002/T-006 development Linux API authentication smoke; not G0 or production acceptance'}
+    $report = @{started_at=$startedAt; ended_at=[DateTime]::UtcNow.ToString('o'); project=$ProjectName; platform=$platform; completed=$completed; cleanup=$cleanupResult; image_ids=$imageIDs; checks=@($steps.ToArray()); scope='T-002/T-006/T-022 development Linux API authentication and preset startup smoke; not G1 or production acceptance'}
     [IO.File]::WriteAllText($reportPath, ($report | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
     $env:PROXYLOOM_DEV_PORT = $oldPort
     if ($cleanupFailed) { throw 'Owned smoke resources were not completely cleaned; inspect the smoke report.' }

@@ -1,0 +1,15 @@
+=== RUN   TestPostgresMTLSRunnerRealCores
+    postgres_test.go:376: verified encrypted submission -> registered mTLS claim -> locked checker -> fenced zero-byte result for three positive and three negative artifacts
+    postgres_test.go:271: resource observations: parent_threads=5 visible_uid_threads=11 core_threads=6 core_virtual_kib=858728
+--- PASS: TestPostgresMTLSRunnerRealCores (12.58s)
+=== RUN   TestMTLSRegistrationFrozenLeaseAndFencing
+--- PASS: TestMTLSRegistrationFrozenLeaseAndFencing (0.01s)
+=== RUN   TestMTLSRejectsMissingUnregisteredAndWrongCACertificates
+=== RUN   TestMTLSRejectsMissingUnregisteredAndWrongCACertificates/missing
+=== RUN   TestMTLSRejectsMissingUnregisteredAndWrongCACertificates/wrong_ca
+--- PASS: TestMTLSRejectsMissingUnregisteredAndWrongCACertificates (0.01s)
+    --- PASS: TestMTLSRejectsMissingUnregisteredAndWrongCACertificates/missing (0.00s)
+    --- PASS: TestMTLSRejectsMissingUnregisteredAndWrongCACertificates/wrong_ca (0.00s)
+PASS
+2026/09/10 07:41:02 http: TLS handshake error from 127.0.0.1:34158: tls: client didn't provide a certificate
+2026/09/10 07:41:02 http: TLS handshake error from 127.0.0.1:34160: tls: failed to verify certificate: x509: certificate signed by unknown authority (possibly because of "x509: ECDSA verification failure" while trying to verify candidate authority certificate "ProxyLoom synthetic test CA")

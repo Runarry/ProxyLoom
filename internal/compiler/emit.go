@@ -14,6 +14,11 @@ func emitNative(graph Graph) (adapter.Artifact, []ir.Diagnostic, error) {
 		TargetKey:    graph.Target.Key,
 		Independents: graph.Independents,
 		Chains:       graph.Chains,
+		Policies:     graph.Policies,
+		FinalTag:     graph.FinalTag,
+		Routing:      graph.Routing,
+		DNS:          graph.DNS,
+		Preset:       graph.Preset,
 	}
 	switch graph.Target.CoreFamily {
 	case ir.Xray:

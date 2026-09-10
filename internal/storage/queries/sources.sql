@@ -74,6 +74,10 @@ ON CONFLICT (source_id) DO UPDATE SET next_run_at = EXCLUDED.next_run_at, backof
 -- name: DeleteSourceSchedule :exec
 DELETE FROM public.source_schedules WHERE scope_id = sqlc.arg(scope_id) AND source_id = sqlc.arg(source_id);
 
+-- name: GetSourceScheduleBackoff :one
+SELECT backoff_seconds FROM public.source_schedules
+WHERE scope_id = sqlc.arg(scope_id) AND source_id = sqlc.arg(source_id);
+
 -- name: ListDueSourceSchedules :many
 SELECT s.source_id, s.scope_id, s.next_run_at, s.backoff_seconds, s.last_job_id, h.head_revision
 FROM public.source_schedules s

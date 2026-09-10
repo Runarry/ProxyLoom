@@ -163,7 +163,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List reviewed structured client presets */
+        /**
+         * List immutable Linux file presets and reviewed loopback control variants
+         * @description Returns provisioned immutable preset resources. Read operations do not initialize presets. Approval covers structured configuration constraints; it does not certify a desktop or mobile client import.
+         */
         get: operations["listClientPresets"];
         put?: never;
         post?: never;
@@ -1349,15 +1352,23 @@ export interface components {
             /** @constant */
             dns_mode: "profile";
             format: components["schemas"]["OutputFormat"];
-            /** @enum {string} */
-            import_method: "file" | "subscription_url";
-            local_listener: components["schemas"]["LocalListener"];
-            platform: components["schemas"]["Platform"];
+            /** @constant */
+            import_method: "file";
+            local_listener: components["schemas"]["LocalListener"] & {
+                /** @constant */
+                listen?: "127.0.0.1";
+                /** @constant */
+                port?: 1080;
+                /** @constant */
+                protocol?: "socks5";
+            };
+            /** @constant */
+            platform: "linux";
             /** @constant */
             review_status: "approved";
             reviewed_at: components["schemas"]["Timestamp"];
             schema_version: components["schemas"]["SchemaVersion"];
-        };
+        } & (unknown & unknown & unknown);
         ClientPresetListResponse: {
             data: components["schemas"]["ClientPresetResource"][];
             page: components["schemas"]["PageInfo"];
@@ -1415,7 +1426,7 @@ export interface components {
             subject_policy: "all_members" | "all_chains";
             test_target_id: components["schemas"]["UUID"];
         };
-        /** @description Reviewed local-only control API. No arbitrary listener, secret or script configuration. */
+        /** @description Reviewed loopback control variants only. Disabled control has no ignored listener fields; no arbitrary secret, script or external UI configuration. */
         ControlAPIPreset: {
             enabled: boolean;
             /** @enum {string} */
@@ -1481,7 +1492,7 @@ export interface components {
             target_key?: components["schemas"]["TargetKey"];
         };
         Diagnostics: components["schemas"]["Diagnostic"][];
-        /** @description Resolver IDs are unique stable local keys, not names. final_resolver and each rule refer to a declared resolver. Bootstrap, resolver and outbound references are checked together for cycles. FakeIP and arbitrary native DNS options are outside P0. */
+        /** @description Resolver IDs are unique stable local keys, not names. final_resolver and each rule refer to a declared resolver. The first bootstrap resolves proxy node addresses; HTTPS uses its explicit bootstrap_resolver_id. The bootstrap array is not an implicit parallel or fallback list. Bootstrap, resolver and outbound references are checked together for cycles. Unsupported native bootstrap combinations fail explicitly. FakeIP and arbitrary native DNS options are outside P0. */
         DNSProfile: {
             bootstrap: components["schemas"]["BootstrapResolver"][];
             final_resolver: components["schemas"]["TargetKey"];

@@ -1,0 +1,24 @@
+[
+  {
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "compiler_artifact": true,
+    "config_sha256": "80f572436bbfbcb5da09b057003f7883724484a3fbaec51e4e8918d5f7174571",
+    "dns_queries": 0,
+    "fixture": "preserve_domain_control",
+    "proxy_A_requests": 1,
+    "proxy_B_requests": 0,
+    "request_success": true
+  },
+  {
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "compiler_artifact": false,
+    "config_sha256": "05fdcef5ed41571266908846e680b6eeaf75f8ecf72ac2a9ccae5c1b00f5fb20",
+    "dns_queries": 2,
+    "fixture": "raw_resolve_counterexample",
+    "proxy_A_requests": 0,
+    "proxy_B_requests": 0,
+    "request_success": false
+  }
+]

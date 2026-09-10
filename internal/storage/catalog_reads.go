@@ -22,7 +22,7 @@ func pageLimit(limit int) (int, error) {
 
 func (c *Catalog) List(ctx context.Context, scope ir.ID, options catalog.ListOptions) (catalog.Page, error) {
 	limit, err := pageLimit(options.Limit)
-	if err != nil || scope.Validate() != nil || (options.Kind != "" && options.Kind != ir.KindNode && options.Kind != ir.KindChain && options.Kind != ir.KindPolicyGroup) ||
+	if err != nil || scope.Validate() != nil || (options.Kind != "" && !typedCatalogKind(options.Kind)) ||
 		!utf8.ValidString(options.Tag) || utf8.RuneCountInString(options.Tag) > 64 {
 		return catalog.Page{}, catalog.ErrInvalidInput
 	}

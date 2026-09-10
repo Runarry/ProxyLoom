@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "task": "T-029",
+  "summary": "M1 typed routing, DNS, inline rule sets and immutable presets; explicit target overrides, appended resource constraints and implemented management routes.",
+  "documents": [
+    "docs/m1-orchestration-contract.md",
+    "docs/adr/0014-m1-orchestration.md"
+  ],
+  "fixtures": [
+    "fixtures/api/implemented-routes.json",
+    "fixtures/api/routing-create.json",
+    "fixtures/api/dns-create.json",
+    "fixtures/api/rule-set-create.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/catalog_routing.sql.go",
+    "internal/storage/generated/sources.sql.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "cbb4a619a70597f1a238617ee484c3c692c0d473c6ed578ea60d8d4d802f6bb3",
+      "after_sha256": "6de554a5039efcc378a2a1e13ccb6110d5156ee39a004537f100d252e008d6a2",
+      "changes": [
+        {
+          "pointer": "/components/schemas/ClientPreset/allOf",
+          "before_sha256": null,
+          "after_sha256": "ce0e5a43a976605181868cdaa2b9e0020dd116736caea05f359a17de8e34de9d"
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/import_method/const",
+          "before_sha256": null,
+          "after_sha256": "bfdde6f5651ac5e4e6711f3c2836d5f8c5c4b381a50eb87c51d990b7eb36501b"
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/import_method/enum",
+          "before_sha256": "8fa27f346eb6ab8d6a281b06c3a2e225ed93019f0be4d0f651ce2fa01ded980d",
+          "after_sha256": null
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/local_listener/$ref",
+          "before_sha256": "db43136f7eb58b212f7435bea912cd966a51304dad40694d13d4167065f3ae57",
+          "after_sha256": null
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/local_listener/allOf",
+          "before_sha256": null,
+          "after_sha256": "70e0e361bee47876b2e9c8464cab64a5346c36f476aa675458f90966a3a5761a"
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/platform/$ref",
+          "before_sha256": "bcacab4bdfe56b444be0abaaaae10bab4bc1f6d7267f9e9af0d044f512a77987",
+          "after_sha256": null
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/platform/const",
+          "before_sha256": null,
+          "after_sha256": "f32af962aa06e4f20ceda568d6493687257ce3aff79853b582d13ee6fbf5171b"
+        },
+        {
+          "pointer": "/components/schemas/ClientPreset/properties/platform/type",
+          "before_sha256": null,
+          "after_sha256": "e9e5c1c9e4f6277339d1bcde0733a59bd42f8731f449da6dc13010a916930d48"
+        },
+        {
+          "pointer": "/components/schemas/ControlAPIPreset/allOf",
+          "before_sha256": "888e2d4f18067ab78d535a3305e283005ac7709a195457d7be65e295381efff5",
+          "after_sha256": "71e7af89a5a7c2a38193d9be18e75dbdc7d332f06f8749e3aa14ef2fbdb343bf"
+        },
+        {
+          "pointer": "/components/schemas/ControlAPIPreset/description",
+          "before_sha256": "8f62b36584d964211d677b1e32686b9857a44d85eb445878b975ef327481d620",
+          "after_sha256": "0728ece2abe0018f71fa7f4b7a14fbc17f16e3541d2571dcac2ee1cad164fd37"
+        },
+        {
+          "pointer": "/components/schemas/DNSProfile/description",
+          "before_sha256": "35571a65a05c2dbdfe20fc3e5d1fcbf08d9de5f63d1449ba3249444780cebb9f",
+          "after_sha256": "36d9f8a9600dfb671821a9493ec71516396dae17ae7cd0b84d322b6e68f625e5"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1client-presets/get/description",
+          "before_sha256": null,
+          "after_sha256": "43a0223135e2d7d6ce309d266bee9403b380b8bc6a9992df9e5ae644afaa9f69"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1client-presets/get/summary",
+          "before_sha256": "54b8e51ea422ae55f1a51a4f3177e327b913c3c9f5b573e3f5260710dc0e6ec8",
+          "after_sha256": "3b97fed49aab2112e94b93bd296d6bf6d55fe2b10cb7f757a9271e1dfb98383d"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1client-presets/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1dns-profiles/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1dns-profiles/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1dns-profiles~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1dns-profiles~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1dns-profiles~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1routing-profiles/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1routing-profiles/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1routing-profiles~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1routing-profiles~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1routing-profiles~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1rule-sets/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1rule-sets/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1rule-sets~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1rule-sets~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1rule-sets~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000013_routing_profiles.up.sql",
+      "before_sha256": null,
+      "after_sha256": "e204759ff1da7abfd97a0b54ba68c91f5fa50e7fc9ed0d49b2ef7a0d9575a282",
+      "changes": []
+    },
+    {
+      "path": "migrations/000014_dns_presets.up.sql",
+      "before_sha256": null,
+      "after_sha256": "cd7a27d412de0ddad72c26b503b05f104055739c49e958aa5e9d09cf43e85a28",
+      "changes": []
+    },
+    {
+      "path": "schemas/ir-v1.schema.json",
+      "before_sha256": "12cd49dd7ffca5b39cbf1cba57912868c5e970b233521e9b1140c4dd609b4656",
+      "after_sha256": "a8d8b5c9cdef0c0ec2973fbc372920ec9078a92117401370a7afe93f1d5c8c54",
+      "changes": [
+        {
+          "pointer": "/$defs/bootstrap_resolver",
+          "before_sha256": null,
+          "after_sha256": "0612558969944cb75c37f0277c260fd80a8c0f21d0bf0b9d9e562b5b0f2aa65e"
+        },
+        {
+          "pointer": "/$defs/cidr",
+          "before_sha256": null,
+          "after_sha256": "5adb68f27c0164c67ee0f87eaa5067f041eb8098d4dfeb73dc78b64f24ffc6a4"
+        },
+        {
+          "pointer": "/$defs/cidr_rule_set_entry",
+          "before_sha256": null,
+          "after_sha256": "ac5489612fb06eddded773dd00de5a35a3de9de9b05e48188b424eda71e5eb41"
+        },
+        {
+          "pointer": "/$defs/client_preset",
+          "before_sha256": null,
+          "after_sha256": "56c8062092fed345794caa808aca7512de467030634ac6691faa90f5255794a6"
+        },
+        {
+          "pointer": "/$defs/comment",
+          "before_sha256": null,
+          "after_sha256": "6cd8f86f5d34f8b82a29db85c992f4ed8f704d46b459635a1132a4ae67e8a8d2"
+        },
+        {
+          "pointer": "/$defs/control_api_preset",
+          "before_sha256": null,
+          "after_sha256": "d0690ed446dcc26e6b0a760953caeafebfb2348610326599f6f7dc76b1f4efc4"
+        },
+        {
+          "pointer": "/$defs/dns_profile",
+          "before_sha256": null,
+          "after_sha256": "349556c136536b533afddeda99f7d30301710a0f9373a278e7bdde26b4bf4218"
+        },
+        {
+          "pointer": "/$defs/dns_resolver",
+          "before_sha256": null,
+          "after_sha256": "42eed394d97b6f8005a365cc1236ff1c2918e5a75cff6985522331e6ce26b8f0"
+        },
+        {
+          "pointer": "/$defs/dns_rule",
+          "before_sha256": null,
+          "after_sha256": "f2b69bae23dd0fbc7af70f1284468b28c02fb593be101ebfc9dcadee887d632c"
+        },
+        {
+          "pointer": "/$defs/domain_match",
+          "before_sha256": null,
+          "after_sha256": "35162fe65a4c71679497b10f13f7bab88cb2a310c08843941659567bf3bc7f39"
+        },
+        {
+          "pointer": "/$defs/domain_name",
+          "before_sha256": null,
+          "after_sha256": "5d1c0732fc828dd18b00f2ba0180e562c879616150da085d9ce30c45aef477eb"
+        },
+        {
+          "pointer": "/$defs/domain_rule_set_entry",
+          "before_sha256": null,
+          "after_sha256": "d3309b40d9ee9920039064d73f0de334e270cc9483733ebe5356113aec5155ba"
+        },
+        {
+          "pointer": "/$defs/frozen_input/properties/dns_profile",
+          "before_sha256": null,
+          "after_sha256": "6df395c94c8d8504cb5a1df19fa9fdb8241109831305a78443d0d8325953c592"
+        },
+        {
+          "pointer": "/$defs/frozen_input/properties/members/items/$ref",
+          "before_sha256": "430575a959aca2d6822cc566e7268bef466f6a89f5c29725d7836539a28c94b4",
+          "after_sha256": null
+        },
+        {
+          "pointer": "/$defs/frozen_input/properties/members/items/allOf",
+          "before_sha256": null,
+          "after_sha256": "f952f29d6cbbbcccfa406122211b3350b20cbddcccd9d6941a3df8ca1c365a44"
+        },
+        {
+          "pointer": "/$defs/frozen_input/properties/members/maxItems",
+          "before_sha256": null,
+          "after_sha256": "81a83544cf93c245178cbc1620030f1123f435af867c79d87135983c52ab39d9"
+        },
+        {
+          "pointer": "/$defs/frozen_input/properties/resources/maxItems",
+          "before_sha256": null,
+          "after_sha256": "81a83544cf93c245178cbc1620030f1123f435af867c79d87135983c52ab39d9"
+        },
+        {
+          "pointer": "/$defs/frozen_input/properties/routing_profile",
+          "before_sha256": null,
+          "after_sha256": "75912b3074aefea2f6e86a44d76dcdba266d6054c44d9f86c6171aeade9c5abf"
+        },
+        {
+          "pointer": "/$defs/frozen_ref/properties/kind/enum",
+          "before_sha256": "c2b21e6f8ae9667bd3897c937495f5af13df2a3c3fb1e3eee9837c33438f6b80",
+          "after_sha256": "7010e1ea49c908699baad2661d8e5542fb42335bfebb5f9429f4d37333535096"
+        },
+        {
+          "pointer": "/$defs/https_dns_resolver",
+          "before_sha256": null,
+          "after_sha256": "88d0d714bfc46538619708e08f793a9789514d897c88ec7840ed18e1282ea308"
+        },
+        {
+          "pointer": "/$defs/https_url",
+          "before_sha256": null,
+          "after_sha256": "50edddcb68e1a642601d7e7d7491584700ab40e0cdd0ac33ec2164840a8ead64"
+        },
+        {
+          "pointer": "/$defs/ip_address",
+          "before_sha256": null,
+          "after_sha256": "9accba99114c63d986fc08519344bc56e266119c018e71bdc41b432d2633ee06"
+        },
+        {
+          "pointer": "/$defs/local_bootstrap_resolver",
+          "before_sha256": null,
+          "after_sha256": "66513b80edf9673ce3c0e77cfbfde4768e423664865695898a09f0c8214b294b"
+        },
+        {
+          "pointer": "/$defs/local_dns_resolver",
+          "before_sha256": null,
+          "after_sha256": "f85f5bcb111b76d5a01823360cafb16b4bcb5b518ce392f6bc5ce5face13fe41"
+        },
+        {
+          "pointer": "/$defs/local_listener",
+          "before_sha256": null,
+          "after_sha256": "bcb25dda156cf3ef8e5a0b3f98fbd9d493df1329f12cab3af04c1af0e46dfe27"
+        },
+        {
+          "pointer": "/$defs/port_range",
+          "before_sha256": null,
+          "after_sha256": "30c0d1609a0776e76ad8b9a68c88a7e3db9db7442c2b67c48198d463e962d49f"
+        },
+        {
+          "pointer": "/$defs/resource/allOf",
+          "before_sha256": "f42e185d59fa957b685c4afd4651df95e7853a8ee5dadc704a5120d10f757729",
+          "after_sha256": "61604b004f6dac07b8d62d7f66f04aa23bb6806d5f4bda6549d62879bae14b0e"
+        },
+        {
+          "pointer": "/$defs/route_match",
+          "before_sha256": null,
+          "after_sha256": "1108fb96c3fd38b7f2fe2a128a42c524cdca35a54cdc38f908158f6cd1837aa7"
+        },
+        {
+          "pointer": "/$defs/routing_profile",
+          "before_sha256": null,
+          "after_sha256": "5490c724e70e7a2b9fa9c09f1b3a75f1831b0dcfdf133cdc1aba33714f2b4c50"
+        },
+        {
+          "pointer": "/$defs/routing_rule",
+          "before_sha256": null,
+          "after_sha256": "8238c7dcc5505009cee83ed03385fa1d186c7505a17b58c0589a7fd701538018"
+        },
+        {
+          "pointer": "/$defs/rule_set",
+          "before_sha256": null,
+          "after_sha256": "d2a6a2fb403e21b99acb51df029375f51a9b347182e0c212f37c3cffb365e1e9"
+        },
+        {
+          "pointer": "/$defs/rule_set_entry",
+          "before_sha256": null,
+          "after_sha256": "52f2554d065b3153a248c1527e38c698d6bd92b9d2254e1266a9cb4ee6becde7"
+        },
+        {
+          "pointer": "/$defs/rule_set_write",
+          "before_sha256": null,
+          "after_sha256": "2ec2cf90db8b07ecbdc0828ffcd7a4086e29d8045b3cbc3c7d30e410ca51367e"
+        },
+        {
+          "pointer": "/$defs/target/properties/policy_overrides",
+          "before_sha256": null,
+          "after_sha256": "fa1dfb4451253b21cf21d90dd79045bb30e3c8242234907c6b16b85aeb640b6c"
+        },
+        {
+          "pointer": "/$defs/target_key",
+          "before_sha256": null,
+          "after_sha256": "69cc30b5c1ea3923c78f82196e7131b28bd9d3f7cb03606f7fe2d8d97ab202b7"
+        },
+        {
+          "pointer": "/$defs/udp_bootstrap_resolver",
+          "before_sha256": null,
+          "after_sha256": "b0866999b37ca41103ce028ae72db0c6ce826f9f7f9a1e81cffa93944ba4cafb"
+        },
+        {
+          "pointer": "/$defs/udp_dns_resolver",
+          "before_sha256": null,
+          "after_sha256": "eaf822d383cf3a8fc10e310a51a621e5daaaf3ecff0571b280b18dad07b77301"
+        },
+        {
+          "pointer": "/oneOf",
+          "before_sha256": "74afcdcd18d1afa75120fc106a26af85e36609c8a07ccc66afa278561d52d693",
+          "after_sha256": "68da85492f5a83537ec0e9ed4b13eda7224d7766de00f2753dd12739a3695bec"
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	"github.com/Runarry/ProxyLoom/internal/source"
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -207,7 +209,16 @@ func (s *Sources) syncSchedule(ctx context.Context, t *catalogTx, document sourc
 	backoff := 60
 	nextRun := now.Add(time.Duration(interval) * time.Second)
 	if success != nil && !*success {
-		backoff = nextBackoff(60, interval)
+		// The enclosing source transaction holds the scope lock. Read the
+		// committed schedule here so consecutive failed refreshes accumulate.
+		current, err := t.q.GetSourceScheduleBackoff(ctx, dbgen.GetSourceScheduleBackoffParams{ScopeID: dbID(t.scope), SourceID: dbID(document.Metadata.ResourceID)})
+		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+			return err
+		}
+		if err == nil {
+			backoff = int(current)
+		}
+		backoff = nextBackoff(backoff, interval)
 		nextRun = now.Add(time.Duration(backoff) * time.Second)
 	}
 	var last pgtype.UUID

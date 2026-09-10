@@ -87,6 +87,12 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	if err != nil {
 		return errors.New("catalog_configuration_invalid")
 	}
+	if err := catalogStore.EnsureScope(ctx, identity.DefaultScopeID, "ProxyLoom"); err != nil {
+		return errors.New("catalog_scope_initialization_failed")
+	}
+	if err := catalogStore.EnsureBuiltinClientPresets(ctx, identity.DefaultScopeID); err != nil {
+		return errors.New("client_preset_initialization_failed")
+	}
 	jobStore, err := storage.NewJobs(pool, box)
 	if err != nil {
 		return errors.New("job_configuration_invalid")

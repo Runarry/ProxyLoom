@@ -150,7 +150,7 @@ func TestSameDisplayNameDoesNotShareTags(t *testing.T) {
 	}
 }
 
-func TestUnmappedP0ProtocolIsRejected(t *testing.T) {
+func TestP0ShadowsocksIsMapped(t *testing.T) {
 	compiler := mustCompiler(t)
 	spec := mustFrozen(t, "frozen-chain-a-b.json").Spec()
 	node, err := ir.DecodeNode(readIR(t, "positive/shadowsocks-aead.json"))
@@ -165,7 +165,7 @@ func TestUnmappedP0ProtocolIsRejected(t *testing.T) {
 		t.Fatal(err)
 	}
 	target, _ := input.Target("xray-default")
-	if _, _, err := compiler.Compile(context.Background(), input, target); !hasCode(err, ir.CompileUnmappedField) {
+	if _, _, err := compiler.Compile(context.Background(), input, target); err != nil {
 		t.Fatalf("shadowsocks: %v", err)
 	}
 }

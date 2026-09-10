@@ -177,10 +177,23 @@ func parse(lockYAML, combinationsYAML []byte) (*Catalog, error) {
 			if extra.State != Unsupported {
 				return nil, ErrInvalidLock
 			}
-			build.Capabilities = append(build.Capabilities, Record{
+			record := Record{
 				Key: extra.Key, State: Unsupported, Reason: extra.Reason,
 				Evidence: EvidenceRef{BuildID: raw.ID, State: Unsupported},
-			})
+			}
+			// A family-specific rejection overrides a shared candidate. Keeping
+			// both would make lookup return the earlier unverified candidate.
+			replaced := false
+			for index := range build.Capabilities {
+				if build.Capabilities[index].Key == extra.Key {
+					build.Capabilities[index] = record
+					replaced = true
+					break
+				}
+			}
+			if !replaced {
+				build.Capabilities = append(build.Capabilities, record)
+			}
 		}
 		catalog.byID[raw.ID] = i
 		catalog.builds = append(catalog.builds, build)

@@ -16,6 +16,8 @@ const messages: Record<string, string> = {
   RATE_LIMITED: '操作过于频繁，请稍后重试。', SERVICE_UNAVAILABLE: '服务暂时不可用，请稍后重试。',
   INTERNAL_ERROR: '服务处理失败，请根据请求编号排查。',
   CAPABILITY_UNSUPPORTED: '此配置不受支持。', CAPABILITY_UNVERIFIED: '此配置尚未完成内核兼容验证。',
+  DNS_CYCLE: 'DNS 与出站存在循环依赖，请检查解析器、引导及出站引用。',
+  DEPENDENCY_CYCLE: '资源之间存在循环依赖，请检查标出的引用。', DEPENDENCY_EXCLUDED: '引用资源被显式排除，请检查依赖配置。',
   CLIPBOARD_UNAVAILABLE: '无法访问剪贴板，请检查浏览器权限或手动选择复制。',
 }
 
@@ -89,7 +91,7 @@ export function queryString(values: Record<string, string | number | boolean | u
   return result ? `?${result}` : ''
 }
 export function errorMessage(error: unknown): string {
-  return error instanceof APIError ? error.message : error instanceof Error && error.name === 'DraftError' ? error.message : '操作未完成，请重试。'
+  return error instanceof APIError ? error.message : error instanceof Error && ['DraftError', 'NetworkFormError'].includes(error.name) ? error.message : '操作未完成，请重试。'
 }
 export function localTime(value: string | undefined) {
   if (!value) return '—'

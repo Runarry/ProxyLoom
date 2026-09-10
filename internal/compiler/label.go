@@ -64,6 +64,14 @@ func chainLabelItem(id ir.ID, revision int64) labelItem {
 	}
 }
 
+func policyMaterial(id ir.ID, revision int64) string {
+	return "policy|" + string(id) + "|" + strconv.FormatInt(revision, 10)
+}
+func policyLabelItem(id ir.ID, revision int64) labelItem {
+	material := policyMaterial(id, revision)
+	return labelItem{key: material, material: material, prefix: "g_", suffixes: []string{""}}
+}
+
 func (l labeler) assign(items []labelItem) (map[string][]string, error) {
 	if l.digest == nil {
 		l.digest = sha256Hex
