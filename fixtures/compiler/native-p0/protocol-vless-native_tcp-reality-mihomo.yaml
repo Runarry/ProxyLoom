@@ -1,0 +1,27 @@
+mixed-port: 17803
+bind-address: 127.0.0.1
+allow-lan: false
+mode: rule
+log-level: silent
+external-controller: ""
+ipv6: false
+geodata-mode: false
+geo-auto-update: false
+find-process-mode: "off"
+proxies:
+  - name: n_513d3e89
+    type: vless
+    server: 192.0.2.10
+    port: 443
+    skip-cert-verify: false
+    udp: false
+    client-fingerprint: chrome
+    uuid: dddddddd-dddd-4ddd-8ddd-dddddddddddd
+    flow: xtls-rprx-vision
+    tls: true
+    servername: reality.example.invalid
+    reality-opts:
+      public-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      short-id: 0123abcd
+rules:
+  - MATCH,n_513d3e89

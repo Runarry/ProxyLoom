@@ -67,7 +67,7 @@ func (c *Catalog) Head(ctx context.Context, scope, id ir.ID) (ir.Resource, error
 	if err != nil {
 		return ir.Resource{}, catalogError(err)
 	}
-	if index.DeletedAt.Valid || (index.Kind != string(ir.KindNode) && index.Kind != string(ir.KindChain) && index.Kind != string(ir.KindPolicyGroup)) {
+	if index.DeletedAt.Valid || !typedCatalogKind(ir.ResourceKind(index.Kind)) {
 		return ir.Resource{}, catalog.ErrNotFound
 	}
 	r, err := c.q.GetResourceHead(ctx, dbgen.GetResourceHeadParams{ScopeID: dbID(scope), ID: dbID(id)})
@@ -236,11 +236,20 @@ func (t *catalogTx) runLocked(fn func() error) error {
 
 func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.Resource, error) {
 	return t.mutate(func() (ir.Resource, error) {
+		if _, preset := input.Payload.(*ir.ClientPreset); preset {
+			return ir.Resource{}, catalog.ErrInvalidInput
+		}
 		r, err := catalog.New(t.scope, input)
 		if err != nil {
 			return ir.Resource{}, err
 		}
 		if err := t.checkPolicyMembers(ctx, r); err != nil {
+			return ir.Resource{}, err
+		}
+		if err := t.checkRoutingReferences(ctx, r); err != nil {
+			return ir.Resource{}, err
+		}
+		if err := t.checkDNSReferences(ctx, r); err != nil {
 			return ir.Resource{}, err
 		}
 		refs, err := catalog.ExtractReferences(r)
@@ -264,6 +273,12 @@ func (t *catalogTx) Update(ctx context.Context, id ir.ID, expected int64, input 
 		next, err := catalog.Apply(old, input)
 		if err == nil {
 			err = t.checkPolicyMembers(ctx, next)
+		}
+		if err == nil {
+			err = t.checkRoutingReferences(ctx, next)
+		}
+		if err == nil {
+			err = t.checkDNSReferences(ctx, next)
 		}
 		return next, err
 	})

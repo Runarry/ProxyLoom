@@ -113,6 +113,22 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 			root.Close()
 			return nil, err
 		}
+		if err := mountRoutingProfiles(router, authentication, *dependencies.Nodes); err != nil {
+			root.Close()
+			return nil, err
+		}
+		if err := mountRuleSets(router, authentication, *dependencies.Nodes); err != nil {
+			root.Close()
+			return nil, err
+		}
+		if err := mountDNSProfiles(router, authentication, *dependencies.Nodes); err != nil {
+			root.Close()
+			return nil, err
+		}
+		if err := mountClientPresets(router, authentication, *dependencies.Nodes); err != nil {
+			root.Close()
+			return nil, err
+		}
 		if err := mountExports(router, authentication, *dependencies.Nodes); err != nil {
 			root.Close()
 			return nil, err

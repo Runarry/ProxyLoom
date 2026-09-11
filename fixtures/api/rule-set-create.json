@@ -1,0 +1,11 @@
+{
+  "name": "域名与网段样例",
+  "rule_set": {
+    "schema_version": 1,
+    "format": "domain_cidr_text",
+    "entries": [
+      {"kind": "domain", "domain": "example.invalid", "match": "suffix"},
+      {"kind": "cidr", "cidr": "192.0.2.0/24"}
+    ]
+  }
+}

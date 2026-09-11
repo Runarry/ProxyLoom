@@ -14,14 +14,17 @@ import (
 )
 
 const (
-	JSONContentType = "application/json"
-	YAMLContentType = "application/yaml"
-	InboundTag      = "in"
-	BlockTag        = "block"
-	LoopbackAddr    = "127.0.0.1"
-	KindIndependent = "independent"
-	KindChainH1     = "chain_h1"
-	KindChainH2     = "chain_h2"
+	MaxOutbounds     = 2000
+	MaxRules         = 20000
+	MaxArtifactBytes = 10 << 20
+	JSONContentType  = "application/json"
+	YAMLContentType  = "application/yaml"
+	InboundTag       = "in"
+	BlockTag         = "block"
+	LoopbackAddr     = "127.0.0.1"
+	KindIndependent  = "independent"
+	KindChainH1      = "chain_h1"
+	KindChainH2      = "chain_h2"
 )
 
 type IndependentOutbound struct {
@@ -46,6 +49,11 @@ type EmitInput struct {
 	TargetKey    string
 	Independents []IndependentOutbound
 	Chains       []ChainInstance
+	Policies     []PolicyInstance
+	FinalTag     string
+	Routing      *RoutingInput
+	DNS          *DNSInput
+	Preset       *ir.ClientPreset
 }
 
 func (EmitInput) Format(state fmt.State, _ rune) { _, _ = fmt.Fprint(state, "EmitInput{[REDACTED]}") }
@@ -98,6 +106,21 @@ func CompileIssue(code ir.DiagnosticCode, path, targetKey string, resource ir.ID
 	}
 }
 
+// Recheck the native expansion, which may add selectors, builtins, final
+// routes and resolver dispatch rules beyond the frozen input's own counts.
+func CheckNativeCounts(in EmitInput, outbounds, rules int) error {
+	path := ""
+	if outbounds > MaxOutbounds {
+		path = "/outbounds"
+	} else if rules > MaxRules {
+		path = "/rules"
+	}
+	if path != "" {
+		return ir.Diagnostics{CompileIssue(ir.InputLimitExceeded, path, in.TargetKey, "")}
+	}
+	return nil
+}
+
 func EncodeJSON(v any) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
@@ -120,6 +143,12 @@ func IsReservedTag(tag string) bool {
 }
 
 func (in EmitInput) ExitTag() (string, error) {
+	if in.FinalTag != "" {
+		return in.FinalTag, nil
+	}
+	if len(in.Policies) > 0 {
+		return in.Policies[0].Tag, nil
+	}
 	if len(in.Chains) > 0 {
 		return in.Chains[0].TagH2, nil
 	}
@@ -131,6 +160,9 @@ func (in EmitInput) ExitTag() (string, error) {
 }
 
 func (in EmitInput) OutboundRefs() ([]OutboundRef, error) {
+	if len(in.Independents)+2*len(in.Chains) > MaxOutbounds {
+		return nil, ir.Diagnostics{CompileIssue(ir.InputLimitExceeded, "/outbounds", in.TargetKey, "")}
+	}
 	refs := make([]OutboundRef, 0, len(in.Independents)+len(in.Chains)*2)
 	for i, outbound := range in.Independents {
 		refs = append(refs, OutboundRef{
@@ -182,11 +214,14 @@ func (in EmitInput) OrderedOutboundRefs() (string, []OutboundRef, error) {
 		}
 		rest = append(rest, ref)
 	}
-	if !found {
+	if !found && exit != in.FinalTag && len(in.Policies) == 0 {
 		d := CompileIssue(ir.InvalidSnapshot, "/members", in.TargetKey, "")
 		return "", nil, ir.Diagnostics{d}
 	}
 	sort.Slice(rest, func(i, j int) bool { return rest[i].Tag < rest[j].Tag })
+	if !found {
+		return exit, rest, nil
+	}
 	return exit, append([]OutboundRef{first}, rest...), nil
 }
 

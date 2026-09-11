@@ -15,33 +15,57 @@ const (
 )
 
 type document struct {
-	MixedPort          int      `yaml:"mixed-port"`
-	BindAddress        string   `yaml:"bind-address"`
-	AllowLAN           bool     `yaml:"allow-lan"`
-	Mode               string   `yaml:"mode"`
-	LogLevel           string   `yaml:"log-level"`
-	ExternalController string   `yaml:"external-controller"`
-	IPv6               bool     `yaml:"ipv6"`
-	GeodataMode        bool     `yaml:"geodata-mode"`
-	GeoAutoUpdate      bool     `yaml:"geo-auto-update"`
-	FindProcessMode    string   `yaml:"find-process-mode"`
-	Proxies            []proxy  `yaml:"proxies"`
-	Rules              []string `yaml:"rules"`
+	MixedPort              int                        `yaml:"mixed-port,omitempty"`
+	SOCKSPort              int                        `yaml:"socks-port,omitempty"`
+	HTTPPort               int                        `yaml:"port,omitempty"`
+	BindAddress            string                     `yaml:"bind-address"`
+	AllowLAN               bool                       `yaml:"allow-lan"`
+	Mode                   string                     `yaml:"mode"`
+	LogLevel               string                     `yaml:"log-level"`
+	ExternalController     string                     `yaml:"external-controller"`
+	ExternalControllerCORS *controllerCORS            `yaml:"external-controller-cors,omitempty"`
+	IPv6                   bool                       `yaml:"ipv6"`
+	GeodataMode            bool                       `yaml:"geodata-mode"`
+	GeoAutoUpdate          bool                       `yaml:"geo-auto-update"`
+	FindProcessMode        string                     `yaml:"find-process-mode"`
+	Proxies                []proxy                    `yaml:"proxies"`
+	Rules                  []string                   `yaml:"rules"`
+	Groups                 []policyGroup              `yaml:"proxy-groups,omitempty"`
+	DNS                    *dnsConfig                 `yaml:"dns,omitempty"`
+	RuleProviders          map[string]dnsRuleProvider `yaml:"rule-providers,omitempty"`
 }
 
 type proxy struct {
-	Name              string   `yaml:"name"`
-	Type              string   `yaml:"type"`
-	Server            string   `yaml:"server"`
-	Port              int      `yaml:"port"`
-	Password          string   `yaml:"password"`
-	Network           string   `yaml:"network,omitempty"`
-	SNI               string   `yaml:"sni"`
-	ALPN              []string `yaml:"alpn,omitempty"`
-	SkipCertVerify    bool     `yaml:"skip-cert-verify"`
-	UDP               *bool    `yaml:"udp,omitempty"`
-	ClientFingerprint string   `yaml:"client-fingerprint,omitempty"`
-	DialerProxy       string   `yaml:"dialer-proxy,omitempty"`
+	Name              string          `yaml:"name"`
+	Type              string          `yaml:"type"`
+	Server            string          `yaml:"server"`
+	Port              int             `yaml:"port"`
+	Password          string          `yaml:"password,omitempty"`
+	Network           string          `yaml:"network,omitempty"`
+	SNI               string          `yaml:"sni,omitempty"`
+	ALPN              []string        `yaml:"alpn,omitempty"`
+	SkipCertVerify    bool            `yaml:"skip-cert-verify"`
+	UDP               *bool           `yaml:"udp,omitempty"`
+	ClientFingerprint string          `yaml:"client-fingerprint,omitempty"`
+	DialerProxy       string          `yaml:"dialer-proxy,omitempty"`
+	Cipher            string          `yaml:"cipher,omitempty"`
+	UUID              string          `yaml:"uuid,omitempty"`
+	AlterID           *int            `yaml:"alterId,omitempty"`
+	Flow              string          `yaml:"flow,omitempty"`
+	Username          string          `yaml:"username,omitempty"`
+	TLS               *bool           `yaml:"tls,omitempty"`
+	ServerName        string          `yaml:"servername,omitempty"`
+	WS                *wsOptions      `yaml:"ws-opts,omitempty"`
+	Reality           *realityOptions `yaml:"reality-opts,omitempty"`
+}
+
+type wsOptions struct {
+	Path    string            `yaml:"path"`
+	Headers map[string]string `yaml:"headers,omitempty"`
+}
+type realityOptions struct {
+	PublicKey string `yaml:"public-key"`
+	ShortID   string `yaml:"short-id"`
 }
 
 func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
@@ -51,11 +75,11 @@ func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
 	}
 	proxies := make([]proxy, 0, len(refs))
 	for _, ref := range refs {
-		mapped, mapErr := adapter.MapTrojanNativeTLS(ref.Resource, ref.FieldPath, input.TargetKey)
+		mapped, mapErr := adapter.MapNode(ref.Resource, ref.FieldPath, input.TargetKey)
 		if mapErr != nil {
 			return adapter.Artifact{}, asDiagnostics(mapErr), mapErr
 		}
-		item := trojanProxy(ref.Tag, mapped, ref.DialerTag)
+		item := nodeProxy(ref.Tag, mapped, ref.DialerTag)
 		proxies = append(proxies, item)
 	}
 	doc := document{
@@ -72,7 +96,20 @@ func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
 		Proxies:            proxies,
 		Rules:              []string{"MATCH," + exit},
 	}
-	if implicitDirect(doc) {
+	if err := applyOrchestration(&doc, input); err != nil {
+		return adapter.Artifact{}, asDiagnostics(err), err
+	}
+	rules := len(doc.Rules)
+	if doc.DNS != nil {
+		rules += len(doc.DNS.NameServerPolicy)
+	}
+	for _, provider := range doc.RuleProviders {
+		rules += len(provider.Payload)
+	}
+	if err := adapter.CheckNativeCounts(input, len(doc.Proxies)+len(doc.Groups), rules); err != nil {
+		return adapter.Artifact{}, asDiagnostics(err), err
+	}
+	if implicitDirect(doc) && !input.UsesTag("direct") {
 		d := adapter.CompileIssue(ir.CompileDialConflict, "/rules", input.TargetKey, "")
 		return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 	}

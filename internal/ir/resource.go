@@ -171,6 +171,34 @@ func (v Resource) Validate() error {
 		if err := payload.Validate(); err != nil {
 			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
 		}
+	case *RoutingProfile:
+		if payload == nil || v.Metadata.Kind != KindRoutingProfile {
+			return Diagnostics{issue(InvalidUnion, "/payload")}
+		}
+		if err := payload.Validate(); err != nil {
+			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
+		}
+	case *DNSProfile:
+		if payload == nil || v.Metadata.Kind != KindDNSProfile {
+			return Diagnostics{issue(InvalidUnion, "/payload")}
+		}
+		if err := payload.Validate(); err != nil {
+			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
+		}
+	case *RuleSet:
+		if payload == nil || v.Metadata.Kind != KindRuleSet {
+			return Diagnostics{issue(InvalidUnion, "/payload")}
+		}
+		if err := payload.Validate(); err != nil {
+			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
+		}
+	case *ClientPreset:
+		if payload == nil || v.Metadata.Kind != KindClientPreset {
+			return Diagnostics{issue(InvalidUnion, "/payload")}
+		}
+		if err := payload.Validate(); err != nil {
+			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
+		}
 	default:
 		return Diagnostics{issue(InvalidUnion, "/payload")}
 	}
@@ -196,6 +224,14 @@ func (v *Resource) UnmarshalJSON(data []byte) error {
 		payload = &Chain{}
 	case KindPolicyGroup:
 		payload = &PolicyGroup{}
+	case KindRoutingProfile:
+		payload = &RoutingProfile{}
+	case KindDNSProfile:
+		payload = &DNSProfile{}
+	case KindRuleSet:
+		payload = &RuleSet{}
+	case KindClientPreset:
+		payload = &ClientPreset{}
 	default:
 		return Diagnostics{issue(InvalidUnion, "/metadata/kind")}
 	}

@@ -1,0 +1,24 @@
+[
+  {
+    "artifact_sha256": "82baeb01e2f4fac8ccf8ff88b9d32bb59807c1d23f815f5998900e0801c6ca2d",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "cors": "own origin only",
+    "direct_bypass": "none",
+    "family": "sing-box",
+    "manual_switch": "pass",
+    "selected_unavailable": "fail_closed",
+    "startup_default": "pass"
+  },
+  {
+    "artifact_sha256": "6440840a521c74154bb5c01bc710f8e879075d17d3b128ed466422ba793524c9",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "cors": "own origin only",
+    "direct_bypass": "none",
+    "family": "mihomo",
+    "manual_switch": "pass",
+    "selected_unavailable": "fail_closed",
+    "startup_default": "pass"
+  }
+]

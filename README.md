@@ -2,7 +2,9 @@
 
 自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。本窗口接入六类节点管理、本地 URI／文本／Base64 导入、登录与管理界面、持久任务及独立 mTLS Runner 配置校验。逐项验收状态与限制见 `docs/PLAN.md` 和 `docs/evidence/`，实现存在不代表所有阶段门槛完成。
 
-来源管理、刷新差异确认、人工覆盖恢复、节点 URI／Base64 导出和策略组后端已接入本窗口。两跳链与策略组可通过 API 管理；完整编排界面、路由／DNS、订阅发布及网络测速仍由后续任务提供。六类节点可解析／保存与内核兼容分别展示；三内核能力保持 `unverified`，已有原型证据不扩大为所有协议、架构或客户端支持。新增契约见 `docs/m1-source-policy-contract.md`。
+来源管理、刷新差异确认、人工覆盖恢复、节点 URI／Base64 导出及编排管理已接入。两跳链、策略组、路由、内联规则集与 DNS 提供类型化 API 和管理界面；系统预设可只读查看。六类节点可解析／保存与内核兼容分别展示；未经对应真实执行验证的组合仍为 `unverified`。订阅发布及网络测速按后续阶段推进。新增契约见 `docs/m1-orchestration-contract.md`。
+
+2026-09-10：M1／G1 已按用户批准范围收口，见 [G1 验收与范围决定](docs/reviews/2026-09-10-g1-decision.md)。sing-box 1.14.0 的 `resolve_for_ip_rules` 含有效 IP 条件时明确拒绝编译，保留 `preserve_domain`，不自动降级；Xray／Mihomo 的两种模式保持。M2 未启动，桌面／移动及 arm64 未验证。
 
 基座提交 `1ff4c09` 的远端运行 [34201742618](https://github.com/Runarry/ProxyLoom/actions/runs/34201742618) 已通过；基座收口见 `docs/reviews/2026-09-08-m1-foundation-closeout.md`。该运行不代表本窗新增代码已在远端执行。
 
@@ -61,7 +63,7 @@ pwsh -NoProfile -File scripts/smoke.ps1 -Build
 
 Linux（或具备 CGO 编译器的 Windows）在安装锁定 sqlc 后可运行 `node scripts/check.mjs`，包括格式检查、依赖漂移、生成查询检查、静态分析和 `go test -race`。GitHub Actions 同时运行 Go 检查、前端构建、API 类型漂移、真实 PostgreSQL 集成及 Compose 烟测。普通本机 `go test` 与 Linux race 结果应分别记录，不以跳过的检查宣称通过。
 
-完整质量入口和兼容性变更声明见 `docs/quality-gates.md`。本地完整验收可运行 `node scripts/check-quality.mjs`；远端主分支强制检查规则必须单独核实，不能仅以工作流存在宣称禁止失败合并。
+完整质量入口和兼容性变更声明见 `docs/quality-gates.md`。本地完整验收可运行 `node scripts/check-quality.mjs`；2026-09-10 已为 master 启用 `checks` 与 `development-smoke` 必需检查，回读证据见 `docs/evidence/T-008/required-checks-2026-09-10.md`。远端检查成功仍须对应实际代码提交。
 
 `verify-foundation.mjs` 每次创建独立 Docker bridge 网络、随机凭证和 tmpfs PostgreSQL，仅发布回环端口，不复用开发卷；测试结束后按所有权标签清理本次容器与网络。报告与 Go 事件保存在 `.cache/foundation/<run_id>/`。其数据库测试必须实际执行，不能把未提供数据库的单测 skip 当作验收通过。
 
@@ -80,8 +82,10 @@ Windows 未安装 CGO 编译器时，使用 `docker build -f deploy/Dockerfile.c
 - API：`serve`、`healthcheck`、`migrate up`、`migrate status`。健康检查不读取秘密；`/healthz` 只表示进程存活，`/readyz` 检查数据库、迁移与必要配置。
 - 迁移：独立 `PROXYLOOM_MIGRATION_DSN_FILE`；运行账号使用 `PROXYLOOM_DATABASE_DSN_FILE`，具有必要业务列权限但不能改写迁移元数据或不可变历史。已执行迁移按内容摘要校验，仅追加新文件。
 - IR：本地嵌入 JSON Schema v1、Go 类型与语义校验；两跳具体节点、严格字段、稳定引用、冻结快照。接口与例子见 `docs/ir-contract.md`。
-- 内核锁：`compat/cores.lock.yaml` 固定 Xray／sing-box／Mihomo 的 linux amd64 与 arm64 摘要；`adapter_version` 为 `0.1.0-m0-native`。`internal/capability` 在版本、摘要或架构不符时拒绝。能力保持 unverified。
-- 编译：`internal/compiler` 复用 `Prepare` 后由三家族 Emit 输出完整原生配置。当前只映射 Trojan／native_tcp／TLS；`node scripts/verify-compile-exec.mjs` 用锁定 linux/amd64 内核检查生成字节。
+- 内核锁：`compat/cores.lock.yaml` 固定 Xray／sing-box／Mihomo 的 linux amd64 与 arm64 摘要；`adapter_version` 为 `0.2.0-m1-orchestration`。`internal/capability` 在版本、摘要或架构不符时拒绝；能力证据按具体组合和架构记录。
+- 编译：`internal/compiler` 从冻结节点、链、策略、路由、DNS、规则集与预设生成三目标配置，支持类型化目标策略覆盖。不等价的字段显式拒绝，最终能力范围以 T-029 的实际证据为准。`node scripts/verify-compile-exec.mjs` 回归锁定 linux/amd64 原型配置检查。
+- M1 原生矩阵：`node scripts/verify-m1-native.mjs` 检查 72 份完整配置及对应损坏反例，并运行手动切换、轮询、低延迟、路由、IP 解析与故障不直连夹具。证据见 `docs/evidence/T-029/`，不能外推全部参数或客户端兼容。
+- 客户端预设：三个 Linux 文件预设使用 SOCKS `127.0.0.1:1080`；另有用户批准的 sing-box／Mihomo 回环控制变体，控制端口分别为 `17812`／`17813`。预设不可编辑、初始化幂等，控制状态在列表中可见；审核状态不等于实际客户端导入验证。
 - 隔离夹具：`internal/isolation` 与 `deploy/compose.isolation.yaml` 仅用于测试，不随开发 Compose 启动。容器烟测：`node scripts/verify-isolation-compose.mjs`。
 - 真实链路（T-028）：`node scripts/verify-live-chain.mjs` 在临时 Linux 容器中冻结夹具地址、Compile、校验并经回环入口探测。不关闭 TLS 校验。限定 G0 已获用户批准，其他架构和组合仍需后续验收。
 - 管理认证、节点、导入及任务接口已接入，内部 Runner 使用单独 mTLS 监听器；具体清单见 `fixtures/api/implemented-routes.json`。未知 `/api`、`/internal`、`/s` 路径不会返回前端成功页面。

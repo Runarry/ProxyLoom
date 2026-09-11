@@ -46,5 +46,9 @@ func (c *Compiler) Compile(ctx context.Context, input ir.FrozenInput, target ir.
 	if err != nil {
 		return adapter.Artifact{}, emitDiags, err
 	}
+	if len(artifact.Bytes) > adapter.MaxArtifactBytes {
+		d := compileIssue(ir.InputLimitExceeded, "/artifact", target.Key, "")
+		return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
+	}
 	return artifact, diags, nil
 }

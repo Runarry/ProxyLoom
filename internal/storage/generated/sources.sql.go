@@ -157,6 +157,23 @@ func (q *Queries) GetSourceItem(ctx context.Context, arg GetSourceItemParams) (G
 	return i, err
 }
 
+const getSourceScheduleBackoff = `-- name: GetSourceScheduleBackoff :one
+SELECT backoff_seconds FROM public.source_schedules
+WHERE scope_id = $1 AND source_id = $2
+`
+
+type GetSourceScheduleBackoffParams struct {
+	ScopeID  pgtype.UUID
+	SourceID pgtype.UUID
+}
+
+func (q *Queries) GetSourceScheduleBackoff(ctx context.Context, arg GetSourceScheduleBackoffParams) (int32, error) {
+	row := q.db.QueryRow(ctx, getSourceScheduleBackoff, arg.ScopeID, arg.SourceID)
+	var backoff_seconds int32
+	err := row.Scan(&backoff_seconds)
+	return backoff_seconds, err
+}
+
 const insertNodeBinding = `-- name: InsertNodeBinding :exec
 INSERT INTO public.node_bindings (node_id, scope_id, source_item_id, binding_revision, match_method, state, override_envelope, wrapping)
 VALUES ($1, $2, $3, $4, $5,

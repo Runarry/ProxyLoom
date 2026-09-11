@@ -1,0 +1,134 @@
+=== RUN   TestM1NativeConfigMatrix
+=== RUN   TestM1NativeConfigMatrix/orchestration-xray.json
+=== RUN   TestM1NativeConfigMatrix/policy-fixed-xray.json
+=== RUN   TestM1NativeConfigMatrix/policy-round_robin-xray.json
+    m1_native_runtime_test.go:133: native check rejected policy-round_robin-xray.json: Xray 26.3.27 (Xray, Penetrates Everything.) d2758a0 (go1.26.1 linux/amd64)
+        A unified platform for anti-censorship.
+        2026/09/10 07:21:02.020459 [Info] infra/conf/serial: Reading config: &{Name:/tmp/TestM1NativeConfigMatrixpolicy-round_robin-xray.json2663240295/001/config.json Format:json}
+        2026/09/10 07:21:02.022085 [Warning] common/errors: The feature Trojan (with no Flow, etc.) is deprecated, not recommended for using and might be removed. Please migrate to VLESS with Flow & Seed as soon as possible.
+        Failed to start: main: failed to create server > core: not all dependencies are resolved.
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/orchestration-sing-box.json
+    m1_native_runtime_test.go:133: native check rejected orchestration-sing-box.json: [31mERROR[0m[0000] missing `route.default_domain_resolver` or `domain_resolver` in dial fields is deprecated in sing-box 1.12.0 and will be removed in sing-box 1.14.0, checkout documentation for migration: https://sing-box.sagernet.org/migration/#migrate-outbound-dns-rule-items-to-domain-resolver
+        [31mFATAL[0m[0000] to continuing using this feature, set environment variable ENABLE_DEPRECATED_MISSING_DOMAIN_RESOLVER=true
+=== RUN   TestM1NativeConfigMatrix/policy-fixed-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/policy-manual_select-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/orchestration-mihomo.yaml
+    m1_native_runtime_test.go:133: native check rejected orchestration-mihomo.yaml: time="2026-09-10T07:21:15.588857144Z" level=info msg="Start initial configuration in progress"
+        time="2026-09-10T07:21:15.591779351Z" level=info msg="Geodata Loader mode: memconservative"
+        time="2026-09-10T07:21:15.591819304Z" level=info msg="Geosite Matcher implementation: succinct"
+        time="2026-09-10T07:21:15.592355568Z" level=error msg="rules[1] [IP-CIDR,192.0.2.0/24,no-resolve,DIRECT] error: proxy [no-resolve] not found"
+        configuration file /tmp/TestM1NativeConfigMatrixorchestration-mihomo.yaml955927797/001/config.yaml test failed
+=== RUN   TestM1NativeConfigMatrix/policy-fixed-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-latency_best-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-manual_select-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-round_robin-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-mihomo.yaml
+--- FAIL: TestM1NativeConfigMatrix (21.60s)
+    --- PASS: TestM1NativeConfigMatrix/orchestration-xray.json (0.26s)
+    --- PASS: TestM1NativeConfigMatrix/policy-fixed-xray.json (0.05s)
+    --- FAIL: TestM1NativeConfigMatrix/policy-round_robin-xray.json (0.03s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-none-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-xray.json (0.23s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-xray.json (0.26s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-xray.json (0.26s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-none-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-tls-xray.json (0.29s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-xray.json (0.68s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-none-xray.json (0.25s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-xray.json (0.05s)
+    --- FAIL: TestM1NativeConfigMatrix/orchestration-sing-box.json (0.50s)
+    --- PASS: TestM1NativeConfigMatrix/policy-fixed-sing-box.json (1.16s)
+    --- PASS: TestM1NativeConfigMatrix/policy-manual_select-sing-box.json (0.80s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-none-sing-box.json (0.86s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-sing-box.json (0.71s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-sing-box.json (0.72s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-sing-box.json (0.65s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-sing-box.json (0.66s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-sing-box.json (0.63s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-sing-box.json (0.36s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-sing-box.json (0.08s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-sing-box.json (0.08s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-none-sing-box.json (0.09s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-tls-sing-box.json (0.09s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-sing-box.json (0.11s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-sing-box.json (0.78s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-none-sing-box.json (0.68s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-sing-box.json (0.65s)
+    --- FAIL: TestM1NativeConfigMatrix/orchestration-mihomo.yaml (0.21s)
+    --- PASS: TestM1NativeConfigMatrix/policy-fixed-mihomo.yaml (0.48s)
+    --- PASS: TestM1NativeConfigMatrix/policy-latency_best-mihomo.yaml (0.23s)
+    --- PASS: TestM1NativeConfigMatrix/policy-manual_select-mihomo.yaml (0.41s)
+    --- PASS: TestM1NativeConfigMatrix/policy-round_robin-mihomo.yaml (0.23s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-none-mihomo.yaml (0.22s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-mihomo.yaml (0.42s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-mihomo.yaml (0.43s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-mihomo.yaml (0.45s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-mihomo.yaml (0.43s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-mihomo.yaml (0.49s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-mihomo.yaml (0.41s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-mihomo.yaml (0.38s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-mihomo.yaml (0.39s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-none-mihomo.yaml (0.39s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-tls-mihomo.yaml (0.41s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-mihomo.yaml (0.41s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-mihomo.yaml (0.45s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-none-mihomo.yaml (0.42s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-mihomo.yaml (0.23s)
+=== RUN   TestM1NativeManualSelectionAndFailure
+=== RUN   TestM1NativeManualSelectionAndFailure/sing-box
+=== RUN   TestM1NativeManualSelectionAndFailure/mihomo
+--- PASS: TestM1NativeManualSelectionAndFailure (3.63s)
+    --- PASS: TestM1NativeManualSelectionAndFailure/sing-box (1.15s)
+    --- PASS: TestM1NativeManualSelectionAndFailure/mihomo (2.48s)
+FAIL
+

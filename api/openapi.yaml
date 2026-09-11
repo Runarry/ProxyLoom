@@ -2865,7 +2865,7 @@ components:
           maxItems: 1000
           items: { $ref: "#/components/schemas/DNSRule" }
         final_resolver: { $ref: "#/components/schemas/TargetKey" }
-      description: "Resolver IDs are unique stable local keys, not names. final_resolver and each rule refer to a declared resolver. Bootstrap, resolver and outbound references are checked together for cycles. FakeIP and arbitrary native DNS options are outside P0."
+      description: "Resolver IDs are unique stable local keys, not names. final_resolver and each rule refer to a declared resolver. The first bootstrap resolves proxy node addresses; HTTPS uses its explicit bootstrap_resolver_id. The bootstrap array is not an implicit parallel or fallback list. Bootstrap, resolver and outbound references are checked together for cycles. Unsupported native bootstrap combinations fail explicitly. FakeIP and arbitrary native DNS options are outside P0."
     DNSProfilePatch:
       type: "object"
       additionalProperties: false
@@ -3158,7 +3158,15 @@ components:
                 const: true
           then:
             required: ["listen", "port"]
-      description: "Reviewed local-only control API. No arbitrary listener, secret or script configuration."
+            properties:
+              listen: { const: "127.0.0.1" }
+              port: { enum: [17812, 17813] }
+          else:
+            not:
+              anyOf:
+                - required: ["listen"]
+                - required: ["port"]
+      description: "Reviewed loopback control variants only. Disabled control has no ignored listener fields; no arbitrary secret, script or external UI configuration."
     ClientPreset:
       type: "object"
       additionalProperties: false
@@ -3166,20 +3174,42 @@ components:
       properties:
         schema_version: { $ref: "#/components/schemas/SchemaVersion" }
         core_family: { $ref: "#/components/schemas/CoreFamily" }
-        platform: { $ref: "#/components/schemas/Platform" }
+        platform: { type: "string", const: "linux" }
         format: { $ref: "#/components/schemas/OutputFormat" }
-        local_listener: { $ref: "#/components/schemas/LocalListener" }
+        local_listener:
+          allOf:
+            - $ref: "#/components/schemas/LocalListener"
+            - properties:
+                protocol: { const: "socks5" }
+                listen: { const: "127.0.0.1" }
+                port: { const: 1080 }
         dns_mode:
           type: "string"
           const: "profile"
         control_api: { $ref: "#/components/schemas/ControlAPIPreset" }
         import_method:
           type: "string"
-          enum: ["file", "subscription_url"]
+          const: "file"
         review_status:
           type: "string"
           const: "approved"
         reviewed_at: { $ref: "#/components/schemas/Timestamp" }
+      allOf:
+        - if: { properties: { core_family: { const: "xray" } } }
+          then:
+            properties:
+              format: { const: "xray_json" }
+              control_api: { properties: { enabled: { const: false } } }
+        - if: { properties: { core_family: { const: "sing-box" } } }
+          then:
+            properties:
+              format: { const: "singbox_json" }
+              control_api: { properties: { port: { const: 17812 } } }
+        - if: { properties: { core_family: { const: "mihomo" } } }
+          then:
+            properties:
+              format: { const: "mihomo_yaml" }
+              control_api: { properties: { port: { const: 17813 } } }
     ClientPresetResource:
       type: "object"
       additionalProperties: false
@@ -5462,7 +5492,7 @@ paths:
   /api/v1/routing-profiles:
     get:
       operationId: listRoutingProfiles
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List routing profiles
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -5472,7 +5502,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createRoutingProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create ordered first-match rules with an explicit final target
       requestBody:
         required: true
@@ -5491,7 +5521,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getRoutingProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read ordered typed routing rules
       responses:
         '200': {$ref: '#/components/responses/RoutingProfileResponse'}
@@ -5501,7 +5531,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateRoutingProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a routing revision with whole-array rule replacement
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5522,7 +5552,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteRoutingProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete a routing profile
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:
@@ -5538,7 +5568,7 @@ paths:
   /api/v1/dns-profiles:
     get:
       operationId: listDNSProfiles
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List DNS profiles
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -5548,7 +5578,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createDNSProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create separate bootstrap and business resolvers with cycle checks
       requestBody:
         required: true
@@ -5567,7 +5597,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getDNSProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read typed DNS resolvers and ordered domain rules
       responses:
         '200': {$ref: '#/components/responses/DNSProfileResponse'}
@@ -5577,7 +5607,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateDNSProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Update typed DNS fields and recheck resolver and outbound dependencies
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5598,7 +5628,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteDNSProfile
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete a DNS profile
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:
@@ -5614,7 +5644,7 @@ paths:
   /api/v1/rule-sets:
     get:
       operationId: listRuleSets
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List inline domain and CIDR rule sets
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -5624,7 +5654,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createRuleSet
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a normalized inline rule set and compute its content hash
       requestBody:
         required: true
@@ -5644,7 +5674,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getRuleSet
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read normalized entries and immutable content hash
       responses:
         '200': {$ref: '#/components/responses/RuleSetResponse'}
@@ -5654,7 +5684,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateRuleSet
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Replace inline rules with safe indexed diagnostics on invalid entries
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5676,7 +5706,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteRuleSet
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete a rule set while preserving frozen publication dependencies
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:
@@ -5692,8 +5722,9 @@ paths:
   /api/v1/client-presets:
     get:
       operationId: listClientPresets
-      x-implementation-status: contract-only
-      summary: List reviewed structured client presets
+      x-implementation-status: implemented
+      summary: List immutable Linux file presets and reviewed loopback control variants
+      description: Returns provisioned immutable preset resources. Read operations do not initialize presets. Approval covers structured configuration constraints; it does not certify a desktop or mobile client import.
       parameters:
         - {$ref: '#/components/parameters/Limit'}
         - {$ref: '#/components/parameters/Cursor'}

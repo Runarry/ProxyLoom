@@ -1,0 +1,80 @@
+[
+  {
+    "artifact_sha256": "6f920d5eebde15f1cfe24a6da391cbe85f55892d55559d319014bd53e99a18ac",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "early_domain_nxdomain": "proxy_without_lookup",
+    "family": "xray",
+    "final": "explicit_proxy",
+    "ip_cidr_or_domain_port_and": "pass",
+    "ip_reject": "fail_closed",
+    "literal_ip": "pass",
+    "mode": "preserve_domain"
+  },
+  {
+    "artifact_sha256": "c815fa08eec5ff53b8f10c6c1b873e3bd4fe1fd812fe9c8f3d864732d6dd21a4",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "early_domain_nxdomain": "proxy_without_lookup",
+    "family": "xray",
+    "final": "explicit_proxy",
+    "ip_cidr_or_domain_port_and": "pass",
+    "ip_reject": "fail_closed",
+    "literal_ip": "pass",
+    "mode": "resolve_for_ip_rules"
+  },
+  {
+    "artifact_sha256": "157d424ae645f25df1dbbe6a868b9ae2eaaa0eeb9adbfb9462f1454c2baf36c5",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "early_domain_nxdomain": "proxy_without_lookup",
+    "family": "sing-box",
+    "final": "explicit_proxy",
+    "ip_cidr_or_domain_port_and": "pass",
+    "ip_reject": "fail_closed",
+    "literal_ip": "pass",
+    "mode": "preserve_domain"
+  },
+  {
+    "artifact": "none",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "compile": "unsupported",
+    "diagnostics": [
+      {
+        "code": "COMPILE_UNMAPPED_FIELD",
+        "severity": "error",
+        "resource_id": "44444444-4444-4444-8444-444444444444",
+        "field_path": "/payload/domain_resolution_mode",
+        "target_key": "singbox-default",
+        "message": "This field cannot be expressed by the current native adapter and cannot be dropped or rewritten."
+      }
+    ],
+    "family": "sing-box",
+    "mode": "resolve_for_ip_rules"
+  },
+  {
+    "artifact_sha256": "2e91c4d10ec2f067fa7a38b2a0596f484654e14428c75f6b9aef5633130acd43",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "early_domain_nxdomain": "proxy_without_lookup",
+    "family": "mihomo",
+    "final": "explicit_proxy",
+    "ip_cidr_or_domain_port_and": "pass",
+    "ip_reject": "fail_closed",
+    "literal_ip": "pass",
+    "mode": "preserve_domain"
+  },
+  {
+    "artifact_sha256": "0b9e9375e80f0c8f097117c11aea60648c078392a17504172235fe897bee6814",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "early_domain_nxdomain": "proxy_without_lookup",
+    "family": "mihomo",
+    "final": "explicit_proxy",
+    "ip_cidr_or_domain_port_and": "pass",
+    "ip_reject": "fail_closed",
+    "literal_ip": "pass",
+    "mode": "resolve_for_ip_rules"
+  }
+]

@@ -65,7 +65,7 @@ type liveReport struct {
 }
 
 var reportBundle = liveReport{
-	Task: "T-028", AdapterVersion: "0.1.0-m0-native", GOOS: runtime.GOOS, GOARCH: runtime.GOARCH,
+	Task: "T-028", AdapterVersion: "0.2.0-m1-orchestration", GOOS: runtime.GOOS, GOARCH: runtime.GOARCH,
 	TestConfigDigestScope: "SHA-256 of test-only synthetic configuration; not a production content HMAC",
 }
 

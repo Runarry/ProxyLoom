@@ -30,6 +30,13 @@ type Graph struct {
 	CapabilityState capability.State
 	Independents    []IndependentOutbound
 	Chains          []ChainInstance
+	Policies        []adapter.PolicyInstance
+	FinalTag        string
+	Routing         *adapter.RoutingInput
+	DNS             *adapter.DNSInput
+	Preset          *ir.ClientPreset
+	RuleSets        []ir.FrozenRef
+	Resources       []ir.FrozenRef
 	RequiredKeys    []string
 	UnverifiedKeys  []string
 }
@@ -42,7 +49,7 @@ func (c *Compiler) Prepare(input ir.FrozenInput, target ir.Target) (Graph, []ir.
 		return Graph{}, asDiagnostics(err), err
 	}
 	pinned, ok := input.Target(target.Key)
-	if !ok || pinned != target {
+	if !ok || !pinned.Equal(target) {
 		d := compileIssue(ir.CompileTargetMismatch, "", target.Key, "")
 		return Graph{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 	}
@@ -78,45 +85,99 @@ func (c *Compiler) Prepare(input ir.FrozenInput, target ir.Target) (Graph, []ir.
 	spec := input.Spec()
 	resources := make(map[ir.ID]ir.Resource, len(spec.Resources))
 	for _, resource := range spec.Resources {
+		if override, ok := target.PolicyOverrides[resource.Metadata.ResourceID]; ok {
+			merged, err := ir.MergePolicyOverride(resource, override)
+			if err != nil {
+				return Graph{}, asDiagnostics(err), err
+			}
+			resource.Payload = &merged
+		}
 		resources[resource.Metadata.ResourceID] = resource
 	}
 
 	var items []labelItem
 	var independents []ir.Resource
 	var chains []ir.Resource
+	var policies []ir.Resource
 	seenNode := map[ir.ID]struct{}{}
 	seenChain := map[ir.ID]struct{}{}
-	for _, member := range spec.Members {
-		resource := resources[member.ResourceID]
+	seenPolicy := map[ir.ID]struct{}{}
+	var addResource func(ir.ID) error
+	addResource = func(id ir.ID) error {
+		resource := resources[id]
 		switch resource.Payload.(type) {
 		case *ir.Node:
-			if _, exists := seenNode[member.ResourceID]; exists {
-				continue
+			if _, exists := seenNode[id]; exists {
+				return nil
 			}
-			seenNode[member.ResourceID] = struct{}{}
+			seenNode[id] = struct{}{}
 			independents = append(independents, resource)
 			items = append(items, nodeLabelItem(resource.Metadata.ResourceID, resource.Metadata.Revision))
 		case *ir.Chain:
-			if _, exists := seenChain[member.ResourceID]; exists {
-				continue
+			if _, exists := seenChain[id]; exists {
+				return nil
 			}
-			seenChain[member.ResourceID] = struct{}{}
+			seenChain[id] = struct{}{}
 			chains = append(chains, resource)
 			items = append(items, chainLabelItem(resource.Metadata.ResourceID, resource.Metadata.Revision))
 		case *ir.PolicyGroup:
-			// Strategy adapters are delivered separately. Never approximate manual
-			// selection, latency selection or round robin with a fixed outbound.
-			d := compileIssue(ir.CapabilityUnsupported, "/payload/strategy", target.Key, member.ResourceID)
-			d.SuggestedAction = "This target has no implemented policy strategy adapter."
-			return Graph{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
+			if _, exists := seenPolicy[id]; exists {
+				return nil
+			}
+			seenPolicy[id] = struct{}{}
+			policies = append(policies, resource)
+			items = append(items, policyLabelItem(id, resource.Metadata.Revision))
 		default:
-			d := compileIssue(ir.InvalidUnion, "/members", target.Key, member.ResourceID)
-			return Graph{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
+			d := compileIssue(ir.InvalidUnion, "/members", target.Key, id)
+			return ir.Diagnostics{d}
+		}
+		return nil
+	}
+	for _, member := range spec.Members {
+		if err := addResource(member.ResourceID); err != nil {
+			return Graph{}, asDiagnostics(err), err
+		}
+	}
+	for _, original := range spec.Resources {
+		resource := resources[original.Metadata.ResourceID]
+		var refs []ir.TargetRef
+		switch payload := resource.Payload.(type) {
+		case *ir.RoutingProfile:
+			refs = append(refs, payload.Final)
+			for _, rule := range payload.Rules {
+				refs = append(refs, rule.Action)
+			}
+		case *ir.DNSProfile:
+			for _, resolver := range payload.Resolvers {
+				if resolver.Outbound != nil {
+					refs = append(refs, *resolver.Outbound)
+				}
+			}
+		}
+		for _, ref := range refs {
+			if ref.Type == ir.ResourceRef {
+				if err := addResource(ref.ResourceID); err != nil {
+					return Graph{}, asDiagnostics(err), err
+				}
+			}
 		}
 	}
 	labels, err := c.labels.assign(items)
 	if err != nil {
 		return Graph{}, asDiagnostics(err), err
+	}
+	count := len(independents) + 2*len(chains)
+	for _, r := range policies {
+		for _, m := range r.Payload.(*ir.PolicyGroup).Members {
+			count++
+			if m.Kind == ir.KindChain {
+				count++
+			}
+		}
+	}
+	if count > adapter.MaxOutbounds {
+		d := compileIssue(ir.InputLimitExceeded, "/outbounds", target.Key, "")
+		return Graph{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 	}
 
 	graph := Graph{
@@ -128,6 +189,11 @@ func (c *Compiler) Prepare(input ir.FrozenInput, target ir.Target) (Graph, []ir.
 		Build:           build,
 		CapabilityState: capability.Unverified,
 	}
+	for _, resource := range spec.Resources {
+		m := resource.Metadata
+		graph.Resources = append(graph.Resources, ir.FrozenRef{ResourceID: m.ResourceID, Kind: m.Kind, Revision: m.Revision, SecurityEpoch: m.SecurityEpoch})
+	}
+	slices.SortFunc(graph.Resources, func(a, b ir.FrozenRef) int { return compareString(string(a.ResourceID), string(b.ResourceID)) })
 	for _, resource := range independents {
 		tags := labels[nodeMaterial(resource.Metadata.ResourceID, resource.Metadata.Revision)]
 		graph.Independents = append(graph.Independents, IndependentOutbound{Tag: tags[0], Resource: resource})
@@ -153,6 +219,11 @@ func (c *Compiler) Prepare(input ir.FrozenInput, target ir.Target) (Graph, []ir.
 	slices.SortFunc(graph.Chains, func(a, b ChainInstance) int {
 		return compareString(string(a.ResourceID), string(b.ResourceID))
 	})
+	if err := prepareOrchestration(&graph, spec, resources, policies, labels); err != nil {
+		return Graph{}, asDiagnostics(err), err
+	}
+	slices.SortFunc(graph.Independents, func(a, b IndependentOutbound) int { return compareString(a.Tag, b.Tag) })
+	slices.SortFunc(graph.Chains, func(a, b ChainInstance) int { return compareString(a.TagH1, b.TagH1) })
 
 	keys, unverified, diags, err := c.collectCapabilities(graph)
 	if err != nil {
@@ -201,6 +272,21 @@ func (c *Compiler) collectCapabilities(graph Graph) ([]string, []string, []ir.Di
 			return nil, nil, asDiagnostics(err), err
 		}
 		required = append(required, req{key: ChainTwoHop, path: base, resourceID: chain.ResourceID})
+	}
+	for _, policy := range graph.Policies {
+		required = append(required, req{key: "policy." + string(policy.Strategy), path: "/payload/strategy", resourceID: policy.ResourceID})
+	}
+	if graph.Routing != nil {
+		required = append(required, req{key: "routing.ordered", path: "/payload/rules", resourceID: graph.Routing.ResourceID})
+	}
+	if graph.DNS != nil {
+		required = append(required, req{key: "dns.profile", path: "/payload/resolvers", resourceID: graph.DNS.ResourceID})
+	}
+	if graph.Preset != nil {
+		required = append(required, req{key: "client_preset", path: "/payload", resourceID: graph.Target.ClientPresetID})
+	}
+	for _, set := range graph.RuleSets {
+		required = append(required, req{key: "rule_set.inline", path: "/payload/entries", resourceID: set.ResourceID})
 	}
 
 	keys := make([]string, 0, len(required))

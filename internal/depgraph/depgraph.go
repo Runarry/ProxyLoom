@@ -8,7 +8,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/ir"
 )
 
-const DefaultMaxResources = 2000
+const DefaultMaxResources = ir.MaxFrozenResources
 
 type Options struct {
 	ScopeID      ir.ID

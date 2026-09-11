@@ -1,0 +1,824 @@
+{
+  "image": "debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171",
+  "network": "none",
+  "platform": "linux/amd64",
+  "binary_sha256": "d8e60c1b40b6487765e74526c15190a9a82d6cbe1f25e391fbfbdc465618ee67",
+  "sources": [
+    {
+      "path": "compat/contract-changes/T-006.json",
+      "sha256": "38c70b054da7dac1650855a74d4b65ead5d6e9293e6a6c7e5413be4db8c2ffa6"
+    },
+    {
+      "path": "compat/contract-changes/T-009-m1-input-validation.json",
+      "sha256": "c2f3699d8a557ff1d7c8fdd3c4ae3ef2529bc51b39131f2c2d1be81f5c07b0df"
+    },
+    {
+      "path": "compat/contract-changes/T-014.json",
+      "sha256": "47ccd7b82738ed96a298a5cc64d80ac4929ad20503cd1b8e3aac7b092c611406"
+    },
+    {
+      "path": "compat/contract-changes/T-015-override-and-export.json",
+      "sha256": "39de6bcfd4dcd05e4c296556d9f0f9da078324ea9843597a3b151bffced09cca"
+    },
+    {
+      "path": "compat/contract-changes/T-017.json",
+      "sha256": "4a6ed6e35e11983fcf7d27c62ed682f94b4e1ee8e0b752d5d4dd6b746303f0d0"
+    },
+    {
+      "path": "compat/contract-changes/T-019-source-policy-window.json",
+      "sha256": "e032f108a68a12147365e3497d4721a7dae5d79d6389a431f71dfe2835a439b1"
+    },
+    {
+      "path": "compat/contract-changes/T-029-m1-orchestration.json",
+      "sha256": "ce345e46b2bbfb4c784784d078c0146d6da0646d6c1291e6d44d365642c4aae9"
+    },
+    {
+      "path": "compat/cores.lock.yaml",
+      "sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18"
+    },
+    {
+      "path": "compat/embed.go",
+      "sha256": "75b82f57cf504d427f8dad7001db462fe92f6234bb18f06c7a4439cf3cd05096"
+    },
+    {
+      "path": "compat/p0-combinations.yaml",
+      "sha256": "5a459d2eb8088942219e7a41571dde05e1cf87a3f8257af8510ced622cdee7fb"
+    },
+    {
+      "path": "fixtures/compiler/frozen-chain-a-b.json",
+      "sha256": "ee27256b7d452066cafd97988a19fec5fa90567fdf70bef0243897ba02d67231"
+    },
+    {
+      "path": "fixtures/compiler/golden/mihomo-native-chain-a-b.yaml",
+      "sha256": "c3114c54e68d2748dcd62e19678e8b06cfd9d5a8b611f4d2ad59eda2de9aba1d"
+    },
+    {
+      "path": "fixtures/compiler/golden/singbox-native-chain-a-b.json",
+      "sha256": "271d77b5785c245c30ee91e2cbe5fc2a08f7c52001dace856cd58d6320ba4374"
+    },
+    {
+      "path": "fixtures/compiler/golden/xray-chain-a-b.json",
+      "sha256": "9863298ff1a1ebf99fba035d9dfb9b668de2e22bbdc1a0ed9445993fcd9cc050"
+    },
+    {
+      "path": "fixtures/compiler/golden/xray-native-chain-a-b.json",
+      "sha256": "818c0063191d161a1db77ad4007330ff3e9edd5adfa09a792c449d9169381efd"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/chain-bootstrap-local-xray.json",
+      "sha256": "18db6a2b10d7534c471d34c64f6b552d904ac47b92524d259dcd762da44c65d6"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-http-native_tcp-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-http-native_tcp-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-http-native_tcp-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-http-native_tcp-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-http-native_tcp-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-http-native_tcp-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-shadowsocks-native_tcp-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-shadowsocks-native_tcp-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-shadowsocks-native_tcp-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-socks5-native_tcp-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-socks5-native_tcp-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-socks5-native_tcp-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-trojan-native_tcp-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-trojan-native_tcp-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-trojan-native_tcp-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-trojan-websocket-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-trojan-websocket-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-trojan-websocket-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-reality-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-reality-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-reality-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-native_tcp-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-websocket-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-websocket-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-websocket-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-websocket-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-websocket-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vless-websocket-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-native_tcp-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-native_tcp-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-native_tcp-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-native_tcp-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-native_tcp-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-native_tcp-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-websocket-none-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-websocket-none-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-websocket-none-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-websocket-tls-mihomo.json",
+      "sha256": "d1a765123fa7a47b8ac89f5be44d1db33e114fc15549c6a473940c2539149956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-websocket-tls-sing-box.json",
+      "sha256": "d880329c504e6bafa83c4026a4551e331c278e4b7e77044b5458aad83e08f836"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/negative/protocol-vmess-websocket-tls-xray.json",
+      "sha256": "0350ab9c9c774b8c504979ddbdbbf1062b7d47422d50b9982f7c11e1959ab76f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/orchestration-mihomo.yaml",
+      "sha256": "65e3633dfe4e5f96d6d5460f3fd0ef8d4fddec3fb7bc0eb5bd01d536c9cb8fe9"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/orchestration-sing-box.json",
+      "sha256": "da2ba12755edbfeec9ab6d6d43485212767c8c9e5aeb9404f1a99ca54f8e0c01"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/orchestration-xray.json",
+      "sha256": "0c217d6182fc8f47ca656ec89e815808a8c6eb3a0932023189762d82eb931fea"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/plan-orchestration.json",
+      "sha256": "6cf528595d050deb2c7ba0df8478d98faa26fcc4d72e4bca6a702000c0fdde72"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-fixed-mihomo.yaml",
+      "sha256": "7b55bb7b4f2c1cf783ba6a4e5510e8064d1722859b8c9cac5360fa905f63913b"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-fixed-sing-box.json",
+      "sha256": "d50cfe3f9a1f8f83d58376a240424dae6cbc922753f46f2dfbf556d537a3aade"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-fixed-xray.json",
+      "sha256": "1791aeea17768370f3b204cf7744304a10c43feae221a76a76dd3169d6adec4d"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-latency_best-mihomo.yaml",
+      "sha256": "bbc4c443f21ab57d3f3b3394bb2ef5842cd5626d22414d776327b726bc61ff3e"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-manual_select-mihomo.yaml",
+      "sha256": "31d258bbc6e52c760b9ae45c5f0613883841841ad1363c1ceff6e9c7931d0520"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-manual_select-sing-box.json",
+      "sha256": "407c3b0ee3968509bc52c044789212dccbf49c84d7b715b3377438803652a965"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-round_robin-mihomo.yaml",
+      "sha256": "1ae2bb846792c504ccdfc9e4704888e1fe2436bfee2ed17126043322406fd768"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/policy-round_robin-xray.json",
+      "sha256": "a0a3d874360f3fd97533bd535099897070e043698fa85c5ea878989d82b9c956"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-native_tcp-none-mihomo.yaml",
+      "sha256": "984427b061430d716a9ca0ce3782de1725227428cfac24819b8c4bfc2988f297"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-native_tcp-none-sing-box.json",
+      "sha256": "19cc50594360c32b7d808f2bae533d0885f9eca58563fbe7fa7fcf4911541fcd"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-native_tcp-none-xray.json",
+      "sha256": "33b339d191456c622cbf7324a525bb0a3ba4c949915c71634de1883bee182559"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-native_tcp-tls-mihomo.yaml",
+      "sha256": "f538e8f8ba8801d909ab561c435a67e5f8bb300427632bf13f1acdf752ed786c"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-native_tcp-tls-sing-box.json",
+      "sha256": "ba2db7cd763130816b14a4a54120d8737862eb5a1274507dc71a27ea769a93b8"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-native_tcp-tls-xray.json",
+      "sha256": "c1406177e7efdabfec00ab86f074617678a5c03f3e4bfcedb0e230da489295ad"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-noauth-mihomo.yaml",
+      "sha256": "a1409ec6a335afa4f2f97ce6cb348c9959ff744800c0a0a302055a3f9e76c5cc"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-noauth-sing-box.json",
+      "sha256": "c0b55cec0dd24572b27358455015be5815e412a8478ec7ec8499d32c79e053c6"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-noauth-xray.json",
+      "sha256": "3585f7ad4c475e87468af065edc8e3ad07b09b312627f4df5204353ed900525d"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-tls-noauth-mihomo.yaml",
+      "sha256": "1c9c4ca7fb35063525109aece3f937315dd790e867fd9e1d9a30a4b4c32e7a16"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-tls-noauth-sing-box.json",
+      "sha256": "6eeb3a84d813dc047ff629a8f82d5ed13be364a239770e21bcab11e30e16351a"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-http-tls-noauth-xray.json",
+      "sha256": "3be94a4530a5462d99e9f91b45c921635e60d350b69740ce6e9fa981ad82d8b1"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-aes-256-gcm-mihomo.yaml",
+      "sha256": "e9349c94a91ce2c7e0eaf371d2c05e3dfaa0938e78eaea4308536b3427cab6c0"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-aes-256-gcm-sing-box.json",
+      "sha256": "961b62fa94f9afb8db1ec9cabaff0a88438bfab5978d63c4d2dfb7ab234777d2"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-aes-256-gcm-xray.json",
+      "sha256": "c678c1421c3df9d48d095ac04ef81b9f79b2ba40c26e41038ef360f085f54ab9"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-chacha20-ietf-poly1305-mihomo.yaml",
+      "sha256": "1dc8785c21281552793e4a1b6acb5b634d6b207061ffbb2731ffad440a9b36e5"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-chacha20-ietf-poly1305-sing-box.json",
+      "sha256": "8f92e9ea89cef192ee29f8b962227dd8f94a0ea89af65637a770e88e852abf71"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-chacha20-ietf-poly1305-xray.json",
+      "sha256": "28ae6eb1535fde80b56f9d82de41f6c9cb7eb9c9bc10b77bcbd4d9ba2d9f80b7"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-native_tcp-none-mihomo.yaml",
+      "sha256": "6122c805b0bc18ce9a9dbb31e403e250d8fd278fd8c45fd5c172bf66643bc7b9"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-native_tcp-none-sing-box.json",
+      "sha256": "c79aacf6ea1597f92173e4f92f66fc4afe4b639f0f6cf5665314ae5a38c51bc5"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-shadowsocks-native_tcp-none-xray.json",
+      "sha256": "81bd9173f2aff9ba6557745672e881a72e8cdc5f98d3a11895dcef5b6c6ec158"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-socks5-native_tcp-none-mihomo.yaml",
+      "sha256": "35c8bbace526a03934d00c46bfc757a707632de211b97d6203eaa764300b2f16"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-socks5-native_tcp-none-sing-box.json",
+      "sha256": "a6bc098438842ba2db9c36d4c7d7ea4b4b7d9d7d7623d3b6f16f03b3ca35c84c"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-socks5-native_tcp-none-xray.json",
+      "sha256": "dffa35514e9337df8b9e9368e657a3a1cdf964f4efc30f34f5602de0c6b13387"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-socks5-noauth-mihomo.yaml",
+      "sha256": "4328430349da7789321827e88a31806bb340e1290bed75f28516774b2084ce62"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-socks5-noauth-sing-box.json",
+      "sha256": "bb8dc2e046ad3a41424a0faf16441fbacc8c06bfd2cfd02f582c1a533ada0fd9"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-socks5-noauth-xray.json",
+      "sha256": "42122a38dc8eef837aa4ac4e9963f6198c66319d666aa2e7258da67420de8e1e"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-trojan-native_tcp-tls-mihomo.yaml",
+      "sha256": "1aa3dd64b5fc8204b630bde880d1ca495361e0ee5ca42da2e8f0006e54d5a50f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-trojan-native_tcp-tls-sing-box.json",
+      "sha256": "8419c0adc1b6edf6e626e26113e587fb9f3baf15562f103a6f0e8800e28fc737"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-trojan-native_tcp-tls-xray.json",
+      "sha256": "100b86fc5fd61c05fb7f17d1258694d1d9754296068e08e38471a1f3002be1bb"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-trojan-websocket-tls-mihomo.yaml",
+      "sha256": "9409940ef90db1549327b9913fa49336c4d738ec37e9067d2dfb100bf14bc748"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-trojan-websocket-tls-sing-box.json",
+      "sha256": "e2da0230a205e30da05b9930a7d279411d3416a049a5b79033c8293094c0ae58"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-trojan-websocket-tls-xray.json",
+      "sha256": "01d819da3c1cef87250a655459e842a38a80f2d4bd8221627b6ffb7ec418ba52"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-none-mihomo.yaml",
+      "sha256": "4089c41657ab60f54ebdc4cf4f9a54bd649b9a514c6fd2912209250155cddf55"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-none-sing-box.json",
+      "sha256": "d1cd02d9f5d87287ba17a3bc4063fbfb4ebf06fda1d151dfb6f4bd2de1f1ec3a"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-none-xray.json",
+      "sha256": "ca68a58e2a6db3dd8130f4ab3fb22b263d4aed2b7465d9d3a7b2fa0d6a19a182"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-reality-mihomo.yaml",
+      "sha256": "5ed2c2468c6f6ffdf35b718a90a36b6b8c76da2e592822b803ab4682fb2a82ea"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-reality-sing-box.json",
+      "sha256": "2ba80667026729d571f51109a4919e550a878b40c8708f74fa6867ed7d2f7630"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-reality-xray.json",
+      "sha256": "d876d776880f90c3eb889ad7ed57b7ffc7f445da7b4837169a3ee7d0e31d94f6"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-tls-mihomo.yaml",
+      "sha256": "5e5f95c09c14f7f307ee99d3dc8afc0229434ae511b5c46ea84af1b5d751f682"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-tls-sing-box.json",
+      "sha256": "5261adab5bb292c8e0827e0fad92963670eac7f283f6db9dfe9b5bfa7ef41e5e"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-native_tcp-tls-xray.json",
+      "sha256": "8842e134323dff2426c9aff2b232a4fef16d0b8ca6b9b0e377d82037217204cc"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-websocket-none-mihomo.yaml",
+      "sha256": "c8a1a4598192fe25d6bdb9f152a03c7a992562cefc1f95b312d02e361bc502a7"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-websocket-none-sing-box.json",
+      "sha256": "e9bb4d934ed73085d72bd2ac99c20e625464646bfed454a72bc5eb05f0fdf61a"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-websocket-none-xray.json",
+      "sha256": "3568cd706022e6857b7dcbd0644a153f04ee0b483281d965830a841f18d04b70"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-websocket-tls-mihomo.yaml",
+      "sha256": "146367cb2aa41746894f0b8e6356c9757b257c4399599e92c6975851f4811915"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-websocket-tls-sing-box.json",
+      "sha256": "92625212544fcca165346f43879bd910d216323ab0f8db233f4040b496ea7df8"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vless-websocket-tls-xray.json",
+      "sha256": "e2708296515c1e6381f9c48b9db3ea0aa78f0f73dc6ed835380ec01113210b17"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-native_tcp-none-mihomo.yaml",
+      "sha256": "ec1db57060e6106abef657fc153b3f6497bd383482d7be43102e916322232357"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-native_tcp-none-sing-box.json",
+      "sha256": "f208707c2f04fe37c69ef9a88ee83abf04c08e0ab4411457541a7714e636a6f4"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-native_tcp-none-xray.json",
+      "sha256": "ef1c6f86f3e2ee0c2b59132c1109d7f700a6e9be2837f181f91e7174d8c92c2f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-native_tcp-tls-mihomo.yaml",
+      "sha256": "1666fe0d2ebea142f88e95110205f52bc8f9f377969f33de40324907cbd3b244"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-native_tcp-tls-sing-box.json",
+      "sha256": "01fe5e96b8de96bd40f6bb9f8c46ae4efb7f092c9ca34a240c7ddb0a610be652"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-native_tcp-tls-xray.json",
+      "sha256": "efe94799310993076d21c03f3a1d0e36ae668c71132a8c1596f64a9be253751f"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-websocket-none-mihomo.yaml",
+      "sha256": "5a7ca571d4532255115a8881543be9830c3bd69d107422529c670e70de48bbeb"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-websocket-none-sing-box.json",
+      "sha256": "df8fd1d6c1fa5b90eaac72ffeb7142780517c40ee69591f63745503eb65c7d94"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-websocket-none-xray.json",
+      "sha256": "2fc7f2fe5c4ae6e3ab3fc27a9139dc973ab7eb75dcd7cc60329470e73b418095"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-websocket-tls-mihomo.yaml",
+      "sha256": "fd8811e0762f7d4aa5dc6b350f5afcdd17f1b17a110b95bd830b3108998cf079"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-websocket-tls-sing-box.json",
+      "sha256": "e23293fd4323c392daaf0907cea8282711dc8ec783666fe5d946dd8f278c3884"
+    },
+    {
+      "path": "fixtures/compiler/native-p0/protocol-vmess-websocket-tls-xray.json",
+      "sha256": "d4638f66eb4985daea071d9d076794b784f2fc912add8c700765e211cedc0cd6"
+    },
+    {
+      "path": "go.mod",
+      "sha256": "abe57dd4a0f7b7d51a682525223b0a317ea1ea7000f2c6f07130beacf3632e3a"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "3fbf4aed7e8524db9bd82f1212909b082451cf984ada30792650d3abb5a7614c"
+    },
+    {
+      "path": "internal/adapter/adapter.go",
+      "sha256": "bf03b5ae6b8ae194603afbc8875efcde506bfbab959c404b4f4a95476f9de17c"
+    },
+    {
+      "path": "internal/adapter/adapter_test.go",
+      "sha256": "b0eac1b0f5e8c089e820ae4b9dd14fbe1740900abc17d2ea4f5723b95054af28"
+    },
+    {
+      "path": "internal/adapter/emit.go",
+      "sha256": "95a2581da22bbe7198bdf1a4018456a55de2b268c983d20bd83f7b77a1800196"
+    },
+    {
+      "path": "internal/adapter/emit_test.go",
+      "sha256": "28a450ac68a76bb903ce33d75ad8387137f25f4c85d95957ce03bbd38c65f871"
+    },
+    {
+      "path": "internal/adapter/mihomo/dns.go",
+      "sha256": "65b5ea3e8a6b19bbf4ae150b848b3c59be6c6a7e662185c9a9f4ba64ce55d744"
+    },
+    {
+      "path": "internal/adapter/mihomo/dns_test.go",
+      "sha256": "3cc213c88981e8627ec7c80bc745efcbac3b53886fa280dc84d5b765c25330bf"
+    },
+    {
+      "path": "internal/adapter/mihomo/emit.go",
+      "sha256": "0a04218607c16f0cac737a507b526c458de96265b86c1bfe8310a345807805d6"
+    },
+    {
+      "path": "internal/adapter/mihomo/emit_test.go",
+      "sha256": "fd70d8bbc7e3a385b49c30e6d49ba5ad387fc55450d3c974e3ea9e73c96e322c"
+    },
+    {
+      "path": "internal/adapter/mihomo/mihomo.go",
+      "sha256": "44d2496dd1a8c89fe20ab0d210d20fad019d06667e8ed58546bd805deedc67e5"
+    },
+    {
+      "path": "internal/adapter/mihomo/mihomo_test.go",
+      "sha256": "033631667f4b55beaf368267778c12d0a1e487323f4e68c3ca6252d52881b938"
+    },
+    {
+      "path": "internal/adapter/mihomo/node.go",
+      "sha256": "0e169dee55f2bba0ccb921eb5905e7c78a4103084d7c67b6b9a505e4f7e43589"
+    },
+    {
+      "path": "internal/adapter/mihomo/orchestration.go",
+      "sha256": "985ee6a2ca12b7ad38d4ab7e8b050d51d41c9517ce14c3770c6000cecd35169d"
+    },
+    {
+      "path": "internal/adapter/node.go",
+      "sha256": "49675c9666d917d215dd87b59b310ade70450bdfcce779e03472d8a8e879f88e"
+    },
+    {
+      "path": "internal/adapter/orchestration.go",
+      "sha256": "6eb0918f2d271279681856bfca3963cccc960cefe7011e8ec72b635ba3af9039"
+    },
+    {
+      "path": "internal/adapter/redact.go",
+      "sha256": "7bd76937895f464c9ed2fdae94a8932534e629a6195ce24368a680071f76b68f"
+    },
+    {
+      "path": "internal/adapter/singbox/dns.go",
+      "sha256": "9068ca774822e62bd5054c985863a96d779f8c58b6a9c0b3d3e8952f90b9528c"
+    },
+    {
+      "path": "internal/adapter/singbox/dns_test.go",
+      "sha256": "c18efbe283a6d0ab2c88c81be535a2ebffb94e910e8b908568ca20f6fbed0697"
+    },
+    {
+      "path": "internal/adapter/singbox/emit.go",
+      "sha256": "50499a372d8f548fc729a677c230ef24b213937730b1324a90d76103e71836e8"
+    },
+    {
+      "path": "internal/adapter/singbox/emit_test.go",
+      "sha256": "5d6274e44c0b124b11aaf65e150456293847301886df98093540fe1bbb9d7021"
+    },
+    {
+      "path": "internal/adapter/singbox/node.go",
+      "sha256": "1468d7896a329f101fa385460dc972385217517c0a38cf57286b73f1b765b57d"
+    },
+    {
+      "path": "internal/adapter/singbox/orchestration.go",
+      "sha256": "f17f214098db6c853c6417cb858f70d32a444b5f7c828ebd29b43d2f39da0638"
+    },
+    {
+      "path": "internal/adapter/singbox/singbox.go",
+      "sha256": "bef082a7ef0566b48bfeb7751bf884d32fd3d04ac8e7c20b5945a52d1d460b34"
+    },
+    {
+      "path": "internal/adapter/singbox/singbox_test.go",
+      "sha256": "ce8be8ddfad76e950b75f4f50385bba61019481a722a9a065ff265ac2424e2a7"
+    },
+    {
+      "path": "internal/adapter/xray/dns.go",
+      "sha256": "90f5ed350c0335b2854b5912322510c997036bc529d1b1c9aa048ffd4d3b7f90"
+    },
+    {
+      "path": "internal/adapter/xray/dns_test.go",
+      "sha256": "b7dbcc3c66b9ffbc9f8e5dadc5850f1f429a97c668475dba84898ffc7c260667"
+    },
+    {
+      "path": "internal/adapter/xray/emit.go",
+      "sha256": "7583eceb7a285a132072ec7691ce0704dab8dfe916453db9445a712609193cc8"
+    },
+    {
+      "path": "internal/adapter/xray/emit_test.go",
+      "sha256": "f56c1ad12e20e592bb8316b76b00ed28f767338569a7efb26fb5eea1c8649cf6"
+    },
+    {
+      "path": "internal/adapter/xray/node.go",
+      "sha256": "98dcc40cfd3c307e504fdd99ffcf89a68254601599d7d8f2bc5ac194361f7db7"
+    },
+    {
+      "path": "internal/adapter/xray/orchestration.go",
+      "sha256": "671a995cc6e926bfa7daecff036c94863e770e6c1f272a8123012439790e3d0a"
+    },
+    {
+      "path": "internal/adapter/xray/xray.go",
+      "sha256": "d45f4cea8a83c8aa1f039c082965e999e49998d7aa0d45e4fce781f5f3d55d77"
+    },
+    {
+      "path": "internal/adapter/xray/xray_test.go",
+      "sha256": "209d11d98e54d9d44bb1b4920fad8c533dc5217c94dedf146cee9c9b61a5f8bc"
+    },
+    {
+      "path": "internal/capability/catalog.go",
+      "sha256": "81e56ab8bcddd0c766613ff459478ce03c3e32c3fed9aaa9d0d87f6878725391"
+    },
+    {
+      "path": "internal/capability/catalog_test.go",
+      "sha256": "4204db21f37ab37d0bd619ef47741394fe389a80366d450163e67845005266f3"
+    },
+    {
+      "path": "internal/capability/parse.go",
+      "sha256": "6a2f71e43f1459b1ba3a99c861aed45ea16f31f8dcabb55e92a837c26138f722"
+    },
+    {
+      "path": "internal/compiler/compile.go",
+      "sha256": "a150cf7fb47a1d11c29f4586246791b017da464cfc7716d40a2613986b535403"
+    },
+    {
+      "path": "internal/compiler/compile_test.go",
+      "sha256": "73e62a3d98ea1e466655cc08e42bf420662c0763c16f1c978244ae38bdf8dd28"
+    },
+    {
+      "path": "internal/compiler/emit.go",
+      "sha256": "dc625218370cb888ae4e5e87553d3527aeaab1e32341294ca2acf33b8357f6f4"
+    },
+    {
+      "path": "internal/compiler/label.go",
+      "sha256": "220b8f116d185c86e1cd2217d7936ae37118aad72b382b4578fd7acc7e8af1e2"
+    },
+    {
+      "path": "internal/compiler/label_test.go",
+      "sha256": "81aea60251444fe21bc1807eb6455f6cd3f7c1593cabcab336f2c84e6e0d4d96"
+    },
+    {
+      "path": "internal/compiler/m1_invariants_test.go",
+      "sha256": "72ade85f2ff7fc72ed6e56709a4b43490f2354fdc2da8a4fe890d3d0c56ad269"
+    },
+    {
+      "path": "internal/compiler/m1_ip_routing_test.go",
+      "sha256": "d217f8999bfbaa6bbd365b5bcaf629cfc814f9f739eac47717217925520df5df"
+    },
+    {
+      "path": "internal/compiler/m1_native_runtime_test.go",
+      "sha256": "62208c8aa599c0d30b9ab3358d817c65b5ff7b696e016e555e33a366fa2812e7"
+    },
+    {
+      "path": "internal/compiler/native_test.go",
+      "sha256": "990fc890865d05e81de16a4c982ce61920b5cf5ef8444f2d744e7fd88d55e779"
+    },
+    {
+      "path": "internal/compiler/orchestration.go",
+      "sha256": "6ab0e3d784c6418c4294437d2d5286dbe68d46b79b7574fa0e01c8002cc2754f"
+    },
+    {
+      "path": "internal/compiler/orchestration_test.go",
+      "sha256": "8888ed18e950e0d99f559185d4c1ca3332c77bc3def04c3e92db4e60625d3c74"
+    },
+    {
+      "path": "internal/compiler/plan.go",
+      "sha256": "2f2175f551b262436824b199f8a41757170086cca098b44fee403cfe4f1a1fb9"
+    },
+    {
+      "path": "internal/compiler/policy_group_test.go",
+      "sha256": "e828a0830a18764cb07bc482ae674268b964bf7c3fbd221305bd0430ca927f18"
+    },
+    {
+      "path": "internal/compiler/prepare.go",
+      "sha256": "5baee60159dc8b5be9c08be5d8d948d5809d247c2a4cc81d622b9d17d18fe495"
+    },
+    {
+      "path": "internal/compiler/protocol.go",
+      "sha256": "940a1268df9a86f28b87eb301d889bf24630b6f9c839eb5e37b23ef6f9191f72"
+    },
+    {
+      "path": "internal/compiler/protocol_mapping_test.go",
+      "sha256": "3071a51f6ae166127fb4e85feea9f4e0934c643ea3af5c15d0e56d0948d53e8b"
+    },
+    {
+      "path": "internal/ir/client_preset.go",
+      "sha256": "a2bc002a4e4c943ba6b4d07d242c855cbbd46d8fc3bbf6212d7247a6a96cde90"
+    },
+    {
+      "path": "internal/ir/client_preset_test.go",
+      "sha256": "2e9a8169ccab0d36a624c42404eca297843097fafec7a7188d5d72ddf5e91910"
+    },
+    {
+      "path": "internal/ir/diagnostic.go",
+      "sha256": "2d413982bfec36ed9627e693303cf1f044575e61c36157d36b01208329252d83"
+    },
+    {
+      "path": "internal/ir/dns.go",
+      "sha256": "195e440e2185cdc3d8f02e5569246259edb56ba98fa3cbc438047c313614a562"
+    },
+    {
+      "path": "internal/ir/frozen.go",
+      "sha256": "ac50e780fdd559a24b3b052d30bcf855fd009da6988d6ad16c2e25c0b4c5622f"
+    },
+    {
+      "path": "internal/ir/frozen_test.go",
+      "sha256": "0e743b426ab0410b20a8128df2ed27a225e1c2dbe2a9dd037720bc8be5a30167"
+    },
+    {
+      "path": "internal/ir/ir_test.go",
+      "sha256": "8eb9bd03afe7d934327ac242e4b5fddf511380b4b12254c94a1cf8ab11b12726"
+    },
+    {
+      "path": "internal/ir/json.go",
+      "sha256": "54b461798bc8b20e91bad1de4040b21fda58de11b7179c4f6ecfdfac81213160"
+    },
+    {
+      "path": "internal/ir/node.go",
+      "sha256": "0ad3d663c716408d28e70bc7e5e6db930fafae97be125af77781d7ed6026cd65"
+    },
+    {
+      "path": "internal/ir/orchestration_test.go",
+      "sha256": "f80c7418846535dfd9be42e369f2706431d0d4c130a1a79bfdc1b851f2c559b0"
+    },
+    {
+      "path": "internal/ir/policy_group.go",
+      "sha256": "355eef82aaad509d2107d5bf36316716183a92c80d80133b0e782fb7853acaf5"
+    },
+    {
+      "path": "internal/ir/policy_group_test.go",
+      "sha256": "aeeebd2f20437b1b207af9af358230399b3fcb2cb903ca36896a66287cebefbd"
+    },
+    {
+      "path": "internal/ir/redaction.go",
+      "sha256": "875d7f72b0a2436902edf1f4e6bb4ffda2d6f10a00c9964b8a9bce9b0308f942"
+    },
+    {
+      "path": "internal/ir/resource.go",
+      "sha256": "19b27dd5800b5208514c73cc81105737c9246e99536d432bf22ba2cd21e4f846"
+    },
+    {
+      "path": "internal/ir/routing.go",
+      "sha256": "45b8a16e095994bbd0116537a7496fa7d177c189c8c5cf485baf2c89a57bed27"
+    },
+    {
+      "path": "internal/ir/value_validation.go",
+      "sha256": "29cd49f218e13253d0140edd281a9bf7bb6af6ef2816913bcb45965fa5484324"
+    },
+    {
+      "path": "schemas/ir-v1.schema.json",
+      "sha256": "a8d8b5c9cdef0c0ec2973fbc372920ec9078a92117401370a7afe93f1d5c8c54"
+    },
+    {
+      "path": "schemas/schema.go",
+      "sha256": "acc026f106f0a81d592a002cd9cc82d1cde75ca0610e9b9d6be67b0c4c2f743c"
+    },
+    {
+      "path": "scripts/verify-m1-native.mjs",
+      "sha256": "56053b8bc2a4b8c149e5c7039134b985cdd29111920e721b370e66a6a4994da9"
+    }
+  ]
+}

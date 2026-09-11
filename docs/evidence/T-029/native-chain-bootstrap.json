@@ -1,0 +1,8 @@
+{
+  "bootstrap": "local before H1 redirect",
+  "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+  "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+  "family": "xray",
+  "h2_unavailable": "fail_closed",
+  "two_hop": "pass"
+}

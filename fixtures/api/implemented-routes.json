@@ -49,6 +49,13 @@
   ],
   "/api/v1/policy-groups": ["get", "post"],
   "/api/v1/policy-groups/{id}": ["get", "patch", "delete"],
+  "/api/v1/routing-profiles": ["get", "post"],
+  "/api/v1/routing-profiles/{id}": ["get", "patch", "delete"],
+  "/api/v1/rule-sets": ["get", "post"],
+  "/api/v1/rule-sets/{id}": ["get", "patch", "delete"],
+  "/api/v1/dns-profiles": ["get", "post"],
+  "/api/v1/dns-profiles/{id}": ["get", "patch", "delete"],
+  "/api/v1/client-presets": ["get"],
   "/api/v1/imports": [
     "post"
   ],

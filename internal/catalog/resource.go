@@ -13,6 +13,9 @@ import (
 )
 
 func New(scope ir.ID, input CreateInput) (ir.Resource, error) {
+	if _, preset := input.Payload.(*ir.ClientPreset); preset {
+		return ir.Resource{}, ErrInvalidInput
+	}
 	var id [16]byte
 	if _, err := rand.Read(id[:]); err != nil {
 		return ir.Resource{}, ErrUnavailable
@@ -31,6 +34,9 @@ func New(scope ir.ID, input CreateInput) (ir.Resource, error) {
 // Apply compares complete validated typed authentication, including its kind.
 // Metadata-only edits and re-enabling preserve the accumulated security epoch.
 func Apply(old ir.Resource, input UpdateInput) (ir.Resource, error) {
+	if old.Metadata.Kind == ir.KindClientPreset {
+		return ir.Resource{}, ErrInvalidInput
+	}
 	if _, err := Canonical(old); err != nil {
 		return ir.Resource{}, err
 	}
@@ -69,6 +75,9 @@ func Revoke(old ir.Resource) (ir.Resource, error) { return invalidate(old, false
 func Delete(old ir.Resource) (ir.Resource, error) { return invalidate(old, true) }
 
 func invalidate(old ir.Resource, disable bool) (ir.Resource, error) {
+	if old.Metadata.Kind == ir.KindClientPreset {
+		return ir.Resource{}, ErrInvalidInput
+	}
 	if old.Metadata.Revision == math.MaxInt64 || old.Metadata.SecurityEpoch == math.MaxInt64 {
 		return ir.Resource{}, ErrInvalidInput
 	}
@@ -129,6 +138,14 @@ func payloadKind(payload ir.ResourcePayload) ir.ResourceKind {
 		return ir.KindChain
 	case *ir.PolicyGroup:
 		return ir.KindPolicyGroup
+	case *ir.RoutingProfile:
+		return ir.KindRoutingProfile
+	case *ir.RuleSet:
+		return ir.KindRuleSet
+	case *ir.DNSProfile:
+		return ir.KindDNSProfile
+	case *ir.ClientPreset:
+		return ir.KindClientPreset
 	}
 	return ""
 }
@@ -155,6 +172,34 @@ func ExtractReferences(resource ir.Resource) ([]Reference, error) {
 		refs = append(refs, Reference{SourceID: resource.Metadata.ResourceID, SourceKind: ir.KindPolicyGroup,
 			SourceRevision: resource.Metadata.Revision, TargetID: group.DefaultMember.ResourceID, ExpectedKind: group.DefaultMember.Kind,
 			Path: "/payload/default_member/resource_id", Current: true})
+	}
+	if profile, ok := resource.Payload.(*ir.RoutingProfile); ok {
+		add := func(target ir.ID, kind ir.ResourceKind, path string) {
+			refs = append(refs, Reference{SourceID: resource.Metadata.ResourceID, SourceKind: ir.KindRoutingProfile,
+				SourceRevision: resource.Metadata.Revision, TargetID: target, ExpectedKind: kind, Path: path, Current: true})
+		}
+		for i, rule := range profile.Rules {
+			path := "/payload/rules/" + strconv.Itoa(i)
+			if rule.Action.Type == ir.ResourceRef {
+				add(rule.Action.ResourceID, rule.Action.Kind, path+"/action/resource_id")
+			}
+			for j, id := range rule.Match.RuleSetIDs {
+				add(id, ir.KindRuleSet, path+"/match/rule_set_ids/"+strconv.Itoa(j))
+			}
+		}
+		if profile.Final.Type == ir.ResourceRef {
+			add(profile.Final.ResourceID, profile.Final.Kind, "/payload/final/resource_id")
+		}
+	}
+	if profile, ok := resource.Payload.(*ir.DNSProfile); ok {
+		for _, ref := range DNSReferences(*profile) {
+			ref.SourceID = resource.Metadata.ResourceID
+			ref.SourceKind = ir.KindDNSProfile
+			ref.SourceRevision = resource.Metadata.Revision
+			ref.Path = "/payload" + ref.Path
+			ref.Current = true
+			refs = append(refs, ref)
+		}
 	}
 	return refs, nil
 }

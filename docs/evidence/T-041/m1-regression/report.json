@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "suite": "runner-control",
+  "status": "passed",
+  "generated_at": "2026-09-10T07:41:03.139Z",
+  "source_sha256_before": "aeb8cb7d0f5e65b5f22766444d8589e0328d33348f3e88dc0eb10bb3380f0234",
+  "source_sha256_after": "aeb8cb7d0f5e65b5f22766444d8589e0328d33348f3e88dc0eb10bb3380f0234",
+  "test_binary_sha256": "771d57546be0a4eb8247470d76d2898f5d83a6d38acb225d6bf15318658ac592"
+}

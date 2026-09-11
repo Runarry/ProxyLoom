@@ -1,0 +1,50 @@
+socks-port: 1080
+bind-address: 127.0.0.1
+allow-lan: false
+mode: rule
+log-level: silent
+external-controller: ""
+ipv6: true
+geodata-mode: false
+geo-auto-update: false
+find-process-mode: "off"
+proxies:
+  - name: g_0c8ef298_m1_n
+    type: trojan
+    server: 192.0.2.10
+    port: 443
+    password: EXAMPLE_ONLY_A
+    network: tcp
+    sni: a.example.invalid
+    alpn:
+      - h2
+      - http/1.1
+    skip-cert-verify: false
+    udp: false
+rules:
+  - MATCH,g_0c8ef298
+proxy-groups:
+  - name: g_0c8ef298
+    type: load-balance
+    proxies:
+      - g_0c8ef298_m1_n
+    strategy: round-robin
+    url: https://health.example.invalid/check
+    interval: 1
+    timeout: 500
+    lazy: false
+    disable-udp: true
+    empty-fallback: REJECT
+dns:
+  enable: true
+  ipv6: true
+  enhanced-mode: redir-host
+  use-hosts: false
+  use-system-hosts: false
+  respect-rules: false
+  nameserver:
+    - system
+  default-nameserver:
+    - system
+  proxy-server-nameserver:
+    - system

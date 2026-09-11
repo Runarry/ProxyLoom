@@ -1,0 +1,324 @@
+=== RUN   TestM1NativeOutboundBudgetIncludesSelectorsAndBuiltins
+--- PASS: TestM1NativeOutboundBudgetIncludesSelectorsAndBuiltins (1.24s)
+=== RUN   TestM1NativeRuleBudgetIncludesFinalRoute
+--- PASS: TestM1NativeRuleBudgetIncludesFinalRoute (0.17s)
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/early.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/later.outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/later-port.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/later-needed.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/match.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/alternate.fixture.invalid:81
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/match.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/miss.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/reject.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/192.0.2.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/198.51.100.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/early.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/later.outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/later-port.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/later-needed.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/match.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/alternate.fixture.invalid:81
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/match.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/miss.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/reject.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/192.0.2.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/198.51.100.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/early.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/later.outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/later-port.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/later-needed.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/match.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/alternate.fixture.invalid:81
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/match.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/miss.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/reject.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/192.0.2.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/198.51.100.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/sing-box/resolve_for_ip_rules
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/early.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/later.outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/later-port.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/later-needed.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/match.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/alternate.fixture.invalid:81
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/match.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/miss.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/reject.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/192.0.2.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/198.51.100.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/early.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/later.outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/later-port.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/later-needed.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/match.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/alternate.fixture.invalid:81
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/match.fixture.invalid:82
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/miss.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/outside.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/reject.fixture.invalid:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/192.0.2.123:80
+=== RUN   TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/198.51.100.123:80
+--- PASS: TestM1NativeIPRoutingResolutionAndOrder (5.91s)
+    --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain (0.64s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/early.fixture.invalid:80 (0.01s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/later.outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/later-port.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/later-needed.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/match.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/alternate.fixture.invalid:81 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/match.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/miss.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/reject.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/192.0.2.123:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/preserve_domain/198.51.100.123:80 (0.00s)
+    --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules (1.07s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/early.fixture.invalid:80 (0.01s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/later.outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/later-port.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/later-needed.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/match.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/alternate.fixture.invalid:81 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/match.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/miss.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/reject.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/192.0.2.123:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/xray/resolve_for_ip_rules/198.51.100.123:80 (0.00s)
+    --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain (1.54s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/early.fixture.invalid:80 (0.01s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/later.outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/later-port.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/later-needed.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/match.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/alternate.fixture.invalid:81 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/match.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/miss.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/reject.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/192.0.2.123:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/preserve_domain/198.51.100.123:80 (0.00s)
+    --- PASS: TestM1NativeIPRoutingResolutionAndOrder/sing-box/resolve_for_ip_rules (0.51s)
+    --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain (1.11s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/early.fixture.invalid:80 (0.01s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/later.outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/later-port.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/later-needed.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/match.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/alternate.fixture.invalid:81 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/match.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/miss.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/reject.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/192.0.2.123:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/preserve_domain/198.51.100.123:80 (0.00s)
+    --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules (1.03s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/early.fixture.invalid:80 (0.01s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/later.outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/later-port.fixture.invalid:82 (0.01s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/later-needed.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/match.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/alternate.fixture.invalid:81 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/match.fixture.invalid:82 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/miss.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/outside.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/reject.fixture.invalid:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/192.0.2.123:80 (0.00s)
+        --- PASS: TestM1NativeIPRoutingResolutionAndOrder/mihomo/resolve_for_ip_rules/198.51.100.123:80 (0.00s)
+=== RUN   TestM1NativeSingBoxIPDNSFailureLimitation
+=== RUN   TestM1NativeSingBoxIPDNSFailureLimitation/preserve_domain_control
+=== RUN   TestM1NativeSingBoxIPDNSFailureLimitation/raw_resolve_counterexample
+--- PASS: TestM1NativeSingBoxIPDNSFailureLimitation (2.66s)
+    --- PASS: TestM1NativeSingBoxIPDNSFailureLimitation/preserve_domain_control (1.06s)
+    --- PASS: TestM1NativeSingBoxIPDNSFailureLimitation/raw_resolve_counterexample (1.02s)
+=== RUN   TestM1NativeRoutingWithoutIPRulesDoesNotResolve
+=== RUN   TestM1NativeRoutingWithoutIPRulesDoesNotResolve/xray
+=== RUN   TestM1NativeRoutingWithoutIPRulesDoesNotResolve/sing-box
+=== RUN   TestM1NativeRoutingWithoutIPRulesDoesNotResolve/mihomo
+--- PASS: TestM1NativeRoutingWithoutIPRulesDoesNotResolve (2.45s)
+    --- PASS: TestM1NativeRoutingWithoutIPRulesDoesNotResolve/xray (0.52s)
+    --- PASS: TestM1NativeRoutingWithoutIPRulesDoesNotResolve/sing-box (1.00s)
+    --- PASS: TestM1NativeRoutingWithoutIPRulesDoesNotResolve/mihomo (0.92s)
+=== RUN   TestM1NativeConfigMatrix
+=== RUN   TestM1NativeConfigMatrix/chain-bootstrap-local-xray.json
+=== RUN   TestM1NativeConfigMatrix/orchestration-xray.json
+=== RUN   TestM1NativeConfigMatrix/policy-fixed-xray.json
+=== RUN   TestM1NativeConfigMatrix/policy-round_robin-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-noauth-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-tls-noauth-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-aes-256-gcm-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-chacha20-ietf-poly1305-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-noauth-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-none-xray.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-xray.json
+=== RUN   TestM1NativeConfigMatrix/orchestration-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/policy-fixed-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/policy-manual_select-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-noauth-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-http-tls-noauth-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-aes-256-gcm-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-chacha20-ietf-poly1305-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-noauth-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-none-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-sing-box.json
+=== RUN   TestM1NativeConfigMatrix/orchestration-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-fixed-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-latency_best-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-manual_select-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/policy-round_robin-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-http-noauth-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-http-tls-noauth-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-aes-256-gcm-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-chacha20-ietf-poly1305-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-socks5-noauth-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vless-websocket-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-none-mihomo.yaml
+=== RUN   TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-mihomo.yaml
+--- PASS: TestM1NativeConfigMatrix (37.44s)
+    --- PASS: TestM1NativeConfigMatrix/chain-bootstrap-local-xray.json (0.28s)
+    --- PASS: TestM1NativeConfigMatrix/orchestration-xray.json (0.06s)
+    --- PASS: TestM1NativeConfigMatrix/policy-fixed-xray.json (0.07s)
+    --- PASS: TestM1NativeConfigMatrix/policy-round_robin-xray.json (0.06s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-none-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-noauth-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-tls-noauth-xray.json (0.35s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-aes-256-gcm-xray.json (0.27s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-chacha20-ietf-poly1305-xray.json (0.29s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-xray.json (0.07s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-noauth-xray.json (0.38s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-xray.json (0.29s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-xray.json (0.46s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-xray.json (0.33s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-none-xray.json (0.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-tls-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-none-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-xray.json (0.04s)
+    --- PASS: TestM1NativeConfigMatrix/orchestration-sing-box.json (0.99s)
+    --- PASS: TestM1NativeConfigMatrix/policy-fixed-sing-box.json (1.09s)
+    --- PASS: TestM1NativeConfigMatrix/policy-manual_select-sing-box.json (0.99s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-none-sing-box.json (0.92s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-sing-box.json (1.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-noauth-sing-box.json (1.01s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-tls-noauth-sing-box.json (1.06s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-aes-256-gcm-sing-box.json (1.19s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-chacha20-ietf-poly1305-sing-box.json (1.03s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-sing-box.json (1.02s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-sing-box.json (1.01s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-noauth-sing-box.json (1.05s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-sing-box.json (0.98s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-sing-box.json (1.10s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-sing-box.json (0.84s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-sing-box.json (0.77s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-sing-box.json (0.77s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-none-sing-box.json (0.86s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-tls-sing-box.json (0.87s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-sing-box.json (0.68s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-sing-box.json (0.10s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-none-sing-box.json (0.09s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-sing-box.json (0.08s)
+    --- PASS: TestM1NativeConfigMatrix/orchestration-mihomo.yaml (0.61s)
+    --- PASS: TestM1NativeConfigMatrix/policy-fixed-mihomo.yaml (0.49s)
+    --- PASS: TestM1NativeConfigMatrix/policy-latency_best-mihomo.yaml (0.57s)
+    --- PASS: TestM1NativeConfigMatrix/policy-manual_select-mihomo.yaml (0.50s)
+    --- PASS: TestM1NativeConfigMatrix/policy-round_robin-mihomo.yaml (0.60s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-none-mihomo.yaml (0.49s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-native_tcp-tls-mihomo.yaml (0.68s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-noauth-mihomo.yaml (0.51s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-http-tls-noauth-mihomo.yaml (0.61s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-aes-256-gcm-mihomo.yaml (0.48s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-chacha20-ietf-poly1305-mihomo.yaml (0.60s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-shadowsocks-native_tcp-none-mihomo.yaml (0.62s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-native_tcp-none-mihomo.yaml (0.60s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-socks5-noauth-mihomo.yaml (0.59s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-native_tcp-tls-mihomo.yaml (0.63s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-trojan-websocket-tls-mihomo.yaml (0.61s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-none-mihomo.yaml (0.68s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-reality-mihomo.yaml (0.53s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-native_tcp-tls-mihomo.yaml (0.57s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-none-mihomo.yaml (0.47s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vless-websocket-tls-mihomo.yaml (0.45s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-none-mihomo.yaml (0.42s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-native_tcp-tls-mihomo.yaml (0.23s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-none-mihomo.yaml (0.52s)
+    --- PASS: TestM1NativeConfigMatrix/protocol-vmess-websocket-tls-mihomo.yaml (0.25s)
+=== RUN   TestM1NativeManualSelectionAndFailure
+=== RUN   TestM1NativeManualSelectionAndFailure/sing-box
+=== RUN   TestM1NativeManualSelectionAndFailure/mihomo
+--- PASS: TestM1NativeManualSelectionAndFailure (3.85s)
+    --- PASS: TestM1NativeManualSelectionAndFailure/sing-box (1.12s)
+    --- PASS: TestM1NativeManualSelectionAndFailure/mihomo (2.73s)
+=== RUN   TestM1NativeRoundRobinAndAllUnavailable
+=== RUN   TestM1NativeRoundRobinAndAllUnavailable/xray
+=== RUN   TestM1NativeRoundRobinAndAllUnavailable/mihomo
+--- PASS: TestM1NativeRoundRobinAndAllUnavailable (4.46s)
+    --- PASS: TestM1NativeRoundRobinAndAllUnavailable/xray (1.50s)
+    --- PASS: TestM1NativeRoundRobinAndAllUnavailable/mihomo (2.95s)
+=== RUN   TestM1NativeRoutingANDOROrder
+=== RUN   TestM1NativeRoutingANDOROrder/xray
+=== RUN   TestM1NativeRoutingANDOROrder/sing-box
+=== RUN   TestM1NativeRoutingANDOROrder/mihomo
+--- PASS: TestM1NativeRoutingANDOROrder (2.89s)
+    --- PASS: TestM1NativeRoutingANDOROrder/xray (0.77s)
+    --- PASS: TestM1NativeRoutingANDOROrder/sing-box (1.40s)
+    --- PASS: TestM1NativeRoutingANDOROrder/mihomo (0.72s)
+=== RUN   TestM1NativeXrayLocalBootstrapBeforeChain
+--- PASS: TestM1NativeXrayLocalBootstrapBeforeChain (2.42s)
+=== RUN   TestM1NativeLatencyBestAndAllUnavailable
+--- PASS: TestM1NativeLatencyBestAndAllUnavailable (3.25s)
+PASS
+
