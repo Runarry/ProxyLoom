@@ -69,6 +69,8 @@ func (a MutationAudit) Validate() error {
 		return ErrInvalidInput
 	}
 	switch a.Action {
+	case "subscription_profile.create", "subscription_profile.update", "subscription_profile.delete", "subscription_profile.clone":
+		return nil
 	case AuditDNSProfileCreate, AuditDNSProfileUpdate, AuditDNSProfileDelete:
 		return nil
 	case AuditRoutingProfileCreate, AuditRoutingProfileUpdate, AuditRoutingProfileDelete, AuditRuleSetCreate, AuditRuleSetUpdate, AuditRuleSetDelete:

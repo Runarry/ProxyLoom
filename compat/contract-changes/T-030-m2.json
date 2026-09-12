@@ -1,0 +1,216 @@
+{
+  "schema_version": 1,
+  "task": "T-030",
+  "summary": "M2 subscription profiles, immutable compilation and publication, preview confirmation, independent tokens and read-only authorized downloads. Adds migration 15 and implements the existing planned API with clone, diagnostics and bounded safe previews.",
+  "documents": [
+    "docs/m2-publication-contract.md",
+    "docs/PLAN.md"
+  ],
+  "fixtures": [
+    "fixtures/api/subscription-create.json",
+    "fixtures/api/subscription-first-publish.json",
+    "fixtures/ir/positive/subscription-profile.json",
+    "fixtures/ir/negative/subscription-duplicate-target.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts",
+    "internal/storage/generated/models.go"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "6de554a5039efcc378a2a1e13ccb6110d5156ee39a004537f100d252e008d6a2",
+      "after_sha256": "22bc26061cd9f5eb9aab4ca23b279e520f28e50f009bb3769d3fbdcdab767d57",
+      "changes": [
+        {
+          "pointer": "/components/schemas/CompileBatch/properties/blocking_reasons",
+          "before_sha256": null,
+          "after_sha256": "dfc633d5ad50420af1ec8dca7decd9fd8ae3a55e8f1e2bacac4535c3c0d2f3ed"
+        },
+        {
+          "pointer": "/components/schemas/CompileOutputSummary/properties/changed",
+          "before_sha256": null,
+          "after_sha256": "7cb541e84f226754a46c21c79f131fa2898354e1242456e6fd1c162bce319553"
+        },
+        {
+          "pointer": "/components/schemas/CompileOutputSummary/properties/preview",
+          "before_sha256": null,
+          "after_sha256": "e76d5cefa50dd870a325015f1e12c6571b22cff35a807a47b7c013ecd1d42ab9"
+        },
+        {
+          "pointer": "/components/schemas/CompileOutputSummary/properties/preview_truncated",
+          "before_sha256": null,
+          "after_sha256": "7cb541e84f226754a46c21c79f131fa2898354e1242456e6fd1c162bce319553"
+        },
+        {
+          "pointer": "/components/schemas/CompileOutputSummary/properties/previous_preview",
+          "before_sha256": null,
+          "after_sha256": "7601f4f31ceb149e922443d49b6d87040957d909d91a15378f5641847d7f06eb"
+        },
+        {
+          "pointer": "/components/schemas/CompileOutputSummary/properties/previous_preview_truncated",
+          "before_sha256": null,
+          "after_sha256": "7cb541e84f226754a46c21c79f131fa2898354e1242456e6fd1c162bce319553"
+        },
+        {
+          "pointer": "/components/schemas/Diagnostic/properties/code/$ref",
+          "before_sha256": "e6186437d352bdc322b5cce1d10e6a5faf3edfd19f26c05b136b2b744bf949dc",
+          "after_sha256": "109bda8c13b173428505049fa3e2c1055610a79745a5f1329f75198b5de9407b"
+        },
+        {
+          "pointer": "/components/schemas/Diagnostic/properties/suggested_action",
+          "before_sha256": null,
+          "after_sha256": "41b92531f2537d034ad2a4e22bd7e9278ef35fd11dafd90eb44076c29d08786e"
+        },
+        {
+          "pointer": "/components/schemas/DiagnosticCode",
+          "before_sha256": null,
+          "after_sha256": "58bb53e2c3979f893eeb220ee57f6fcf1723e2a665539712921de21da9f1fa84"
+        },
+        {
+          "pointer": "/components/schemas/PublicationDependency/properties/required_by/maxItems",
+          "before_sha256": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf",
+          "after_sha256": "81a83544cf93c245178cbc1620030f1123f435af867c79d87135983c52ab39d9"
+        },
+        {
+          "pointer": "/components/schemas/SubscriptionCloneRequest",
+          "before_sha256": null,
+          "after_sha256": "b60e1ae4a5c8a50a6ed638fe825d99b135a58cd7d61caccce7295ad90c633347"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1compile-batches~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1cores/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1cores~1{id}~1disable/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}/delete/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}/patch/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1clone",
+          "before_sha256": null,
+          "after_sha256": "18c441cbed25e1cdea0ddeef487f3a1656da2f3c34b8d2a3d9bbf031c296fded"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1compile/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1publications/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1publish/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1rollback/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1tokens/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1subscriptions~1{id}~1tokens/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1api~1v1~1tokens~1{id}~1revoke/post/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        },
+        {
+          "pointer": "/paths/~1s~1{token}~1{target_key}/get/x-implementation-status",
+          "before_sha256": "7e086698c6c7c5c3e95bbdeadac1b89c9f35ae2b5bd8f61cd696350858ac9a14",
+          "after_sha256": "95fa40a4229bc6c4db1ea6185c8562769e7c592a8c80964d934f2a75ed5e7dcd"
+        }
+      ]
+    },
+    {
+      "path": "schemas/ir-v1.schema.json",
+      "before_sha256": "a8d8b5c9cdef0c0ec2973fbc372920ec9078a92117401370a7afe93f1d5c8c54",
+      "after_sha256": "3d2a64f3e22df67b202d44ffa9c125d74a7bf46e9bd25a92073e7a1f94c6f364",
+      "changes": [
+        {
+          "pointer": "/$defs/client_parameters",
+          "before_sha256": null,
+          "after_sha256": "f8a7380db194fb42b74b0578f8cdce8de6caf8669006c49205e166fec0cf6395"
+        },
+        {
+          "pointer": "/$defs/resource/allOf",
+          "before_sha256": "61604b004f6dac07b8d62d7f66f04aa23bb6806d5f4bda6549d62879bae14b0e",
+          "after_sha256": "2e82f83e9fb334e77a30ddc32c449113a04224df69bb287dd309eb338d3c4e81"
+        },
+        {
+          "pointer": "/$defs/subscription_members",
+          "before_sha256": null,
+          "after_sha256": "99c3276782c6995e8e13ff1df2aa7a4b99c5266ecd69e737174261ca5a349704"
+        },
+        {
+          "pointer": "/$defs/subscription_profile",
+          "before_sha256": null,
+          "after_sha256": "7ce2aafbc525ec9728a9d2703e41bdd7c390460fc55db7f62860a73612544cb2"
+        },
+        {
+          "pointer": "/$defs/subscription_target",
+          "before_sha256": null,
+          "after_sha256": "721e1aed8e2ccd88b1c73806bfecc953f052b0207c670b6dd89edcce84cc13d9"
+        },
+        {
+          "pointer": "/$defs/tag_selector",
+          "before_sha256": null,
+          "after_sha256": "37b316744ee67cb133e69ceb1a826881ae0e7412214f249950d0f8d8ca0897b4"
+        },
+        {
+          "pointer": "/oneOf",
+          "before_sha256": "68da85492f5a83537ec0e9ed4b13eda7224d7766de00f2753dd12739a3695bec",
+          "after_sha256": "1f80a0e214480b64f2b67cd547ffc873664124f450a3c0614da6d80ea3a73e4e"
+        }
+      ]
+    },
+    {
+      "path": "migrations/000015_subscriptions.up.sql",
+      "before_sha256": null,
+      "after_sha256": "ff5f37fd4dd613011b749b6118678078d9ff1eeec3e02501fbccec2e9f4ae8dd",
+      "changes": []
+    }
+  ]
+}

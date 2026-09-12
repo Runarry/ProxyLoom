@@ -252,7 +252,7 @@ func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.R
 		if err := t.checkDNSReferences(ctx, r); err != nil {
 			return ir.Resource{}, err
 		}
-		refs, err := catalog.ExtractReferences(r)
+		refs, err := t.resourceReferences(ctx, r)
 		if err != nil {
 			return ir.Resource{}, err
 		}
@@ -315,11 +315,11 @@ func (t *catalogTx) change(ctx context.Context, id ir.ID, expected int64, delete
 		if err != nil {
 			return ir.Resource{}, err
 		}
-		refs, err := catalog.ExtractReferences(next)
+		refs, err := t.resourceReferences(ctx, next)
 		if err != nil {
 			return ir.Resource{}, err
 		}
-		previousRefs, err := catalog.ExtractReferences(old)
+		previousRefs, err := t.resourceReferences(ctx, old)
 		if err != nil {
 			return ir.Resource{}, err
 		}

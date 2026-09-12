@@ -20,6 +20,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/subscriptions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,6 +44,7 @@ type Dependencies struct {
 	Imports        imports.Repository
 	Jobs           jobs.ManagementRepository
 	JobCursor      *apicontract.CursorCodec
+	Subscriptions  subscriptions.Repository
 }
 
 type Handler struct {
@@ -129,7 +131,7 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 			root.Close()
 			return nil, err
 		}
-		if err := mountExports(router, authentication, *dependencies.Nodes); err != nil {
+		if err := mountExports(router, authentication, *dependencies.Nodes, dependencies.Subscriptions); err != nil {
 			root.Close()
 			return nil, err
 		}
@@ -153,6 +155,16 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 			return nil, errors.New("job_cursor_required")
 		}
 		if err := mountJobs(router, authentication, dependencies.Jobs, dependencies.JobCursor); err != nil {
+			root.Close()
+			return nil, err
+		}
+	}
+	if dependencies.Subscriptions != nil {
+		if dependencies.Nodes == nil {
+			root.Close()
+			return nil, errors.New("subscription_catalog_required")
+		}
+		if err := mountSubscriptions(router, authentication, *dependencies.Nodes, dependencies.Subscriptions); err != nil {
 			root.Close()
 			return nil, err
 		}
@@ -311,7 +323,7 @@ func safeAccessLog(logger *slog.Logger) gin.HandlerFunc {
 
 func safeRegisteredRoute(route string) bool {
 	switch route {
-	case "/healthz", "/readyz", "/api/v1/setup", "/api/v1/auth/login",
+	case "/s/:token/:target_key", "/healthz", "/readyz", "/api/v1/setup", "/api/v1/auth/login",
 		"/api/v1/auth/logout", "/api/v1/auth/me", "/api/v1/auth/reauth":
 		return true
 	default:

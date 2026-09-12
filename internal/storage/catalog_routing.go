@@ -16,7 +16,7 @@ import (
 
 func typedCatalogKind(kind ir.ResourceKind) bool {
 	switch kind {
-	case ir.KindNode, ir.KindChain, ir.KindPolicyGroup, ir.KindRoutingProfile, ir.KindRuleSet, ir.KindDNSProfile, ir.KindClientPreset:
+	case ir.KindNode, ir.KindChain, ir.KindPolicyGroup, ir.KindRoutingProfile, ir.KindRuleSet, ir.KindDNSProfile, ir.KindClientPreset, ir.KindSubscriptionProfile:
 		return true
 	}
 	return false

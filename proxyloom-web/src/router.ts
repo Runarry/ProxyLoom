@@ -35,6 +35,10 @@ export const router = createRouter({
         { path: `${path}/:id/edit`, name: `${kind}-edit`, component: () => import('./views/NetworkEditorPage.vue'), props: { kind } },
       ]
     }),
+    { path: '/subscriptions', name: 'subscriptions', component: () => import('./views/SubscriptionsPage.vue') },
+    { path: '/subscriptions/new', name: 'subscription-new', component: () => import('./views/SubscriptionEditorPage.vue') },
+    { path: '/subscriptions/:id', name: 'subscription-detail', component: () => import('./views/SubscriptionDetailPage.vue') },
+    { path: '/subscriptions/:id/edit', name: 'subscription-edit', component: () => import('./views/SubscriptionEditorPage.vue') },
     { path: '/client-presets', name: 'client-presets', component: () => import('./views/ClientPresetsPage.vue') },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('./views/NotFoundPage.vue'), meta: { public: true } },
   ],

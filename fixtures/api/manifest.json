@@ -84,5 +84,15 @@
     "file": "auth-session.json",
     "schema": "SessionResponse",
     "valid": true
+  },
+  {
+    "file": "subscription-create.json",
+    "schema": "SubscriptionCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "subscription-first-publish.json",
+    "schema": "PublishRequest",
+    "valid": true
   }
 ]

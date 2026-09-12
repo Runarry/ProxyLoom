@@ -144,6 +144,8 @@ func payloadKind(payload ir.ResourcePayload) ir.ResourceKind {
 		return ir.KindRuleSet
 	case *ir.DNSProfile:
 		return ir.KindDNSProfile
+	case *ir.SubscriptionProfile:
+		return ir.KindSubscriptionProfile
 	case *ir.ClientPreset:
 		return ir.KindClientPreset
 	}
@@ -199,6 +201,16 @@ func ExtractReferences(resource ir.Resource) ([]Reference, error) {
 			ref.Path = "/payload" + ref.Path
 			ref.Current = true
 			refs = append(refs, ref)
+		}
+	}
+	if p, ok := resource.Payload.(*ir.SubscriptionProfile); ok {
+		add := func(id ir.ID, kind ir.ResourceKind, path string) {
+			refs = append(refs, Reference{SourceID: resource.Metadata.ResourceID, SourceKind: ir.KindSubscriptionProfile, SourceRevision: resource.Metadata.Revision, TargetID: id, ExpectedKind: kind, Path: "/payload" + path, Current: true})
+		}
+		add(p.RoutingProfileID, ir.KindRoutingProfile, "/routing_profile_id")
+		add(p.DNSProfileID, ir.KindDNSProfile, "/dns_profile_id")
+		for i, t := range p.Targets {
+			add(t.ClientPresetID, ir.KindClientPreset, "/targets/"+strconv.Itoa(i)+"/client_preset_id")
 		}
 	}
 	return refs, nil

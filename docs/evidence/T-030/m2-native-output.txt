@@ -1,0 +1,9 @@
+=== RUN   TestPostgresM2RealPublication
+    m2_postgres_test.go:196: PASS: VMess cipher auto, three final configuration checks
+    m2_postgres_test.go:196: PASS: VMess cipher aes-128-gcm, three final configuration checks
+    m2_postgres_test.go:196: PASS: VMess cipher chacha20-poly1305, three final configuration checks
+    m2_postgres_test.go:196: PASS: VMess cipher none, three final configuration checks
+    m2_postgres_test.go:196: PASS: VMess cipher zero, three final configuration checks
+    m2_postgres_test.go:198: PASS: frozen profile -> persistent compile -> mTLS three locked kernels -> confirmed atomic publication -> exact-byte downloads -> committed revocation
+--- PASS: TestPostgresM2RealPublication (62.16s)
+PASS

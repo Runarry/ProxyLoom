@@ -144,6 +144,18 @@
       "definition": "frozen_input",
       "schema_valid": true,
       "go_valid": false
+    },
+    {
+      "name": "positive/subscription-profile.json",
+      "definition": "subscription_profile",
+      "schema_valid": true,
+      "go_valid": true
+    },
+    {
+      "name": "negative/subscription-duplicate-target.json",
+      "definition": "subscription_profile",
+      "schema_valid": true,
+      "go_valid": false
     }
   ]
 }

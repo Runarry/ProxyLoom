@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "run_id": "dffa88ce-26ce-46c3-81b2-dd1836932fa8",
+  "mode": "browser",
+  "started_at": "2026-09-12T07:26:30.887Z",
+  "result": "fail",
+  "steps": [
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "browser",
+      "result": "fail"
+    },
+    {
+      "name": "browser-native-server",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "test_binary_sha256": "016953c260289db80cff5c7d70be4f78b97c4316f266e7efcc77bec0d79c114e",
+  "error": "AssertionError [ERR_ASSERTION]: browser_failed\n\n1 !== 0\n",
+  "ended_at": "2026-09-12T07:27:07.666Z"
+}

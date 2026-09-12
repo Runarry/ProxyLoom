@@ -109,8 +109,16 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	if err != nil {
 		return errors.New("cursor_configuration_invalid")
 	}
+	publicationStore, err := storage.NewSubscriptions(catalogStore, jobStore, keys.TokenPepper)
+	if err != nil {
+		return errors.New("publication_configuration_invalid")
+	}
+	defer publicationStore.Close()
+	if err = publicationStore.EnsureCoreBuilds(ctx); err != nil {
+		return errors.New("core_build_initialization_failed")
+	}
 	worker, err := jobs.NewWorker(jobStore, jobs.WorkerConfig{
-		WorkerID: jobs.NewID(), Handlers: map[jobs.Type]jobs.Handler{jobs.ImportParse: importStore.HandleParse, jobs.SourceRefresh: sourceStore.HandleRefresh},
+		WorkerID: jobs.NewID(), Handlers: map[jobs.Type]jobs.Handler{jobs.ImportParse: importStore.HandleParse, jobs.SourceRefresh: sourceStore.HandleRefresh, jobs.Compile: publicationStore.HandleCompile},
 	})
 	if err != nil {
 		return errors.New("worker_configuration_invalid")
@@ -146,6 +154,7 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		Identity: identities, PublicURL: cfg.PublicURL, Development: cfg.Development,
 		TrustedProxies: cfg.TrustedProxies(),
 		Nodes:          &server.NodeDependencies{Repository: catalogStore, Cursor: cursor},
+		Subscriptions:  publicationStore,
 		Sources:        sourceStore, Imports: importStore, Jobs: jobStore, JobCursor: cursor,
 	}, logger)
 	if err != nil {
@@ -157,10 +166,11 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	finished := make(chan error, 5)
-	count := 4
+	finished := make(chan error, 6)
+	count := 5
 	go func() { finished <- server.Serve(runCtx, cfg.HTTPAddr, handler, logger) }()
 	go func() { finished <- worker.Run(runCtx) }()
+	go func() { finished <- publicationStore.Run(runCtx) }()
 	go func() { finished <- expireImports(runCtx, importStore, logger) }()
 	go func() { finished <- scheduleSources(runCtx, sourceStore, logger) }()
 	if internalListener != nil {

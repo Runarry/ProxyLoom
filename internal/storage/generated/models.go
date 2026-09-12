@@ -8,6 +8,65 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type CompileBatch struct {
+	ID                pgtype.UUID
+	ScopeID           pgtype.UUID
+	ProfileID         pgtype.UUID
+	ProfileRevision   int64
+	CatalogRevision   int64
+	AuthEpoch         int64
+	Envelope          []byte
+	InputHmac         []byte
+	Revision          int64
+	State             string
+	Diagnostics       []byte
+	PreviewHash       pgtype.Text
+	BasePublicationID pgtype.UUID
+	CompileJobID      pgtype.UUID
+	CreatedAt         pgtype.Timestamptz
+}
+
+type CompileBatchWrapping struct {
+	ScopeID     pgtype.UUID
+	BatchID     pgtype.UUID
+	Wrapping    []byte
+	WrapVersion int64
+}
+
+type CompileOutput struct {
+	ArtifactID      pgtype.UUID
+	ScopeID         pgtype.UUID
+	BatchID         pgtype.UUID
+	TargetKey       string
+	CoreBuildID     pgtype.UUID
+	Descriptor      []byte
+	Envelope        []byte
+	ContentHmac     []byte
+	ValidationJobID pgtype.UUID
+}
+
+type CompileOutputWrapping struct {
+	ArtifactID  pgtype.UUID
+	Wrapping    []byte
+	WrapVersion int64
+}
+
+type CompilePreviewView struct {
+	ScopeID     pgtype.UUID
+	ActorID     pgtype.UUID
+	BatchID     pgtype.UUID
+	PreviewHash string
+}
+
+type CoreBuild struct {
+	ID           pgtype.UUID
+	Manifest     []byte
+	Enabled      bool
+	Revision     int64
+	RegisteredAt pgtype.Timestamptz
+	DisabledAt   pgtype.Timestamptz
+}
+
 type IdempotencyKey struct {
 	PrincipalID      pgtype.UUID
 	RouteKey         string
@@ -188,6 +247,40 @@ type ProxyloomSchemaMigration struct {
 	AppliedAt pgtype.Timestamptz
 }
 
+type Publication struct {
+	ID                  pgtype.UUID
+	ScopeID             pgtype.UUID
+	ProfileID           pgtype.UUID
+	Generation          int64
+	BatchID             pgtype.UUID
+	SourcePublicationID pgtype.UUID
+	CreatedBy           pgtype.UUID
+	CreatedAt           pgtype.Timestamptz
+}
+
+type PublicationAuditEvent struct {
+	ID        int64
+	ScopeID   pgtype.UUID
+	ActorID   pgtype.UUID
+	ObjectID  pgtype.UUID
+	Action    string
+	CreatedAt pgtype.Timestamptz
+}
+
+type PublicationDependency struct {
+	PublicationID pgtype.UUID
+	ScopeID       pgtype.UUID
+	ResourceID    pgtype.UUID
+	Revision      int64
+	SecurityEpoch int64
+}
+
+type PublicationHead struct {
+	ScopeID       pgtype.UUID
+	ProfileID     pgtype.UUID
+	PublicationID pgtype.UUID
+}
+
 type Resource struct {
 	ID            pgtype.UUID
 	ScopeID       pgtype.UUID
@@ -303,6 +396,30 @@ type SourceSnapshot struct {
 	ContentType    pgtype.Text
 	DecodedBytes   int32
 	State          string
+	CreatedAt      pgtype.Timestamptz
+}
+
+type SubscriptionOperation struct {
+	ScopeID     pgtype.UUID
+	ActorID     pgtype.UUID
+	Route       string
+	Key         string
+	RequestHmac []byte
+	OperationID pgtype.UUID
+}
+
+type SubscriptionToken struct {
+	ID             pgtype.UUID
+	ScopeID        pgtype.UUID
+	ProfileID      pgtype.UUID
+	PublicID       string
+	SecretDigest   []byte
+	Name           string
+	AllowedTargets []string
+	AuthEpoch      int64
+	Revision       int64
+	ExpiresAt      pgtype.Timestamptz
+	RevokedAt      pgtype.Timestamptz
 	CreatedAt      pgtype.Timestamptz
 }
 

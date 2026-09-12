@@ -18,46 +18,52 @@ import (
 type Code string
 
 const (
-	MalformedRequest     Code = "MALFORMED_REQUEST"
-	UnknownField         Code = "UNKNOWN_FIELD"
-	DuplicateField       Code = "DUPLICATE_FIELD"
-	AuthRequired         Code = "AUTH_REQUIRED"
-	PermissionDenied     Code = "PERMISSION_DENIED"
-	ReauthRequired       Code = "REAUTH_REQUIRED"
-	ResourceNotFound     Code = "RESOURCE_NOT_FOUND"
-	StateConflict        Code = "STATE_CONFLICT"
-	IdempotencyConflict  Code = "IDEMPOTENCY_CONFLICT"
-	LeaseLost            Code = "LEASE_LOST"
-	RevisionMismatch     Code = "REVISION_MISMATCH"
-	InputLimitExceeded   Code = "INPUT_LIMIT_EXCEEDED"
-	ValidationFailed     Code = "VALIDATION_FAILED"
-	PreconditionRequired Code = "PRECONDITION_REQUIRED"
-	RateLimited          Code = "RATE_LIMITED"
-	ServiceUnavailable   Code = "SERVICE_UNAVAILABLE"
-	InternalError        Code = "INTERNAL_ERROR"
+	CompileObsolete             Code = "COMPILE_OBSOLETE"
+	PublicationBlocked          Code = "PUBLICATION_BLOCKED"
+	PreviewConfirmationRequired Code = "PUBLICATION_CONFIRMATION_REQUIRED"
+	MalformedRequest            Code = "MALFORMED_REQUEST"
+	UnknownField                Code = "UNKNOWN_FIELD"
+	DuplicateField              Code = "DUPLICATE_FIELD"
+	AuthRequired                Code = "AUTH_REQUIRED"
+	PermissionDenied            Code = "PERMISSION_DENIED"
+	ReauthRequired              Code = "REAUTH_REQUIRED"
+	ResourceNotFound            Code = "RESOURCE_NOT_FOUND"
+	StateConflict               Code = "STATE_CONFLICT"
+	IdempotencyConflict         Code = "IDEMPOTENCY_CONFLICT"
+	LeaseLost                   Code = "LEASE_LOST"
+	RevisionMismatch            Code = "REVISION_MISMATCH"
+	InputLimitExceeded          Code = "INPUT_LIMIT_EXCEEDED"
+	ValidationFailed            Code = "VALIDATION_FAILED"
+	PreconditionRequired        Code = "PRECONDITION_REQUIRED"
+	RateLimited                 Code = "RATE_LIMITED"
+	ServiceUnavailable          Code = "SERVICE_UNAVAILABLE"
+	InternalError               Code = "INTERNAL_ERROR"
 )
 
 var errorDefinitions = map[Code]struct {
 	status  int
 	message string
 }{
-	MalformedRequest:     {400, "The request does not match the API contract."},
-	UnknownField:         {400, "A field is not part of the API contract."},
-	DuplicateField:       {400, "Duplicate object fields are forbidden."},
-	AuthRequired:         {401, "Authentication is required."},
-	PermissionDenied:     {403, "The operation is not permitted."},
-	ReauthRequired:       {403, "Recent authentication is required."},
-	ResourceNotFound:     {404, "The resource was not found."},
-	StateConflict:        {409, "The operation conflicts with the current state."},
-	IdempotencyConflict:  {409, "The idempotency key was used for a different request."},
-	LeaseLost:            {409, "The job lease is no longer valid."},
-	RevisionMismatch:     {412, "The resource revision has changed."},
-	InputLimitExceeded:   {413, "The request exceeds the input limit."},
-	ValidationFailed:     {422, "The merged resource is not valid."},
-	PreconditionRequired: {428, "A resource revision precondition is required."},
-	RateLimited:          {429, "The request exceeds the permitted budget."},
-	ServiceUnavailable:   {503, "The operation is temporarily unavailable."},
-	InternalError:        {500, "The operation could not be completed."},
+	CompileObsolete:             {409, "The compiled input is obsolete."},
+	PublicationBlocked:          {422, "The publication is blocked by its current safety state."},
+	PreviewConfirmationRequired: {409, "View and confirm this exact publication preview."},
+	MalformedRequest:            {400, "The request does not match the API contract."},
+	UnknownField:                {400, "A field is not part of the API contract."},
+	DuplicateField:              {400, "Duplicate object fields are forbidden."},
+	AuthRequired:                {401, "Authentication is required."},
+	PermissionDenied:            {403, "The operation is not permitted."},
+	ReauthRequired:              {403, "Recent authentication is required."},
+	ResourceNotFound:            {404, "The resource was not found."},
+	StateConflict:               {409, "The operation conflicts with the current state."},
+	IdempotencyConflict:         {409, "The idempotency key was used for a different request."},
+	LeaseLost:                   {409, "The job lease is no longer valid."},
+	RevisionMismatch:            {412, "The resource revision has changed."},
+	InputLimitExceeded:          {413, "The request exceeds the input limit."},
+	ValidationFailed:            {422, "The merged resource is not valid."},
+	PreconditionRequired:        {428, "A resource revision precondition is required."},
+	RateLimited:                 {429, "The request exceeds the permitted budget."},
+	ServiceUnavailable:          {503, "The operation is temporarily unavailable."},
+	InternalError:               {500, "The operation could not be completed."},
 }
 
 type Detail struct {

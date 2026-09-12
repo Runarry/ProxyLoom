@@ -25,6 +25,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/server"
+	"github.com/Runarry/ProxyLoom/internal/subscriptions"
 )
 
 const nodeAcceptanceOrigin = "http://127.0.0.1:8080"
@@ -39,7 +40,7 @@ type nodeHTTPAcceptance struct {
 	actor  ir.ID
 }
 
-func newNodeHTTPAcceptance(t *testing.T) *nodeHTTPAcceptance {
+func newNodeHTTPAcceptance(t *testing.T, subscriptionsEnabled ...bool) *nodeHTTPAcceptance {
 	t.Helper()
 	env := newPostgres(t, true)
 	setup := base64.RawURLEncoding.EncodeToString(bytes.Repeat([]byte{0x53}, 32))
@@ -59,8 +60,27 @@ func newNodeHTTPAcceptance(t *testing.T) *nodeHTTPAcceptance {
 	if os.WriteFile(filepath.Join(web, "index.html"), []byte("<html>synthetic</html>"), 0600) != nil {
 		t.Fatal("node acceptance static fixture failed")
 	}
+	var publications subscriptions.Repository
+	if len(subscriptionsEnabled) > 0 && subscriptionsEnabled[0] {
+		jobStore, e := NewJobs(env.runtime, env.box)
+		if e != nil {
+			t.Fatal(e)
+		}
+		publicationStore, e := NewSubscriptions(env.store, jobStore, bytes.Repeat([]byte{0x71}, 32))
+		if e != nil {
+			t.Fatal(e)
+		}
+		publications = publicationStore
+		t.Cleanup(publicationStore.Close)
+		if e = publicationStore.EnsureCoreBuilds(env.ctx); e != nil {
+			t.Fatal(e)
+		}
+		if e = env.store.EnsureBuiltinClientPresets(env.ctx, env.scope); e != nil {
+			t.Fatal(e)
+		}
+	}
 	handler, err := server.NewHandler(web, server.Dependencies{Database: env.runtime.Ping, Secrets: func() error { return nil },
-		Identity: service, PublicURL: nodeAcceptanceOrigin, Development: true,
+		Identity: service, PublicURL: nodeAcceptanceOrigin, Development: true, Subscriptions: publications,
 		Nodes: &server.NodeDependencies{Repository: env.store, Cursor: codec}}, slog.New(slog.NewJSONHandler(io.Discard, nil)))
 	if err != nil {
 		t.Fatal("node acceptance handler construction failed")

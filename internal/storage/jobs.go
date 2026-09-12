@@ -143,7 +143,7 @@ func (s *Jobs) Get(ctx context.Context, scope, id ir.ID) (jobs.Job, error) {
 }
 
 func (s *Jobs) Claim(ctx context.Context, input jobs.ClaimInput) (*jobs.Lease, error) {
-	if input.WorkerID.Validate() != nil || len(input.Types) < 1 || len(input.Types) > 2 {
+	if input.WorkerID.Validate() != nil || len(input.Types) < 1 || len(input.Types) > 3 {
 		return nil, jobs.ErrInvalidInput
 	}
 	kinds := make([]string, 0, len(input.Types))

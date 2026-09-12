@@ -117,6 +117,10 @@ func TestSchemaFixturesMatchTypedGo(t *testing.T) {
 			}
 			var value interface{ Validate() error }
 			switch test.Definition {
+			case "subscription_profile":
+				var next ir.SubscriptionProfile
+				err = json.Unmarshal(data, &next)
+				value = next
 			case "node":
 				next, decodeErr := ir.DecodeNode(data)
 				value, err = next, decodeErr

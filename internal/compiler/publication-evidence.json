@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "adapter_version": "0.2.0-m1-orchestration",
+  "platform": "linux",
+  "architecture": "amd64",
+  "report": "docs/evidence/T-029/native-config-matrix.json",
+  "report_sha256": "624e9013ce51290bdb5a81fd8a1e224f6cf33f6672e158d1ce1a6f13887040c4",
+  "builds": [
+    {
+      "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "fixtures": [
+        "chain-bootstrap-local-xray.json",
+        "orchestration-xray.json",
+        "policy-fixed-xray.json",
+        "policy-round_robin-xray.json",
+        "protocol-http-native_tcp-none-xray.json",
+        "protocol-http-native_tcp-tls-xray.json",
+        "protocol-http-noauth-xray.json",
+        "protocol-http-tls-noauth-xray.json",
+        "protocol-shadowsocks-aes-256-gcm-xray.json",
+        "protocol-shadowsocks-chacha20-ietf-poly1305-xray.json",
+        "protocol-shadowsocks-native_tcp-none-xray.json",
+        "protocol-socks5-native_tcp-none-xray.json",
+        "protocol-socks5-noauth-xray.json",
+        "protocol-trojan-native_tcp-tls-xray.json",
+        "protocol-trojan-websocket-tls-xray.json",
+        "protocol-vless-native_tcp-none-xray.json",
+        "protocol-vless-native_tcp-reality-xray.json",
+        "protocol-vless-native_tcp-tls-xray.json",
+        "protocol-vless-websocket-none-xray.json",
+        "protocol-vless-websocket-tls-xray.json",
+        "protocol-vmess-native_tcp-none-xray.json",
+        "protocol-vmess-native_tcp-tls-xray.json",
+        "protocol-vmess-websocket-none-xray.json",
+        "protocol-vmess-websocket-tls-xray.json"
+      ]
+    },
+    {
+      "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "fixtures": [
+        "orchestration-sing-box.json",
+        "policy-fixed-sing-box.json",
+        "policy-manual_select-sing-box.json",
+        "protocol-http-native_tcp-none-sing-box.json",
+        "protocol-http-native_tcp-tls-sing-box.json",
+        "protocol-http-noauth-sing-box.json",
+        "protocol-http-tls-noauth-sing-box.json",
+        "protocol-shadowsocks-aes-256-gcm-sing-box.json",
+        "protocol-shadowsocks-chacha20-ietf-poly1305-sing-box.json",
+        "protocol-shadowsocks-native_tcp-none-sing-box.json",
+        "protocol-socks5-native_tcp-none-sing-box.json",
+        "protocol-socks5-noauth-sing-box.json",
+        "protocol-trojan-native_tcp-tls-sing-box.json",
+        "protocol-trojan-websocket-tls-sing-box.json",
+        "protocol-vless-native_tcp-none-sing-box.json",
+        "protocol-vless-native_tcp-reality-sing-box.json",
+        "protocol-vless-native_tcp-tls-sing-box.json",
+        "protocol-vless-websocket-none-sing-box.json",
+        "protocol-vless-websocket-tls-sing-box.json",
+        "protocol-vmess-native_tcp-none-sing-box.json",
+        "protocol-vmess-native_tcp-tls-sing-box.json",
+        "protocol-vmess-websocket-none-sing-box.json",
+        "protocol-vmess-websocket-tls-sing-box.json"
+      ]
+    },
+    {
+      "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "fixtures": [
+        "orchestration-mihomo.yaml",
+        "policy-fixed-mihomo.yaml",
+        "policy-latency_best-mihomo.yaml",
+        "policy-manual_select-mihomo.yaml",
+        "policy-round_robin-mihomo.yaml",
+        "protocol-http-native_tcp-none-mihomo.yaml",
+        "protocol-http-native_tcp-tls-mihomo.yaml",
+        "protocol-http-noauth-mihomo.yaml",
+        "protocol-http-tls-noauth-mihomo.yaml",
+        "protocol-shadowsocks-aes-256-gcm-mihomo.yaml",
+        "protocol-shadowsocks-chacha20-ietf-poly1305-mihomo.yaml",
+        "protocol-shadowsocks-native_tcp-none-mihomo.yaml",
+        "protocol-socks5-native_tcp-none-mihomo.yaml",
+        "protocol-socks5-noauth-mihomo.yaml",
+        "protocol-trojan-native_tcp-tls-mihomo.yaml",
+        "protocol-trojan-websocket-tls-mihomo.yaml",
+        "protocol-vless-native_tcp-none-mihomo.yaml",
+        "protocol-vless-native_tcp-reality-mihomo.yaml",
+        "protocol-vless-native_tcp-tls-mihomo.yaml",
+        "protocol-vless-websocket-none-mihomo.yaml",
+        "protocol-vless-websocket-tls-mihomo.yaml",
+        "protocol-vmess-native_tcp-none-mihomo.yaml",
+        "protocol-vmess-native_tcp-tls-mihomo.yaml",
+        "protocol-vmess-websocket-none-mihomo.yaml",
+        "protocol-vmess-websocket-tls-mihomo.yaml"
+      ]
+    }
+  ],
+  "vmess_ciphers": [
+    "auto",
+    "aes-128-gcm",
+    "chacha20-poly1305",
+    "none",
+    "zero"
+  ],
+  "vmess_evidence": {
+    "suite": "m2-vmess-ciphers-v1",
+    "report": "docs/evidence/T-030/m2-native-report.json",
+    "report_sha256": "9b29133fd66c749c0df3551e559fc6e0b793c9e3c305c688e3c2406257c984b2"
+  }
+}

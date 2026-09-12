@@ -2,9 +2,9 @@
 
 自托管的 Xray、sing-box、Mihomo 订阅管理与测试平台。本窗口接入六类节点管理、本地 URI／文本／Base64 导入、登录与管理界面、持久任务及独立 mTLS Runner 配置校验。逐项验收状态与限制见 `docs/PLAN.md` 和 `docs/evidence/`，实现存在不代表所有阶段门槛完成。
 
-来源管理、刷新差异确认、人工覆盖恢复、节点 URI／Base64 导出及编排管理已接入。两跳链、策略组、路由、内联规则集与 DNS 提供类型化 API 和管理界面；系统预设可只读查看。六类节点可解析／保存与内核兼容分别展示；未经对应真实执行验证的组合仍为 `unverified`。订阅发布及网络测速按后续阶段推进。新增契约见 `docs/m1-orchestration-contract.md`。
+来源管理、刷新差异确认、人工覆盖恢复、节点 URI／Base64 导出及编排管理已接入。两跳链、策略组、路由、内联规则集与 DNS 提供类型化 API 和管理界面；系统预设可只读查看。六类节点可解析／保存与内核兼容分别展示；未经对应真实执行验证的组合仍为 `unverified`。订阅发布闭环已完成 M2 联验；网络测速按 M3 推进。新增契约见 `docs/m1-orchestration-contract.md`。
 
-2026-09-10：M1／G1 已按用户批准范围收口，见 [G1 验收与范围决定](docs/reviews/2026-09-10-g1-decision.md)。sing-box 1.14.0 的 `resolve_for_ip_rules` 含有效 IP 条件时明确拒绝编译，保留 `preserve_domain`，不自动降级；Xray／Mihomo 的两种模式保持。M2 未启动，桌面／移动及 arm64 未验证。
+2026-09-10：M1／G1 已按用户批准范围收口，见 [G1 验收与范围决定](docs/reviews/2026-09-10-g1-decision.md)。sing-box 1.14.0 的 `resolve_for_ip_rules` 含有效 IP 条件时明确拒绝编译，保留 `preserve_domain`，不自动降级；Xray／Mihomo 的两种模式保持。2026-09-12：M2／G2 已按已验内核与预设范围收口，10 项任务完成，见 [M2 发布契约](docs/m2-publication-contract.md)与 [G2 验收决定](docs/reviews/2026-09-12-g2-decision.md)。桌面／移动客户端导入及 arm64 未验证。
 
 基座提交 `1ff4c09` 的远端运行 [34201742618](https://github.com/Runarry/ProxyLoom/actions/runs/34201742618) 已通过；基座收口见 `docs/reviews/2026-09-08-m1-foundation-closeout.md`。该运行不代表本窗新增代码已在远端执行。
 

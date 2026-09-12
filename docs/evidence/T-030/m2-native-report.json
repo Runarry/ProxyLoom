@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "run_id": "2d9c7ad1-e0d5-433c-8ab2-eef2b4f678d8",
+  "mode": "all",
+  "started_at": "2026-09-12T07:54:50.282Z",
+  "result": "pass",
+  "steps": [
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "postgres",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "native-publication",
+      "result": "pass"
+    },
+    {
+      "name": "browser",
+      "result": "pass"
+    },
+    {
+      "name": "browser-native-server",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "test_binary_sha256": "99cab873c1474115a1e49a21f21c1514c4ebea32699d9c2ec1a2f70b4cf4efbe",
+  "ended_at": "2026-09-12T07:56:44.969Z"
+}

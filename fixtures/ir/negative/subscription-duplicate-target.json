@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "members": {
+    "include_ids": [
+      "11111111-1111-4111-8111-111111111111"
+    ],
+    "exclude_ids": [],
+    "selector": {
+      "all_tags": [],
+      "any_tags": [],
+      "none_tags": []
+    }
+  },
+  "routing_profile_id": "33333333-3333-4333-8333-333333333333",
+  "dns_profile_id": "44444444-4444-4444-8444-444444444444",
+  "targets": [
+    {
+      "key": "xray-default",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "client_preset_id": "66666666-6666-4666-8666-666666666666",
+      "format": "xray_json",
+      "policy_overrides": []
+    },
+    {
+      "key": "xray-default",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "client_preset_id": "66666666-6666-4666-8666-666666666666",
+      "format": "xray_json",
+      "policy_overrides": []
+    }
+  ],
+  "publish_policy": "strict_all_targets"
+}

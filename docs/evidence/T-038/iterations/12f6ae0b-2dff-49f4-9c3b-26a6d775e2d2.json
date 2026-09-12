@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "run_id": "12f6ae0b-2dff-49f4-9c3b-26a6d775e2d2",
+  "mode": "all",
+  "started_at": "2026-09-12T08:02:13.255Z",
+  "result": "fail",
+  "steps": [
+    {
+      "name": "publication-evidence-integrity",
+      "result": "pass"
+    },
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "postgres",
+      "result": "fail"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "source_manifest_sha256": "ca546b98d1375192953f702be78d36e9b445e74bb0f7ae985238388589ffbc4d",
+  "core_lock_sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18",
+  "error": "AssertionError [ERR_ASSERTION]: postgres_failed\n\n1 !== 0\n",
+  "ended_at": "2026-09-12T08:02:35.043Z"
+}

@@ -11,6 +11,7 @@ const messages: Record<string, string> = {
   PRECONDITION_REQUIRED: '缺少修订前置条件，请重新读取资源。',
   VALIDATION_FAILED: '内容不符合要求，请检查标出的字段。', MALFORMED_REQUEST: '请求格式不正确。',
   INPUT_LIMIT_EXCEEDED: '输入超过服务端限制，请缩小输入后重试。',
+  COMPILE_OBSOLETE: '输入或发布版本已变化，请重新编译并检查差异。', PUBLICATION_BLOCKED: '当前依赖或构建状态阻止发布。', PUBLICATION_CONFIRMATION_REQUIRED: '请查看并确认本次完整预览。',
   STATE_CONFLICT: '当前状态不允许此操作，请刷新状态后检查。',
   IDEMPOTENCY_CONFLICT: '该提交标识已用于不同请求，请检查提交结果。',
   RATE_LIMITED: '操作过于频繁，请稍后重试。', SERVICE_UNAVAILABLE: '服务暂时不可用，请稍后重试。',

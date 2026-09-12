@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "run_id": "8f7bdbf9-3bfa-4c0d-ace5-b2e468a129d6",
+  "mode": "all",
+  "started_at": "2026-09-12T07:17:08.213Z",
+  "result": "fail",
+  "steps": [
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "postgres",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "native-publication",
+      "result": "fail"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "test_binary_sha256": "c9e633d113692bb5b8a57d6227267bd17aac17ea5f0330bfc6db8a3a058ea4e2",
+  "error": "AssertionError [ERR_ASSERTION]: native-publication_failed\n\n1 !== 0\n",
+  "ended_at": "2026-09-12T07:17:47.120Z"
+}

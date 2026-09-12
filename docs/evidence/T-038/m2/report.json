@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "run_id": "778d05f7-9735-4e01-9746-5cab39f233da",
+  "mode": "all",
+  "started_at": "2026-09-12T08:15:13.787Z",
+  "result": "pass",
+  "steps": [
+    {
+      "name": "publication-evidence-integrity",
+      "result": "pass"
+    },
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "postgres",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "native-publication",
+      "result": "pass"
+    },
+    {
+      "name": "browser",
+      "result": "pass"
+    },
+    {
+      "name": "browser-native-server",
+      "result": "pass"
+    },
+    {
+      "name": "source-stability",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "source_manifest_sha256": "e2e174d4c9a0dba135b0b57304634efb04da2a7020d913ef589e7032af62c76b",
+  "core_lock_sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18",
+  "test_binary_sha256": "badbaa519fe59f6917349c4093e480f9a37a1a88d5866bd59bb1af0ae55b7782",
+  "ended_at": "2026-09-12T08:17:15.318Z"
+}

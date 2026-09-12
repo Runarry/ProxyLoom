@@ -1,0 +1,18 @@
+=== RUN   TestPostgresSubscriptionHTTPContractAndAuthorization
+--- PASS: TestPostgresSubscriptionHTTPContractAndAuthorization (1.14s)
+=== RUN   TestPostgresPublicationAtomicSnapshotRevocationAndRollback
+--- PASS: TestPostgresPublicationAtomicSnapshotRevocationAndRollback (0.57s)
+=== RUN   TestPostgresPublicationObsoleteFailureAndConcurrentPublish
+--- PASS: TestPostgresPublicationObsoleteFailureAndConcurrentPublish (0.82s)
+=== RUN   TestPostgresSubscriptionSelectionReferencesAndImmutableBatch
+--- PASS: TestPostgresSubscriptionSelectionReferencesAndImmutableBatch (0.35s)
+=== RUN   TestPostgresSubscriptionTwoProfilesAndExcludedChainDependency
+--- PASS: TestPostgresSubscriptionTwoProfilesAndExcludedChainDependency (0.38s)
+=== RUN   TestPostgresPublicationFencingReplayAndRestart
+--- PASS: TestPostgresPublicationFencingReplayAndRestart (0.54s)
+=== RUN   TestPostgresPublicationConcurrentSwitchAndCommittedRevocation
+--- PASS: TestPostgresPublicationConcurrentSwitchAndCommittedRevocation (0.90s)
+=== RUN   TestPostgresPublicationStaleAndResourceRevocation
+--- PASS: TestPostgresPublicationStaleAndResourceRevocation (0.93s)
+PASS
+ok  	github.com/Runarry/ProxyLoom/internal/storage	6.444s

@@ -821,6 +821,25 @@ export interface paths {
         patch: operations["updateSubscription"];
         trace?: never;
     };
+    "/api/v1/subscriptions/{id}/clone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy a subscription profile while retaining referenced resource identities */
+        post: operations["cloneSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions/{id}/compile": {
         parameters: {
             query?: never;
@@ -1381,6 +1400,7 @@ export interface components {
         /** @description Safe preview only. effective_preview_hash is present once the full effective dependency/target preview is frozen. It identifies exactly what the actor must confirm; no raw credentials, full IR or native output. */
         CompileBatch: {
             batch_id: components["schemas"]["UUID"];
+            blocking_reasons?: components["schemas"]["Diagnostics"];
             catalog_revision: components["schemas"]["Revision"];
             created_at: components["schemas"]["Timestamp"];
             dependencies: components["schemas"]["PublicationDependency"][];
@@ -1401,12 +1421,18 @@ export interface components {
         CompileOutputSummary: {
             adapter_version: components["schemas"]["ShortText"];
             artifact_id?: components["schemas"]["UUID"];
+            changed?: boolean;
             client_preset_id: components["schemas"]["UUID"];
             client_preset_revision: components["schemas"]["Revision"];
             core_build_id: components["schemas"]["UUID"];
             core_build_sha256: components["schemas"]["SHA256"];
             diagnostics: components["schemas"]["Diagnostics"];
             format: components["schemas"]["OutputFormat"];
+            /** @description Structurally redacted display only; never a publishable configuration. */
+            preview?: string;
+            preview_truncated?: boolean;
+            previous_preview?: string;
+            previous_preview_truncated?: boolean;
             /** @enum {string} */
             state: "queued" | "compiling" | "validating" | "ready" | "failed";
             target_key: components["schemas"]["TargetKey"];
@@ -1482,15 +1508,17 @@ export interface components {
             username: components["schemas"]["AuthUsername"];
         };
         Diagnostic: {
-            code: components["schemas"]["ErrorCode"];
+            code: components["schemas"]["DiagnosticCode"];
             field_path?: components["schemas"]["SafeFieldPath"];
             /** @description Fixed redacted explanation. */
             message: string;
             resource_id?: components["schemas"]["UUID"];
             /** @enum {string} */
             severity: "info" | "warning" | "error";
+            suggested_action?: string;
             target_key?: components["schemas"]["TargetKey"];
         };
+        DiagnosticCode: components["schemas"]["ErrorCode"] | ("IR_INVALID_JSON" | "IR_DUPLICATE_FIELD" | "IR_UNKNOWN_FIELD" | "IR_REQUIRED" | "IR_INVALID_TYPE" | "IR_INVALID_VALUE" | "INPUT_LIMIT_EXCEEDED" | "IR_UNSUPPORTED_VERSION" | "IR_INVALID_UNION" | "IR_INVALID_SNAPSHOT" | "IR_DUPLICATE_RESOURCE" | "IR_DUPLICATE_TARGET" | "IR_REFERENCE_MISSING" | "IR_REFERENCE_KIND" | "IR_REFERENCE_REVISION" | "IR_REFERENCE_EPOCH" | "IR_REFERENCE_CYCLE" | "IR_SCOPE_MISMATCH" | "IR_RESOURCE_DISABLED" | "IR_UNREACHABLE_RESOURCE" | "CAPABILITY_UNSUPPORTED" | "CAPABILITY_UNVERIFIED" | "COMPILE_TARGET_MISMATCH" | "COMPILE_UNKNOWN_BUILD" | "COMPILE_DIGEST_MISMATCH" | "COMPILE_ADAPTER_VERSION" | "COMPILE_FORMAT_MISMATCH" | "COMPILE_LABEL_COLLISION" | "COMPILE_UNKNOWN_CAPABILITY" | "COMPILE_UNMAPPED_FIELD" | "COMPILE_DIAL_CONFLICT" | "RUNNER_VALIDATION_PENDING");
         Diagnostics: components["schemas"]["Diagnostic"][];
         /** @description Resolver IDs are unique stable local keys, not names. final_resolver and each rule refer to a declared resolver. The first bootstrap resolves proxy node addresses; HTTPS uses its explicit bootstrap_resolver_id. The bootstrap array is not an implicit parallel or fallback list. Bootstrap, resolver and outbound references are checked together for cycles. Unsupported native bootstrap combinations fail explicitly. FakeIP and arbitrary native DNS options are outside P0. */
         DNSProfile: {
@@ -2739,6 +2767,9 @@ export interface components {
             refresh_policy: components["schemas"]["SourceRefreshPolicy"];
             schema_version: components["schemas"]["SchemaVersion"];
             url: components["schemas"]["SourceURL"];
+        };
+        SubscriptionCloneRequest: {
+            name: components["schemas"]["Name"];
         };
         SubscriptionCreateRequest: {
             enabled?: boolean;
@@ -5424,6 +5455,35 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            412: components["responses"]["PreconditionFailed"];
+            422: components["responses"]["UnprocessableEntity"];
+            428: components["responses"]["PreconditionRequired"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    cloneSubscription: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Exactly one strong tag "r<N>" for the resource being changed. Missing => 428; malformed, weak, wildcard, multi-tag or overflow => 400; valid stale revision => 412. Business/generation/lease/idempotency conflicts => 409. Creates and authentication operations have no resource precondition. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionCloneRequest"];
+            };
+        };
+        responses: {
+            201: components["responses"]["SubscriptionResponse"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             412: components["responses"]["PreconditionFailed"];
             422: components["responses"]["UnprocessableEntity"];
             428: components["responses"]["PreconditionRequired"];

@@ -192,6 +192,13 @@ func (v Resource) Validate() error {
 		if err := payload.Validate(); err != nil {
 			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
 		}
+	case *SubscriptionProfile:
+		if payload == nil || v.Metadata.Kind != KindSubscriptionProfile {
+			return Diagnostics{issue(InvalidUnion, "/payload")}
+		}
+		if err := payload.Validate(); err != nil {
+			return prefixDiagnostics(err, "/payload", v.Metadata.ResourceID)
+		}
 	case *ClientPreset:
 		if payload == nil || v.Metadata.Kind != KindClientPreset {
 			return Diagnostics{issue(InvalidUnion, "/payload")}
@@ -230,6 +237,8 @@ func (v *Resource) UnmarshalJSON(data []byte) error {
 		payload = &DNSProfile{}
 	case KindRuleSet:
 		payload = &RuleSet{}
+	case KindSubscriptionProfile:
+		payload = &SubscriptionProfile{}
 	case KindClientPreset:
 		payload = &ClientPreset{}
 	default:
