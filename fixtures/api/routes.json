@@ -201,5 +201,8 @@
   ],
   "/api/v1/nodes/{id}/clone": [
     "post"
+  ],
+  "/api/v1/subscriptions/{id}/clone": [
+    "post"
   ]
 }

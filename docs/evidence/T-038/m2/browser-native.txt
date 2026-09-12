@@ -1,0 +1,3 @@
+=== RUN   TestPostgresM2RealPublication
+--- PASS: TestPostgresM2RealPublication (39.94s)
+PASS

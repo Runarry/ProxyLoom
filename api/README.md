@@ -1,8 +1,11 @@
 # HTTP contract boundary
 
 `openapi.yaml` is the full P0 OpenAPI 3.1 contract. Authentication, node management,
-local imports, durable jobs and the separate Runner mTLS transport are implemented.
-Other operations remain `contract-only`. `fixtures/api/implemented-routes.json`
+local imports, orchestration, durable jobs and the separate Runner mTLS transport
+are implemented. M2 adds subscription CRUD/clone, persistent compile batches,
+confirmed publication and rollback, independent tokens, publication export,
+authorized downloads, and minimal core listing/disable operations.
+Remaining operations retain `contract-only`. `fixtures/api/implemented-routes.json`
 records mounted routes. API implementation does not assert kernel capability.
 
 Management uses its session Cookie. Runner operations belong to a separate mTLS

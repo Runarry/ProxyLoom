@@ -86,7 +86,9 @@ try {
     Assert-Step 'api live' (Wait-Status '/healthz' 200)
     Assert-Step 'frontend served' (Wait-Status '/' 200)
     Assert-Step 'node API requires authentication' (Wait-Status '/api/v1/nodes' 401)
-    foreach ($path in @('/api/v1/subscriptions','/internal/v1/jobs','/s/EXAMPLE_ONLY/test')) { Assert-Step "reserved route $path returns 404" (Wait-Status $path 404) }
+    Assert-Step 'subscription API requires authentication' (Wait-Status '/api/v1/subscriptions' 401)
+    Assert-Step 'invalid subscription token returns 404' (Wait-Status '/s/EXAMPLE_ONLY/test' 404)
+    Assert-Step 'internal jobs are not mounted on public API' (Wait-Status '/internal/v1/jobs' 404)
 
     $anonymous = Invoke-SmokeAuth '/api/v1/auth/me'
     Assert-Step 'management requires a session' ($anonymous.StatusCode -eq 401)

@@ -1,0 +1,12 @@
+
+Running 3 tests using 1 worker
+
+(node:24080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\subscriptions.spec.ts:28:1 › create three targets, validate real kernels, confirm publication and revoke a mobile link (31.6s)
+  ok 2 tests\e2e\subscriptions.spec.ts:104:1 › concurrent editing preserves the draft and cloning retains resource references (1.7s)
+  ok 3 tests\e2e\subscriptions.spec.ts:129:1 › obsolete input requires recompile and disabled build blocks history (1.5s)
+
+  3 passed (36.7s)

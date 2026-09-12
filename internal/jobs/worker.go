@@ -82,7 +82,11 @@ func (w *Worker) process(parent context.Context, lease Lease) error {
 	done := make(chan struct{})
 	stopped := make(chan struct{})
 	go func() { defer close(stopped); w.renew(ctx, cancel, lease, done) }()
-	_, err := w.repo.Event(ctx, lease.Identity, EventInput{EventID: NewID(), Phase: "parsing", Total: 1})
+	phase := "parsing"
+	if lease.Job.Type == Compile {
+		phase = "compiling"
+	}
+	_, err := w.repo.Event(ctx, lease.Identity, EventInput{EventID: NewID(), Phase: phase, Total: 1})
 	var result Result
 	var commit CommitFunc
 	if err == nil {

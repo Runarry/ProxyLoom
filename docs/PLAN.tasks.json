@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-10 M1/G1收口：累计36项done，剩余24项not_started。用户已批准sing-box IP解析目标限制；最终13项门禁、57项实库及原生/浏览器验收通过。G1按批准范围关闭，M2未启动；未验架构/客户端及宽泛能力保持unverified。",
+  "status_note": "2026-09-12 M2收口：T-030～T-038、T-050完成，累计46项done、14项not_started。订阅发布闭环通过当前源码适用验收，G2按已验内核／预设范围关闭；M3未启动。",
   "tasks": [
     {
       "id": "T-001",
@@ -607,7 +607,8 @@
         "T-029"
       ],
       "acceptance": "扩展／预设不能绕过限制；声明支持字段不丢失；相同输入 100 次字节一致；错误可定位资源与字段。\nNFR-04；AC-23",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-031",
@@ -627,7 +628,8 @@
         "T-022"
       ],
       "acceptance": "两组不同成员互不覆盖；复制不复制节点身份；必要依赖与显式排除冲突必须可见。\nAC-13",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-032",
@@ -646,7 +648,8 @@
         "T-031"
       ],
       "acceptance": "输入读取一致；事务外编译不再读活动对象；编辑节点或标签后旧批次变 obsolete。\nAC-13、AC-15",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-033",
@@ -666,7 +669,8 @@
         "T-041"
       ],
       "acceptance": "不能用最小探测配置代替发布物校验；任何目标失败阻止批次 ready；离线 Runner 明确阻塞而不假通过。\nAC-14、AC-18（配置层）",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-034",
@@ -684,7 +688,8 @@
         "T-033"
       ],
       "acceptance": "未确认或预览变化不能发布；自动依赖凭证范围明确；完整秘密导出仍需单独重认证。\nAC-13、AC-15、AC-23",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-035",
@@ -703,7 +708,8 @@
         "T-034"
       ],
       "acceptance": "并发只见完整旧版或新版；禁止混用目标；停用节点、旧凭证、禁用构建不能借回滚复活。\nAC-14～AC-17",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-036",
@@ -722,7 +728,8 @@
         "T-031"
       ],
       "acceptance": "令牌不能跨方案／目标／API 使用；丢失签发响应须撤销重签；明文不落库、不进入访问日志。\nAC-16、AC-23",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-037",
@@ -740,7 +747,8 @@
         "T-036"
       ],
       "acceptance": "GET 不触发刷新、编译、测速；DB 故障失败关闭；Runner 离线仍读安全有效版本；无 200 空配置。\nAC-16、AC-17",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-038",
@@ -759,7 +767,8 @@
         "T-037"
       ],
       "acceptance": "撤销提交后开始的新请求无受影响字节；缓存不能绕过授权；失败批次不破坏仍安全的旧版。\nAC-14～AC-17；NFR-07、NFR-08",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-039",
@@ -1012,7 +1021,8 @@
         "T-047"
       ],
       "acceptance": "发布请求绑定实际预览；自动依赖凭证范围明确；blocked／obsolete／failed 区分；移动端可复制链接。\nAC-13～AC-17、AC-23",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-12-g2-decision.md"
     },
     {
       "id": "T-051",

@@ -14,21 +14,52 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/importparse"
 	"github.com/Runarry/ProxyLoom/internal/ir"
+	"github.com/Runarry/ProxyLoom/internal/subscriptions"
 	"github.com/gin-gonic/gin"
 )
 
-func mountExports(router *gin.Engine, auth *Authentication, nodes NodeDependencies) error {
+func mountExports(router *gin.Engine, auth *Authentication, nodes NodeDependencies, publications subscriptions.Repository) error {
 	if router == nil || auth == nil || nodes.Repository == nil {
 		return errors.New("export_dependencies_invalid")
 	}
 	h := &nodeHandler{auth: auth, store: nodes.Repository, cursor: nodes.Cursor}
-	router.POST("/api/v1/exports", auth.RequireSession(), h.export)
+	router.POST("/api/v1/exports", auth.RequireSession(), func(c *gin.Context) { h.exportWithPublications(c, publications) })
 	return nil
 }
 
-func (h *nodeHandler) export(c *gin.Context) {
+func (h *nodeHandler) export(c *gin.Context) { h.exportWithPublications(c, nil) }
+
+func (h *nodeHandler) exportWithPublications(c *gin.Context, publications subscriptions.Repository) {
 	var request apicontract.ExportRequest
 	if !h.readRequest(c, "ExportRequest", &request) {
+		return
+	}
+	if request.Type == "publication" && publications != nil {
+		session, _ := SessionFromContext(c.Request.Context())
+		if request.IncludeSecrets {
+			now := time.Now()
+			if session.ReauthenticatedAt.IsZero() || session.ReauthenticatedAt.After(now) || !session.ReauthenticatedAt.Add(identity.ReauthenticationLifetime).After(now) {
+				h.fail(c, identity.ErrReauthenticationRequired)
+				return
+			}
+			source, err := h.auth.source(c.Request)
+			if err == nil {
+				err = h.auth.service.AuditSensitive(c.Request.Context(), session.ID, identity.SensitiveExportPrivate, source)
+			}
+			if err != nil {
+				h.fail(c, err)
+				return
+			}
+		}
+		artifacts, err := publications.Export(c.Request.Context(), subscriptions.Actor{ScopeID: session.User.ScopeID, ID: session.User.ID}, request.PublicationID, request.TargetKeys, ir.OutputFormat(request.Format), request.IncludeSecrets)
+		if err != nil {
+			if errors.Is(err, subscriptions.ErrBlocked) {
+				err = apicontract.NewError(apicontract.PublicationBlocked)
+			}
+			h.fail(c, err)
+			return
+		}
+		h.response(c, 200, "ExportResponse", apicontract.ExportResponse{RequestID: apicontract.RequestID(c.Request.Context()), Data: apicontract.ExportData{Artifacts: artifacts, CreatedAt: time.Now().UTC()}})
 		return
 	}
 	if request.Type != "resources" {

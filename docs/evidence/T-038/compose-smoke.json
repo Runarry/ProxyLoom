@@ -1,0 +1,163 @@
+{
+  "image_ids": [
+    "sha256:adf0bc3b8161ad9371b4a5651b8eeebaedd3c6846fd502b1e32e9378890b2119",
+    "sha256:83a99ce82f600dda8e74ca4b4020b75f290863103f8477a3ed026b25cef17278"
+  ],
+  "platform": "linux/amd64",
+  "scope": "T-002/T-006/T-022 development Linux API authentication and preset startup smoke; not G1 or production acceptance",
+  "ended_at": "2026-09-12T08:12:52.3253211Z",
+  "cleanup": "pass",
+  "started_at": "2026-09-12T08:11:56.9760308Z",
+  "completed": true,
+  "checks": [
+    {
+      "result": "pass",
+      "name": "api ready"
+    },
+    {
+      "result": "pass",
+      "name": "api live"
+    },
+    {
+      "result": "pass",
+      "name": "frontend served"
+    },
+    {
+      "result": "pass",
+      "name": "node API requires authentication"
+    },
+    {
+      "result": "pass",
+      "name": "subscription API requires authentication"
+    },
+    {
+      "result": "pass",
+      "name": "invalid subscription token returns 404"
+    },
+    {
+      "result": "pass",
+      "name": "internal jobs are not mounted on public API"
+    },
+    {
+      "result": "pass",
+      "name": "management requires a session"
+    },
+    {
+      "result": "pass",
+      "name": "administrator initializes through Linux API"
+    },
+    {
+      "result": "pass",
+      "name": "administrator role matches the public contract"
+    },
+    {
+      "result": "pass",
+      "name": "initialization cannot be reused"
+    },
+    {
+      "result": "pass",
+      "name": "authenticated write requires CSRF"
+    },
+    {
+      "result": "pass",
+      "name": "explicit reauthentication succeeds"
+    },
+    {
+      "result": "pass",
+      "name": "startup provisions five reviewed presets"
+    },
+    {
+      "result": "pass",
+      "name": "all five presets use reviewed Linux file constraints"
+    },
+    {
+      "result": "pass",
+      "name": "original presets stay disabled and controlled variants are explicit"
+    },
+    {
+      "result": "pass",
+      "name": "migrations repeat safely"
+    },
+    {
+      "result": "pass",
+      "name": "concurrent migration process 41448"
+    },
+    {
+      "result": "pass",
+      "name": "concurrent migration process 2960"
+    },
+    {
+      "result": "pass",
+      "name": "runtime database privileges are restricted"
+    },
+    {
+      "result": "pass",
+      "name": "missing key fails startup"
+    },
+    {
+      "result": "pass",
+      "name": "runner offline does not block api readiness"
+    },
+    {
+      "result": "pass",
+      "name": "database outage blocks readiness"
+    },
+    {
+      "result": "pass",
+      "name": "database outage preserves liveness"
+    },
+    {
+      "result": "pass",
+      "name": "database outage rejects authenticated reads"
+    },
+    {
+      "result": "pass",
+      "name": "database recovery restores readiness"
+    },
+    {
+      "result": "pass",
+      "name": "api restart preserves migration state"
+    },
+    {
+      "result": "pass",
+      "name": "API restart preserves the database session"
+    },
+    {
+      "result": "pass",
+      "name": "restarted API can read presets"
+    },
+    {
+      "result": "pass",
+      "name": "API restart preserves preset identities revisions and values"
+    },
+    {
+      "result": "pass",
+      "name": "logout revokes the session"
+    },
+    {
+      "result": "pass",
+      "name": "logged out requests are unauthorized"
+    },
+    {
+      "result": "pass",
+      "name": "runner excluded from database network"
+    },
+    {
+      "result": "pass",
+      "name": "runner mounts no secrets"
+    },
+    {
+      "result": "pass",
+      "name": "runner has no published ports"
+    },
+    {
+      "result": "pass",
+      "name": "services exit gracefully"
+    },
+    {
+      "result": "pass",
+      "name": "captured logs contain no development secrets"
+    }
+  ],
+  "project": "proxyloom-smoke-36e6ef0529ef"
+}

@@ -26,6 +26,9 @@ const (
 	PayloadVersion    = 1
 	WrappingVersion   = 1
 
+	PurposeCompileInput     = "compile_input"
+	PurposeCompileOutput    = "compile_output"
+	PurposePreview          = "publication_preview"
 	PurposeResourceContent  = "resource_content"
 	PurposeIdempotency      = "idempotency"
 	PurposeCursor           = "cursor"
@@ -292,7 +295,7 @@ func validContext(ctx Context) bool {
 
 func validPurpose(purpose string) bool {
 	switch purpose {
-	case PurposeResourceContent, PurposeIdempotency, PurposeCursor, PurposeNodeIdentity, PurposeImportConnection, PurposeImportCommit:
+	case PurposeCompileInput, PurposeCompileOutput, PurposePreview, PurposeResourceContent, PurposeIdempotency, PurposeCursor, PurposeNodeIdentity, PurposeImportConnection, PurposeImportCommit:
 		return true
 	default:
 		return false

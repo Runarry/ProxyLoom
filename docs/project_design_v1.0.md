@@ -655,6 +655,7 @@ JSON 字段使用 snake_case；时间为带时区 RFC3339，数据库用 UTC；�
 | GET/POST /rule-sets；GET/PATCH/DELETE /rule-sets/{id} | 标准文本规则 | 规则修订及行号错误 |
 | GET /client-presets；GET /capabilities | 目标构建与字段约束筛选 | 审核过的预设、能力及证据 |
 | GET/POST /subscriptions；GET/PATCH/DELETE /subscriptions/{id} | 成员、目标、路由和 DNS | 订阅方案；删除先阻断获取 |
+| POST /subscriptions/{id}/clone | 新名称、If-Match | 创建新方案，保留资源引用，不复制令牌或发布 |
 | POST /subscriptions/{id}/compile | 目标集合、期望方案修订 | 202，compile_batch_id |
 | GET /compile-batches/{id} | 无 | 进度、脱敏预览、依赖和诊断 |
 | POST /subscriptions/{id}/publish | batch_id、期望当前 generation | 201，新 publication |

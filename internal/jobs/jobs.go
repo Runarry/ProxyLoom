@@ -61,7 +61,7 @@ func (s State) Terminal() bool {
 }
 func (s State) Valid() bool { return s == Queued || s == Leased || s == Running || s.Terminal() }
 func ValidType(executor Executor, kind Type) bool {
-	return executor == APIWorker && (kind == ImportParse || kind == SourceRefresh) || executor == Runner && kind == ConfigValidate
+	return executor == APIWorker && (kind == ImportParse || kind == SourceRefresh || kind == Compile) || executor == Runner && kind == ConfigValidate
 }
 func (kind Type) Valid() bool {
 	return kind == ImportParse || kind == ConfigValidate || kind == SourceRefresh || kind == Compile || kind == Connectivity || kind == DownloadThroughput

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "image_id": "sha256:25ec1acea8bc7958ff6de0fae8b1091b830a59897d8f07ead2c0d07f41074fb3",
+  "checks": [
+    {
+      "command": "docker build -f deploy/Dockerfile.check -t proxyloom-m2-check .",
+      "result": "pass",
+      "scope": "Linux locked Go toolchain: engineering, vet and race; integration environment tests are covered by separate PostgreSQL/native acceptance."
+    },
+    {
+      "command": "docker run --rm --network none --read-only --tmpfs /tmp:rw,exec,nosuid,nodev,size=32m proxyloom-m2-check node --test scripts/postgres-init.test.mjs",
+      "result": "pass",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "source_manifest": "linux-source-manifest.json",
+  "notes": "Application, compiler, runner and contract bytes match final acceptance. The storage recovery test was subsequently strengthened and covered by final Windows race and full PostgreSQL runs. Five POSIX-only cases were skipped on Windows and passed here; the earlier noexec test mount was corrected."
+}

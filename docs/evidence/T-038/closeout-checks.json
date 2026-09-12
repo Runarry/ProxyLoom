@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "checked_at": "2026-09-12T08:21:06.081Z",
+  "quality_run": "7027fb83-8fea-46cf-9a37-9e826d4ba49a",
+  "m2_run": "778d05f7-9735-4e01-9746-5cab39f233da",
+  "post_validation_changes": [
+    "README.md",
+    "docs/PLAN.md",
+    "docs/PLAN.tasks.json"
+  ],
+  "application_and_m2_test_sources_unchanged": true,
+  "plan": "pass",
+  "contracts": "pass",
+  "secrets": "pass",
+  "whitespace": "pass",
+  "tasks": {
+    "done": 46,
+    "not_started": 14
+  },
+  "source_commit": "15efc0e32a101f824440c1c881ab92b43a9469d7"
+}

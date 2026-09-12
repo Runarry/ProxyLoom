@@ -33,9 +33,10 @@ import (
 )
 
 type runnerDatabase struct {
-	queue *storage.Jobs
-	pool  *pgxpool.Pool
-	scope ir.ID
+	catalog *storage.Catalog
+	queue   *storage.Jobs
+	pool    *pgxpool.Pool
+	scope   ir.ID
 }
 
 func realRunnerDatabase(t *testing.T, ctx context.Context) runnerDatabase {
@@ -126,7 +127,7 @@ func realRunnerDatabase(t *testing.T, ctx context.Context) runnerDatabase {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return runnerDatabase{queue: queue, pool: pool, scope: scope}
+	return runnerDatabase{queue: queue, pool: pool, scope: scope, catalog: catalog}
 }
 
 func TestPostgresMTLSRunnerRealCores(t *testing.T) {

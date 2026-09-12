@@ -47,15 +47,45 @@
     "patch",
     "delete"
   ],
-  "/api/v1/policy-groups": ["get", "post"],
-  "/api/v1/policy-groups/{id}": ["get", "patch", "delete"],
-  "/api/v1/routing-profiles": ["get", "post"],
-  "/api/v1/routing-profiles/{id}": ["get", "patch", "delete"],
-  "/api/v1/rule-sets": ["get", "post"],
-  "/api/v1/rule-sets/{id}": ["get", "patch", "delete"],
-  "/api/v1/dns-profiles": ["get", "post"],
-  "/api/v1/dns-profiles/{id}": ["get", "patch", "delete"],
-  "/api/v1/client-presets": ["get"],
+  "/api/v1/policy-groups": [
+    "get",
+    "post"
+  ],
+  "/api/v1/policy-groups/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/routing-profiles": [
+    "get",
+    "post"
+  ],
+  "/api/v1/routing-profiles/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/rule-sets": [
+    "get",
+    "post"
+  ],
+  "/api/v1/rule-sets/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/dns-profiles": [
+    "get",
+    "post"
+  ],
+  "/api/v1/dns-profiles/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/client-presets": [
+    "get"
+  ],
   "/api/v1/imports": [
     "post"
   ],
@@ -106,5 +136,48 @@
   ],
   "/internal/v1/jobs/{id}/result": [
     "post"
+  ],
+  "/api/v1/subscriptions": [
+    "get",
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/subscriptions/{id}/clone": [
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}/compile": [
+    "post"
+  ],
+  "/api/v1/compile-batches/{id}": [
+    "get"
+  ],
+  "/api/v1/subscriptions/{id}/publish": [
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}/rollback": [
+    "post"
+  ],
+  "/api/v1/subscriptions/{id}/publications": [
+    "get"
+  ],
+  "/api/v1/subscriptions/{id}/tokens": [
+    "get",
+    "post"
+  ],
+  "/api/v1/tokens/{id}/revoke": [
+    "post"
+  ],
+  "/api/v1/cores": [
+    "get"
+  ],
+  "/api/v1/cores/{id}/disable": [
+    "post"
+  ],
+  "/s/{token}/{target_key}": [
+    "get"
   ]
 }

@@ -810,12 +810,18 @@ components:
       properties:
         request_id: { $ref: "#/components/schemas/RequestID" }
         error: { $ref: "#/components/schemas/SafeError" }
+    DiagnosticCode:
+      anyOf:
+        - { $ref: "#/components/schemas/ErrorCode" }
+        - type: string
+          enum: ["IR_INVALID_JSON","IR_DUPLICATE_FIELD","IR_UNKNOWN_FIELD","IR_REQUIRED","IR_INVALID_TYPE","IR_INVALID_VALUE","INPUT_LIMIT_EXCEEDED","IR_UNSUPPORTED_VERSION","IR_INVALID_UNION","IR_INVALID_SNAPSHOT","IR_DUPLICATE_RESOURCE","IR_DUPLICATE_TARGET","IR_REFERENCE_MISSING","IR_REFERENCE_KIND","IR_REFERENCE_REVISION","IR_REFERENCE_EPOCH","IR_REFERENCE_CYCLE","IR_SCOPE_MISMATCH","IR_RESOURCE_DISABLED","IR_UNREACHABLE_RESOURCE","CAPABILITY_UNSUPPORTED","CAPABILITY_UNVERIFIED","COMPILE_TARGET_MISMATCH","COMPILE_UNKNOWN_BUILD","COMPILE_DIGEST_MISMATCH","COMPILE_ADAPTER_VERSION","COMPILE_FORMAT_MISMATCH","COMPILE_LABEL_COLLISION","COMPILE_UNKNOWN_CAPABILITY","COMPILE_UNMAPPED_FIELD","COMPILE_DIAL_CONFLICT","RUNNER_VALIDATION_PENDING"]
     Diagnostic:
       type: "object"
       additionalProperties: false
       required: ["code", "severity", "message"]
       properties:
-        code: { $ref: "#/components/schemas/ErrorCode" }
+        code: { $ref: "#/components/schemas/DiagnosticCode" }
+        suggested_action: { type: string, maxLength: 512 }
         severity:
           type: "string"
           enum: ["info", "warning", "error"]
@@ -3495,6 +3501,12 @@ components:
           const: "strict_all_targets"
         connectivity_gate: { $ref: "#/components/schemas/ConnectivityPublishGate" }
       minProperties: 1
+    SubscriptionCloneRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { $ref: "#/components/schemas/Name" }
     SubscriptionCreateRequest:
       type: "object"
       additionalProperties: false
@@ -3585,7 +3597,7 @@ components:
         required_by:
           type: "array"
           minItems: 0
-          maxItems: 200
+          maxItems: 2000
           items: { $ref: "#/components/schemas/UUID" }
           uniqueItems: true
         credential_categories:
@@ -3611,6 +3623,11 @@ components:
         state:
           type: "string"
           enum: ["queued", "compiling", "validating", "ready", "failed"]
+        preview_truncated: { type: boolean }
+        previous_preview_truncated: { type: boolean }
+        preview: { type: string, maxLength: 32768, description: "Structurally redacted display only; never a publishable configuration." }
+        previous_preview: { type: string, maxLength: 32768 }
+        changed: { type: boolean }
         artifact_id: { $ref: "#/components/schemas/UUID" }
         validation_job_id: { $ref: "#/components/schemas/UUID" }
         validation_verdict:
@@ -3637,6 +3654,7 @@ components:
           items: { $ref: "#/components/schemas/UUID" }
           uniqueItems: true
         effective_preview_hash: { $ref: "#/components/schemas/SHA256" }
+        blocking_reasons: { $ref: "#/components/schemas/Diagnostics" }
         dependencies:
           type: "array"
           minItems: 0
@@ -5763,7 +5781,7 @@ paths:
   /api/v1/subscriptions:
     get:
       operationId: listSubscriptions
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List subscription profiles and publication heads
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}, {$ref: '#/components/parameters/Tag'}]
       responses:
@@ -5773,7 +5791,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a subscription profile with explicit target keys
       requestBody:
         required: true
@@ -5792,7 +5810,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read a typed subscription profile
       responses:
         '200': {$ref: '#/components/responses/SubscriptionResponse'}
@@ -5802,7 +5820,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a profile revision without mutating existing publication bytes
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -5823,7 +5841,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Soft-delete the profile and synchronously block new subscription downloads
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:
@@ -5836,11 +5854,33 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
         '503': {$ref: '#/components/responses/Unavailable'}
+  /api/v1/subscriptions/{id}/clone:
+    parameters: [{$ref: '#/components/parameters/ID'}]
+    post:
+      operationId: cloneSubscription
+      x-implementation-status: implemented
+      summary: Copy a subscription profile while retaining referenced resource identities
+      parameters: [{$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionCloneRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/SubscriptionResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '412': {$ref: '#/components/responses/PreconditionFailed'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '503': {$ref: '#/components/responses/Unavailable'}
   /api/v1/subscriptions/{id}/compile:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: compileSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Freeze all enabled targets and enqueue compilation plus native validation
       description: Compilation is an API Worker job; config_validate is a separate Runner job for each output. No target is published or silently omitted by this operation.
       parameters: [{$ref: '#/components/parameters/IfMatch'}, {$ref: '#/components/parameters/IdempotencyKey'}]
@@ -5865,7 +5905,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getCompileBatch
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read safe effective membership, dependencies, output summaries and diagnostics
       description: Returns no native configuration or complete IR. The server records the preview hash presented to the current actor; that record is checked when publishing.
       responses:
@@ -5878,7 +5918,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: publishSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Atomically publish a confirmed ready batch for all enabled targets
       description: >-
         The server verifies the current actor's confirmation for exactly batch_id
@@ -5909,7 +5949,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: rollbackSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Create a new publication event from a safe historical publication
       description: Rechecks current dependency security epochs, enabled builds and current target authorization. Historical credentials cannot be revived. expected_generation is separate from the profile If-Match.
       parameters: [{$ref: '#/components/parameters/IfMatch'}, {$ref: '#/components/parameters/IdempotencyKey'}]
@@ -5933,7 +5973,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: listPublications
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List immutable publication records and current safe blocking reasons
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}]
       responses:
@@ -5946,7 +5986,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: listSubscriptionTokens
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List token metadata without token values, verification HMACs or URLs
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}]
       responses:
@@ -5957,7 +5997,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: issueSubscriptionToken
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Issue a target-scoped token and return its secret exactly once
       description: >-
         This creates a token and has no token-resource If-Match. The referenced
@@ -5985,7 +6025,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: revokeToken
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Commit token revocation before acknowledging success
       description: Requests starting authorization after commit are rejected. Responses whose authorization already completed cannot be withdrawn.
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
@@ -6243,7 +6283,7 @@ paths:
   /api/v1/cores:
     get:
       operationId: listCores
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List pinned registered core builds and exact digests
       description: There is no binary upload, arbitrary installation or remote executable URL endpoint.
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/CoreFamily'}, {$ref: '#/components/parameters/Enabled'}]
@@ -6256,7 +6296,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     post:
       operationId: disableCore
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Disable a core build and immediately block unsafe dependent publications
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -6465,7 +6505,7 @@ paths:
   /s/{token}/{target_key}:
     get:
       operationId: getPublishedSubscription
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       x-authentication-surface: subscription-token
       security: []
       x-token-authentication:
