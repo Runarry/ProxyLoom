@@ -40,18 +40,22 @@ type Queue interface {
 }
 
 type Registration struct {
-	RunnerID          ir.ID   `json:"runner_id"`
-	CertificateSHA256 string  `json:"certificate_sha256"`
-	Architecture      string  `json:"arch"`
-	CoreBuildIDs      []ir.ID `json:"core_build_ids"`
-	ValidationSlots   int32   `json:"validation_slots"`
+	AuthorizationEpoch string  `json:"authorization_epoch,omitempty"`
+	RunnerID           ir.ID   `json:"runner_id"`
+	CertificateSHA256  string  `json:"certificate_sha256"`
+	Architecture       string  `json:"arch"`
+	CoreBuildIDs       []ir.ID `json:"core_build_ids"`
+	ValidationSlots    int32   `json:"validation_slots"`
+	ConnectivitySlots  int32   `json:"connectivity_slots,omitempty"`
+	ThroughputSlots    int32   `json:"throughput_slots,omitempty"`
 }
 
 type Config struct {
-	TLS           *tls.Config
-	Registrations []Registration
-	Catalog       *capability.Catalog
-	Jobs          Queue
+	AuthorizationEpoch func(context.Context) (string, error)
+	TLS                *tls.Config
+	Registrations      []Registration
+	Catalog            *capability.Catalog
+	Jobs               Queue
 }
 
 type registration struct {
@@ -63,11 +67,12 @@ type session struct {
 	seen   time.Time
 }
 type Server struct {
-	tls        *tls.Config
-	queue      Queue
-	registered map[string]registration
-	mu         sync.Mutex
-	sessions   map[ir.ID]session
+	authorizationEpoch func(context.Context) (string, error)
+	tls                *tls.Config
+	queue              Queue
+	registered         map[string]registration
+	mu                 sync.Mutex
+	sessions           map[ir.ID]session
 }
 
 func ReadRegistry(path string) ([]Registration, error) {
@@ -102,11 +107,14 @@ func New(config Config) (*Server, error) {
 			return nil, ErrConfiguration
 		}
 	}
-	s := &Server{tls: config.TLS.Clone(), queue: config.Jobs, registered: make(map[string]registration), sessions: make(map[ir.ID]session)}
+	s := &Server{tls: config.TLS.Clone(), queue: config.Jobs, registered: make(map[string]registration), sessions: make(map[ir.ID]session), authorizationEpoch: config.AuthorizationEpoch}
 	s.tls.MinVersion = tls.VersionTLS13
 	seenIDs := make(map[ir.ID]bool)
 	for _, r := range config.Registrations {
-		if r.RunnerID.Validate() != nil || !runnerprotocol.ValidDigest(r.CertificateSHA256) || seenIDs[r.RunnerID] || r.Architecture != "amd64" && r.Architecture != "arm64" || r.ValidationSlots != 1 || len(r.CoreBuildIDs) < 1 || len(r.CoreBuildIDs) > 100 {
+		if r.AuthorizationEpoch != "" && ir.ID(r.AuthorizationEpoch).Validate() != nil {
+			return nil, ErrConfiguration
+		}
+		if r.RunnerID.Validate() != nil || !runnerprotocol.ValidDigest(r.CertificateSHA256) || seenIDs[r.RunnerID] || r.Architecture != "amd64" && r.Architecture != "arm64" || r.ValidationSlots != 1 || r.ConnectivitySlots < 0 || r.ConnectivitySlots > 64 || r.ThroughputSlots < 0 || r.ThroughputSlots > 16 || len(r.CoreBuildIDs) < 1 || len(r.CoreBuildIDs) > 100 {
 			return nil, ErrConfiguration
 		}
 		if _, duplicate := s.registered[r.CertificateSHA256]; duplicate {
@@ -175,6 +183,19 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fail(w, requestID, http.StatusForbidden, "RUNNER_IDENTITY_REJECTED")
 		return
 	}
+	if s.authorizationEpoch != nil {
+		ctx, cancel := context.WithTimeout(r.Context(), time.Second)
+		epoch, err := s.authorizationEpoch(ctx)
+		cancel()
+		if err != nil {
+			fail(w, requestID, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE")
+			return
+		}
+		if epoch != reg.AuthorizationEpoch {
+			fail(w, requestID, http.StatusForbidden, "RUNNER_IDENTITY_REJECTED")
+			return
+		}
+	}
 	if r.Method != http.MethodPost || r.URL.RawQuery != "" || r.URL.RawPath != "" {
 		fail(w, requestID, http.StatusNotFound, "NOT_FOUND")
 		return
@@ -201,7 +222,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/internal/v1/runners/heartbeat":
 		var request runnerprotocol.RegisterRequest
-		if decode(data, &request) != nil || request.RunnerID != reg.RunnerID || request.Platform != "linux" || request.Architecture != reg.Architecture || !validSlots(request.AvailableSlots, reg.ValidationSlots) || request.Load.ActiveJobs < 0 || request.Load.ActiveJobs > reg.ValidationSlots || request.Load.MemoryAvailableBytes < 0 || request.Load.MemoryAvailableBytes > 9007199254740991 || len(request.Builds) < 1 || len(request.Builds) > 100 {
+		if decode(data, &request) != nil || request.RunnerID != reg.RunnerID || request.Platform != "linux" || request.Architecture != reg.Architecture || !validRegisteredSlots(request.AvailableSlots, reg) || request.Load.ActiveJobs < 0 || request.Load.ActiveJobs > reg.ValidationSlots+reg.ConnectivitySlots+reg.ThroughputSlots || request.Load.MemoryAvailableBytes < 0 || request.Load.MemoryAvailableBytes > 9007199254740991 || len(request.Builds) < 1 || len(request.Builds) > 100 {
 			fail(w, requestID, http.StatusBadRequest, "INVALID_REQUEST")
 			return
 		}
@@ -222,7 +243,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		respond(w, requestID, runnerprotocol.RegisterData{RunnerID: reg.RunnerID, HeartbeatIntervalMS: 5000, LeaseDurationMS: 30000, ServerTime: time.Now().UTC(), AcceptedBuildIDs: ids})
 	case "/internal/v1/jobs/lease":
 		var request runnerprotocol.LeaseRequest
-		if decode(data, &request) != nil || request.RunnerID != reg.RunnerID || !validSlots(request.AvailableSlots, reg.ValidationSlots) {
+		if decode(data, &request) != nil || request.RunnerID != reg.RunnerID || !validRegisteredSlots(request.AvailableSlots, reg) {
 			fail(w, requestID, http.StatusBadRequest, "INVALID_REQUEST")
 			return
 		}
@@ -233,11 +254,21 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			fail(w, requestID, http.StatusForbidden, "RUNNER_REGISTRATION_REQUIRED")
 			return
 		}
-		if request.AvailableSlots.ConfigValidate == 0 {
+		if request.AvailableSlots.ConfigValidate+request.AvailableSlots.Connectivity+request.AvailableSlots.DownloadThroughput == 0 {
 			respond(w, requestID, runnerprotocol.LeaseData{})
 			return
 		}
-		lease, err := s.queue.Claim(r.Context(), jobs.ClaimInput{Executor: jobs.Runner, WorkerID: reg.RunnerID, Types: []jobs.Type{jobs.ConfigValidate}, CoreBuildIDs: append([]ir.ID(nil), active.builds...)})
+		kinds := []jobs.Type{}
+		if request.AvailableSlots.ConfigValidate > 0 {
+			kinds = append(kinds, jobs.ConfigValidate)
+		}
+		if request.AvailableSlots.Connectivity > 0 {
+			kinds = append(kinds, jobs.Connectivity)
+		}
+		if request.AvailableSlots.DownloadThroughput > 0 {
+			kinds = append(kinds, jobs.DownloadThroughput)
+		}
+		lease, err := s.queue.Claim(r.Context(), jobs.ClaimInput{Executor: jobs.Runner, WorkerID: reg.RunnerID, Types: kinds, CoreBuildIDs: append([]ir.ID(nil), active.builds...), AvailableSlots: request.AvailableSlots, MaximumSlots: runnerprotocol.Slots{ConfigValidate: reg.ValidationSlots, Connectivity: reg.ConnectivitySlots, DownloadThroughput: reg.ThroughputSlots}})
 		if err != nil {
 			queueError(w, requestID, err)
 			return
@@ -248,7 +279,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		defer clear(lease.Payload)
 		var payload runnerprotocol.FrozenPayload
-		if decode(lease.Payload, &payload) != nil || runnerprotocol.ValidateConfigPayload(payload) != nil || payload.Core.CoreBuildID != lease.Job.CoreBuildID || lease.Job.Executor != jobs.Runner || lease.Job.Type != jobs.ConfigValidate || lease.Identity.WorkerID != reg.RunnerID || lease.Identity.JobID != lease.Job.ID || !lease.Identity.Valid() || !matchingCore(payload.Core, reg.builds[payload.Core.CoreBuildID]) {
+		if decode(lease.Payload, &payload) != nil || runnerprotocol.ValidatePayload(payload) != nil || payload.Core.CoreBuildID != lease.Job.CoreBuildID || lease.Job.Executor != jobs.Runner || payload.Type != string(lease.Job.Type) || lease.Identity.WorkerID != reg.RunnerID || lease.Identity.JobID != lease.Job.ID || !lease.Identity.Valid() || !matchingCore(payload.Core, reg.builds[payload.Core.CoreBuildID]) {
 			fail(w, requestID, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE")
 			return
 		}
@@ -332,7 +363,7 @@ func (s *Server) jobRequest(w http.ResponseWriter, r *http.Request, requestID st
 		respond(w, requestID, receipt)
 	case "result":
 		var request runnerprotocol.ResultRequest
-		if decode(data, &request) != nil || runnerprotocol.ValidateConfigMetrics(request.Metrics) != nil || !runnerprotocol.ValidDigest(request.ResultHash) {
+		if decode(data, &request) != nil || runnerprotocol.ValidateMetrics(request.Metrics) != nil || request.Observation.Validate() != nil || !runnerprotocol.ValidDigest(request.ResultHash) {
 			fail(w, requestID, http.StatusBadRequest, "INVALID_REQUEST")
 			return
 		}
@@ -346,7 +377,7 @@ func (s *Server) jobRequest(w http.ResponseWriter, r *http.Request, requestID st
 			fail(w, requestID, http.StatusBadRequest, "INVALID_REQUEST")
 			return
 		}
-		receipt, err := s.queue.Complete(r.Context(), id, jobs.Result{State: jobs.State(request.State), Verdict: jobs.Verdict(request.Verdict), Metrics: request.Metrics, Error: request.Error, Hash: request.ResultHash})
+		receipt, err := s.queue.Complete(r.Context(), id, jobs.Result{State: jobs.State(request.State), Verdict: jobs.Verdict(request.Verdict), Metrics: request.Metrics, Error: request.Error, Hash: request.ResultHash, Observation: request.Observation})
 		if err != nil {
 			queueError(w, requestID, err)
 			return
@@ -363,6 +394,10 @@ func matchingCore(core runnerprotocol.CoreIdentity, build capability.Build) bool
 
 func validSlots(slots runnerprotocol.Slots, maximum int32) bool {
 	return slots.ConfigValidate >= 0 && slots.ConfigValidate <= maximum && slots.Connectivity == 0 && slots.DownloadThroughput == 0
+}
+
+func validRegisteredSlots(slots runnerprotocol.Slots, r registration) bool {
+	return slots.ConfigValidate >= 0 && slots.ConfigValidate <= r.ValidationSlots && slots.Connectivity >= 0 && slots.Connectivity <= r.ConnectivitySlots && slots.DownloadThroughput >= 0 && slots.DownloadThroughput <= r.ThroughputSlots
 }
 
 func (s *Server) authenticate(r *http.Request) (registration, bool) {

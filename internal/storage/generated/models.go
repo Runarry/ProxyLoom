@@ -9,21 +9,22 @@ import (
 )
 
 type CompileBatch struct {
-	ID                pgtype.UUID
-	ScopeID           pgtype.UUID
-	ProfileID         pgtype.UUID
-	ProfileRevision   int64
-	CatalogRevision   int64
-	AuthEpoch         int64
-	Envelope          []byte
-	InputHmac         []byte
-	Revision          int64
-	State             string
-	Diagnostics       []byte
-	PreviewHash       pgtype.Text
-	BasePublicationID pgtype.UUID
-	CompileJobID      pgtype.UUID
-	CreatedAt         pgtype.Timestamptz
+	ID                     pgtype.UUID
+	ScopeID                pgtype.UUID
+	ProfileID              pgtype.UUID
+	ProfileRevision        int64
+	CatalogRevision        int64
+	AuthEpoch              int64
+	Envelope               []byte
+	InputHmac              []byte
+	Revision               int64
+	State                  string
+	Diagnostics            []byte
+	PreviewHash            pgtype.Text
+	BasePublicationID      pgtype.UUID
+	CompileJobID           pgtype.UUID
+	CreatedAt              pgtype.Timestamptz
+	DependenciesRegistered bool
 }
 
 type CompileBatchWrapping struct {
@@ -31,6 +32,13 @@ type CompileBatchWrapping struct {
 	BatchID     pgtype.UUID
 	Wrapping    []byte
 	WrapVersion int64
+}
+
+type CompileDependency struct {
+	ScopeID    pgtype.UUID
+	BatchID    pgtype.UUID
+	ResourceID pgtype.UUID
+	Revision   int64
 }
 
 type CompileOutput struct {
@@ -58,13 +66,19 @@ type CompilePreviewView struct {
 	PreviewHash string
 }
 
+type ControlAuthorization struct {
+	Singleton bool
+	Epoch     pgtype.UUID
+}
+
 type CoreBuild struct {
-	ID           pgtype.UUID
-	Manifest     []byte
-	Enabled      bool
-	Revision     int64
-	RegisteredAt pgtype.Timestamptz
-	DisabledAt   pgtype.Timestamptz
+	ID            pgtype.UUID
+	Manifest      []byte
+	Enabled       bool
+	Revision      int64
+	RegisteredAt  pgtype.Timestamptz
+	DisabledAt    pgtype.Timestamptz
+	DisableReason pgtype.Text
 }
 
 type IdempotencyKey struct {
@@ -122,6 +136,7 @@ type ImportBatch struct {
 	SourceID       pgtype.UUID
 	SnapshotID     pgtype.UUID
 	SourceRevision pgtype.Int8
+	CatalogLimits  []byte
 }
 
 type ImportCandidate struct {
@@ -229,6 +244,12 @@ type JobResult struct {
 	CreatedAt    pgtype.Timestamptz
 }
 
+type MaintenanceStatus struct {
+	ScopeID       pgtype.UUID
+	LastCleanupAt pgtype.Timestamptz
+	LastBackupAt  pgtype.Timestamptz
+}
+
 type NodeBinding struct {
 	NodeID           pgtype.UUID
 	ScopeID          pgtype.UUID
@@ -265,6 +286,8 @@ type PublicationAuditEvent struct {
 	ObjectID  pgtype.UUID
 	Action    string
 	CreatedAt pgtype.Timestamptz
+	EventID   pgtype.UUID
+	RequestID string
 }
 
 type PublicationDependency struct {
@@ -279,6 +302,33 @@ type PublicationHead struct {
 	ScopeID       pgtype.UUID
 	ProfileID     pgtype.UUID
 	PublicationID pgtype.UUID
+}
+
+type QuotaBucket struct {
+	ScopeID       pgtype.UUID
+	UtcDay        pgtype.Date
+	ReservedBytes int64
+	SettledBytes  int64
+}
+
+type QuotaReservation struct {
+	ID            pgtype.UUID
+	ScopeID       pgtype.UUID
+	JobID         pgtype.UUID
+	Attempt       int32
+	UtcDay        pgtype.Date
+	ReservedBytes int64
+	SettledBytes  pgtype.Int8
+	StartedAt     pgtype.Timestamptz
+	SettledAt     pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+}
+
+type QuotaSetting struct {
+	ScopeID   pgtype.UUID
+	Revision  int64
+	Settings  []byte
+	UpdatedAt pgtype.Timestamptz
 }
 
 type Resource struct {
@@ -315,6 +365,7 @@ type ResourceRef struct {
 	ExpectedKind     string
 }
 
+// Immutable ProxyLoom IR revisions; database schema 24 requires application support for up to 10000 ordered routing rules.
 type ResourceRevision struct {
 	ScopeID            pgtype.UUID
 	ResourceID         pgtype.UUID
@@ -406,6 +457,7 @@ type SubscriptionOperation struct {
 	Key         string
 	RequestHmac []byte
 	OperationID pgtype.UUID
+	CreatedAt   pgtype.Timestamptz
 }
 
 type SubscriptionToken struct {
@@ -421,6 +473,75 @@ type SubscriptionToken struct {
 	ExpiresAt      pgtype.Timestamptz
 	RevokedAt      pgtype.Timestamptz
 	CreatedAt      pgtype.Timestamptz
+}
+
+type SystemAuditEvent struct {
+	ID            int64
+	ScopeID       pgtype.UUID
+	ActorID       pgtype.UUID
+	ObjectID      pgtype.UUID
+	Action        string
+	Result        string
+	CreatedAt     pgtype.Timestamptz
+	EventID       pgtype.UUID
+	RequestID     string
+	ChangedFields []byte
+}
+
+type SystemSetting struct {
+	ScopeID   pgtype.UUID
+	Revision  int64
+	Settings  []byte
+	UpdatedAt pgtype.Timestamptz
+}
+
+type SystemSettingRevision struct {
+	ScopeID   pgtype.UUID
+	Revision  int64
+	Settings  []byte
+	ActorID   pgtype.UUID
+	CreatedAt pgtype.Timestamptz
+}
+
+type TestJob struct {
+	JobID              pgtype.UUID
+	ScopeID            pgtype.UUID
+	Subject            []byte
+	Dependencies       []byte
+	TestTargetID       pgtype.UUID
+	TestTargetRevision pgtype.Int8
+	CoreIdentity       []byte
+	EffectiveLimits    []byte
+}
+
+type TestOperation struct {
+	ScopeID     pgtype.UUID
+	ActorID     pgtype.UUID
+	Route       string
+	Key         string
+	RequestHmac []byte
+	OperationID pgtype.UUID
+	CreatedAt   pgtype.Timestamptz
+}
+
+type TestTarget struct {
+	ID              pgtype.UUID
+	ScopeID         pgtype.UUID
+	Revision        int64
+	Name            string
+	Enabled         bool
+	Config          []byte
+	SafetyCheckedAt pgtype.Timestamptz
+	CreatedAt       pgtype.Timestamptz
+	DeletedAt       pgtype.Timestamptz
+}
+
+type TestTargetRevision struct {
+	ScopeID   pgtype.UUID
+	TargetID  pgtype.UUID
+	Revision  int64
+	Config    []byte
+	CreatedAt pgtype.Timestamptz
 }
 
 type User struct {

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "tests": 5,
+  "failed": 0,
+  "skipped": 0,
+  "environment": "native_linux_amd64_container",
+  "image": "node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff",
+  "command": "node --test scripts/postgres-init.test.mjs",
+  "network": "none",
+  "root_filesystem": "read_only",
+  "temporary_fixture_directory": "/tmp:exec,mode=1777",
+  "source_sha256": {
+    "scripts/postgres-init.test.mjs": "5d04840195a2de19330aa7e85df331f5f80eaeb697aa5e1f5990800d7f9aebc7",
+    "deploy/postgres-init.sh": "af850c8a66b8a99f829ac76c6243340ff727c572bd8bea1822abc1f4aa49f8ba"
+  },
+  "output_sha256": "66bfc2d1d20bb2449c381805a52049ee3c938921c2e65ef5d056ecbb758a03a6",
+  "prior_attempt": "Four negative tests passed; the positive fixture failed because the temporary test directory was mounted noexec. Repeated with an executable temporary fixture directory; no product source changed."
+}

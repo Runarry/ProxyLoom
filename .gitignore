@@ -18,6 +18,8 @@
 /proxyloom-runner/bin/
 /proxyloom-server/proxyloom-server
 /proxyloom-runner/proxyloom-runner
+/proxyloom-operations/bin/
+/proxyloom-operations/proxyloom-operations
 *.exe
 *.test
 /coverage.out

@@ -1,0 +1,103 @@
+{
+  "baseline_run": true,
+  "compile": {
+    "mihomo": {
+      "artifact_sha256": "af8716aee70c11c8d56b61ad42dbef9eef97af03e35fdadf1a6dce327ca022dd",
+      "bytes": 1127958,
+      "duration": {
+        "samples": 100,
+        "p50_ms": 481.527434,
+        "p95_ms": 616.319113,
+        "p99_ms": 736.006292,
+        "max_ms": 751.827084
+      },
+      "identical_repeats": 100,
+      "native_outbounds": 500,
+      "native_rules": 2001,
+      "subject_outbounds": 500
+    },
+    "sing-box": {
+      "artifact_sha256": "dcad853775bc205da49f56f8338c27d154a52707246982f5d97c4b6f5f00b441",
+      "bytes": 1141797,
+      "duration": {
+        "samples": 100,
+        "p50_ms": 449.823756,
+        "p95_ms": 496.038729,
+        "p99_ms": 525.285076,
+        "max_ms": 556.928521
+      },
+      "identical_repeats": 100,
+      "native_outbounds": 500,
+      "native_rules": 2001,
+      "subject_outbounds": 500
+    },
+    "xray": {
+      "artifact_sha256": "fab6c16c03d899055fe0771162c68ee4e9dc5d8fc9cd468e62c21f7a6304c23f",
+      "bytes": 1249001,
+      "duration": {
+        "samples": 100,
+        "p50_ms": 448.376862,
+        "p95_ms": 850.576264,
+        "p99_ms": 907.677317,
+        "max_ms": 934.503138
+      },
+      "identical_repeats": 100,
+      "native_outbounds": 501,
+      "native_rules": 2002,
+      "subject_outbounds": 500
+    }
+  },
+  "dataset": {
+    "chain": 500,
+    "client_preset": 5,
+    "dns_profile": 1,
+    "node": 10000,
+    "routing_profile": 1,
+    "subscription_profile": 200
+  },
+  "environment": "real_production_services_in_owned_linux_amd64_docker_host",
+  "error_code": "management_baseline_failed",
+  "finished_at": "2026-09-13T21:27:48.102164538Z",
+  "limits": {
+    "api_cpus": 1,
+    "api_memory_bytes": 536870912,
+    "host_cpus": 4,
+    "host_memory_bytes": 6442450944,
+    "postgres_cpus": 1,
+    "postgres_memory_bytes": 1073741824,
+    "runner_cpus": 2,
+    "runner_memory_bytes": 1073741824
+  },
+  "management": {
+    "concurrency": 10,
+    "elapsed_seconds": 148.040046246,
+    "requests": 321,
+    "errors": 110,
+    "error_rate": 0.3426791277258567,
+    "latency": {
+      "samples": 321,
+      "p50_ms": 2311.860906,
+      "p95_ms": 10001.186125,
+      "p99_ms": 10007.574391,
+      "max_ms": 10009.315568
+    },
+    "ttfb": {
+      "samples": 212,
+      "p50_ms": 960.302069,
+      "p95_ms": 5592.468372,
+      "p99_ms": 7211.603518,
+      "max_ms": 10002.914844
+    }
+  },
+  "publication": {
+    "bytes": 1249001,
+    "real_kernel_validation": true,
+    "sha256": "fab6c16c03d899055fe0771162c68ee4e9dc5d8fc9cd468e62c21f7a6304c23f",
+    "target": "xray"
+  },
+  "publication_validation_state": "validating",
+  "result": "fail",
+  "schema_version": 1,
+  "seed_seconds": 28.102013328,
+  "started_at": "2026-09-13T21:21:55.429479649Z"
+}

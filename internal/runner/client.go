@@ -11,11 +11,13 @@ import (
 	"net/http"
 	"net/url"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/capability"
 	"github.com/Runarry/ProxyLoom/internal/ir"
+	"github.com/Runarry/ProxyLoom/internal/networktest"
 	coreexec "github.com/Runarry/ProxyLoom/internal/runner/exec"
 	"github.com/Runarry/ProxyLoom/internal/runnerprotocol"
 )
@@ -28,10 +30,12 @@ const controlTimeout = 3 * time.Second
 const leaseSafetyMargin = 5 * time.Second // TERM + KILL + one second transport allowance.
 
 type ClientConfig struct {
-	RunnerID ir.ID
-	APIURL   string
-	TLS      *tls.Config
-	CoreRoot string
+	RunnerID       ir.ID
+	APIURL         string
+	TLS            *tls.Config
+	CoreRoot       string
+	NetworkEnabled bool
+	Location       string
 }
 
 type Client struct {
@@ -40,8 +44,13 @@ type Client struct {
 	registry    coreexec.Registry
 	builds      []runnerprotocol.BuildReport
 	clockOffset time.Duration
-	ready       atomic.Bool
-	validate    func(context.Context, coreexec.Registry, ir.ID, []byte, time.Duration, coreexec.SandboxPolicy) (coreexec.Result, error)
+	clockMu     sync.RWMutex
+	// Test harnesses can supply isolated loopback fixtures. Production has no
+	// environment or wire option for changing protected-address policy.
+	networkPolicy networktest.Resolver
+	ready         atomic.Bool
+	validate      func(context.Context, coreexec.Registry, ir.ID, []byte, time.Duration, coreexec.SandboxPolicy) (coreexec.Result, error)
+	start         func(context.Context, coreexec.Registry, ir.ID, []byte, coreexec.SandboxPolicy, func(int)) (coreexec.Result, error)
 }
 
 func NewClient(config ClientConfig) (*Client, error) {
@@ -74,9 +83,9 @@ func newClient(config ClientConfig, registry coreexec.Registry, builds []runnerp
 	tlsConfig := config.TLS.Clone()
 	tlsConfig.MinVersion = tls.VersionTLS13
 	tlsConfig.ServerName = u.Hostname()
-	transport := &http.Transport{TLSClientConfig: tlsConfig, Proxy: nil, DisableCompression: true, MaxConnsPerHost: 2, TLSHandshakeTimeout: controlTimeout, ResponseHeaderTimeout: controlTimeout}
+	transport := &http.Transport{TLSClientConfig: tlsConfig, Proxy: nil, DisableCompression: true, MaxConnsPerHost: 16, TLSHandshakeTimeout: controlTimeout, ResponseHeaderTimeout: controlTimeout}
 	client := &http.Client{Transport: transport, Timeout: controlTimeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
-	return &Client{config: config, http: client, registry: registry, builds: append([]runnerprotocol.BuildReport(nil), builds...), validate: validate}, nil
+	return &Client{config: config, http: client, registry: registry, builds: append([]runnerprotocol.BuildReport(nil), builds...), validate: validate, start: coreexec.StartIsolated}, nil
 }
 
 func (c *Client) Ready() bool { return c.ready.Load() }
@@ -84,6 +93,9 @@ func (c *Client) Ready() bool { return c.ready.Load() }
 // Run owns one local validation slot. The queue's lease predicate and the
 // server's registered slot limit enforce capacity independently of client data.
 func (c *Client) Run(ctx context.Context) error {
+	if c.config.NetworkEnabled {
+		return c.runConcurrent(ctx)
+	}
 	defer c.http.CloseIdleConnections()
 	defer c.ready.Store(false)
 	for ctx.Err() == nil {
@@ -128,7 +140,7 @@ func waitControl(ctx context.Context) bool {
 }
 
 func (c *Client) register(ctx context.Context) error {
-	request := runnerprotocol.RegisterRequest{RunnerID: c.config.RunnerID, Platform: "linux", Architecture: runtime.GOARCH, Builds: c.builds, AvailableSlots: runnerprotocol.Slots{ConfigValidate: 1}, Load: runnerprotocol.Load{MemoryAvailableBytes: 0}}
+	request := runnerprotocol.RegisterRequest{RunnerID: c.config.RunnerID, Platform: "linux", Architecture: runtime.GOARCH, Builds: c.builds, AvailableSlots: c.capacity(), Load: runnerprotocol.Load{MemoryAvailableBytes: 0}}
 	var response runnerprotocol.Response[runnerprotocol.RegisterData]
 	before := time.Now()
 	if err := c.post(ctx, "/internal/v1/runners/heartbeat", request, &response); err != nil {
@@ -149,7 +161,9 @@ func (c *Client) register(ctx context.Context) error {
 	}
 	// Starting the offset at request dispatch overestimates server time by at
 	// most round-trip latency, making the local stop deadline conservative.
+	c.clockMu.Lock()
 	c.clockOffset = data.ServerTime.Sub(before)
+	c.clockMu.Unlock()
 	c.ready.Store(true)
 	return nil
 }
@@ -162,6 +176,9 @@ func (c *Client) executeLeaseFrom(ctx context.Context, lease *runnerprotocol.Lea
 	defer func() { lease.Artifact.ContentBase64 = "" }()
 	if lease.JobID.Validate() != nil || lease.Attempt < 1 || lease.Attempt > 100 || lease.LeaseSeq < 1 || lease.LeaseExpiresAt.IsZero() {
 		return ErrControlRejected
+	}
+	if lease.Type == "connectivity" || lease.Type == "download_throughput" {
+		return c.executeNetwork(ctx, lease, issuedAt)
 	}
 	result := runnerprotocol.ResultRequest{JobID: lease.JobID, Attempt: lease.Attempt, LeaseSeq: lease.LeaseSeq, State: "failed", Error: runnerprotocol.Safe("INVALID_CONFIG"), Metrics: runnerprotocol.Metrics{}}
 	config, err := c.validateLease(lease)
@@ -266,7 +283,10 @@ func (c *Client) executeLeaseFrom(ctx context.Context, lease *runnerprotocol.Lea
 }
 
 func (c *Client) stopAfter(expiresAt, issuedAt time.Time) time.Duration {
-	remaining := expiresAt.Sub(time.Now().Add(c.clockOffset)) - leaseSafetyMargin
+	c.clockMu.RLock()
+	offset := c.clockOffset
+	c.clockMu.RUnlock()
+	remaining := expiresAt.Sub(time.Now().Add(offset)) - leaseSafetyMargin
 	// PostgreSQL owns the 30-second lease clock. A conservative local bound
 	// starting before the request prevents API/DB wall-clock skew or a delayed
 	// response from extending execution beyond that actual lease duration.
@@ -301,7 +321,11 @@ func (c *Client) sendResult(ctx context.Context, request runnerprotocol.ResultRe
 		cancel()
 		if err == nil {
 			r := response.Data
-			if r.JobID != request.JobID || r.Attempt != request.Attempt || r.LeaseSeq != request.LeaseSeq || r.ResultHash != request.ResultHash || r.SettledBytes != 0 {
+			expected := int64(0)
+			if request.Metrics.BodyBytes != nil {
+				expected = *request.Metrics.BodyBytes
+			}
+			if r.JobID != request.JobID || r.Attempt != request.Attempt || r.LeaseSeq != request.LeaseSeq || r.ResultHash != request.ResultHash || r.SettledBytes != expected {
 				return ErrControlRejected
 			}
 			return nil

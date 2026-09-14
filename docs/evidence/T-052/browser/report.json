@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "run_id": "bc2bb2a7-1d4a-4206-a3ca-749b7c81cc9d",
+  "mode": "browser",
+  "started_at": "2026-09-13T17:01:57.468Z",
+  "result": "pass",
+  "steps": [
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "browser",
+      "result": "pass"
+    },
+    {
+      "name": "browser-native-server",
+      "result": "pass"
+    },
+    {
+      "name": "source-stability",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "fixture-network",
+      "result": "pass"
+    },
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "source_manifest_sha256": "efc616da6afa998ec7d69287c6657ea466afb4bd9dc80a58d89fffbed6eccb47",
+  "core_lock_sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18",
+  "test_binary_sha256": "d510543eb79decc25ae5f23bd8bc66092661d9251ddaade777a4cf3a1fbf4619",
+  "ended_at": "2026-09-13T17:02:27.450Z"
+}

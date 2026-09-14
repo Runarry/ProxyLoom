@@ -4,9 +4,19 @@ package exec
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"syscall"
 )
+
+func bindParentLifetime(attr *syscall.SysProcAttr) { attr.Pdeathsig = syscall.SIGKILL }
+
+// Linux ties Pdeathsig to the creating OS thread. Keep that thread alive until
+// the entire supervised process group is reaped, including normal cancellation.
+func pinParentThread() func() {
+	runtime.LockOSThread()
+	return runtime.UnlockOSThread
+}
 
 // Subreaper keeps killed helpers' grandchildren from becoming PID 1 zombies.
 const prSetChildSubreaper = 36

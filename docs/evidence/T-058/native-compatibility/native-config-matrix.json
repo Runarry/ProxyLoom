@@ -1,0 +1,650 @@
+[
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "chain-bootstrap-local-xray.json",
+    "artifact_sha256": "18db6a2b10d7534c471d34c64f6b552d904ac47b92524d259dcd762da44c65d6",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "orchestration-xray.json",
+    "artifact_sha256": "0c217d6182fc8f47ca656ec89e815808a8c6eb3a0932023189762d82eb931fea",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "policy-fixed-xray.json",
+    "artifact_sha256": "1791aeea17768370f3b204cf7744304a10c43feae221a76a76dd3169d6adec4d",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "policy-round_robin-xray.json",
+    "artifact_sha256": "a0a3d874360f3fd97533bd535099897070e043698fa85c5ea878989d82b9c956",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-http-native_tcp-none-xray.json",
+    "artifact_sha256": "33b339d191456c622cbf7324a525bb0a3ba4c949915c71634de1883bee182559",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-http-native_tcp-tls-xray.json",
+    "artifact_sha256": "c1406177e7efdabfec00ab86f074617678a5c03f3e4bfcedb0e230da489295ad",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-http-noauth-xray.json",
+    "artifact_sha256": "3585f7ad4c475e87468af065edc8e3ad07b09b312627f4df5204353ed900525d",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-http-tls-noauth-xray.json",
+    "artifact_sha256": "3be94a4530a5462d99e9f91b45c921635e60d350b69740ce6e9fa981ad82d8b1",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-shadowsocks-aes-256-gcm-xray.json",
+    "artifact_sha256": "c678c1421c3df9d48d095ac04ef81b9f79b2ba40c26e41038ef360f085f54ab9",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-shadowsocks-chacha20-ietf-poly1305-xray.json",
+    "artifact_sha256": "28ae6eb1535fde80b56f9d82de41f6c9cb7eb9c9bc10b77bcbd4d9ba2d9f80b7",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-shadowsocks-native_tcp-none-xray.json",
+    "artifact_sha256": "81bd9173f2aff9ba6557745672e881a72e8cdc5f98d3a11895dcef5b6c6ec158",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-socks5-native_tcp-none-xray.json",
+    "artifact_sha256": "dffa35514e9337df8b9e9368e657a3a1cdf964f4efc30f34f5602de0c6b13387",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-socks5-noauth-xray.json",
+    "artifact_sha256": "42122a38dc8eef837aa4ac4e9963f6198c66319d666aa2e7258da67420de8e1e",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-trojan-native_tcp-tls-xray.json",
+    "artifact_sha256": "100b86fc5fd61c05fb7f17d1258694d1d9754296068e08e38471a1f3002be1bb",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-trojan-websocket-tls-xray.json",
+    "artifact_sha256": "01d819da3c1cef87250a655459e842a38a80f2d4bd8221627b6ffb7ec418ba52",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vless-native_tcp-none-xray.json",
+    "artifact_sha256": "ca68a58e2a6db3dd8130f4ab3fb22b263d4aed2b7465d9d3a7b2fa0d6a19a182",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vless-native_tcp-reality-xray.json",
+    "artifact_sha256": "d876d776880f90c3eb889ad7ed57b7ffc7f445da7b4837169a3ee7d0e31d94f6",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vless-native_tcp-tls-xray.json",
+    "artifact_sha256": "8842e134323dff2426c9aff2b232a4fef16d0b8ca6b9b0e377d82037217204cc",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vless-websocket-none-xray.json",
+    "artifact_sha256": "3568cd706022e6857b7dcbd0644a153f04ee0b483281d965830a841f18d04b70",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vless-websocket-tls-xray.json",
+    "artifact_sha256": "e2708296515c1e6381f9c48b9db3ea0aa78f0f73dc6ed835380ec01113210b17",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vmess-native_tcp-none-xray.json",
+    "artifact_sha256": "ef1c6f86f3e2ee0c2b59132c1109d7f700a6e9be2837f181f91e7174d8c92c2f",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vmess-native_tcp-tls-xray.json",
+    "artifact_sha256": "efe94799310993076d21c03f3a1d0e36ae668c71132a8c1596f64a9be253751f",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vmess-websocket-none-xray.json",
+    "artifact_sha256": "2fc7f2fe5c4ae6e3ab3fc27a9139dc973ab7eb75dcd7cc60329470e73b418095",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "xray",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "fixture": "protocol-vmess-websocket-tls-xray.json",
+    "artifact_sha256": "d4638f66eb4985daea071d9d076794b784f2fc912add8c700765e211cedc0cd6",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "orchestration-sing-box.json",
+    "artifact_sha256": "da2ba12755edbfeec9ab6d6d43485212767c8c9e5aeb9404f1a99ca54f8e0c01",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "policy-fixed-sing-box.json",
+    "artifact_sha256": "d50cfe3f9a1f8f83d58376a240424dae6cbc922753f46f2dfbf556d537a3aade",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "policy-manual_select-sing-box.json",
+    "artifact_sha256": "407c3b0ee3968509bc52c044789212dccbf49c84d7b715b3377438803652a965",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-http-native_tcp-none-sing-box.json",
+    "artifact_sha256": "19cc50594360c32b7d808f2bae533d0885f9eca58563fbe7fa7fcf4911541fcd",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-http-native_tcp-tls-sing-box.json",
+    "artifact_sha256": "ba2db7cd763130816b14a4a54120d8737862eb5a1274507dc71a27ea769a93b8",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-http-noauth-sing-box.json",
+    "artifact_sha256": "c0b55cec0dd24572b27358455015be5815e412a8478ec7ec8499d32c79e053c6",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-http-tls-noauth-sing-box.json",
+    "artifact_sha256": "6eeb3a84d813dc047ff629a8f82d5ed13be364a239770e21bcab11e30e16351a",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-shadowsocks-aes-256-gcm-sing-box.json",
+    "artifact_sha256": "961b62fa94f9afb8db1ec9cabaff0a88438bfab5978d63c4d2dfb7ab234777d2",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-shadowsocks-chacha20-ietf-poly1305-sing-box.json",
+    "artifact_sha256": "8f92e9ea89cef192ee29f8b962227dd8f94a0ea89af65637a770e88e852abf71",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-shadowsocks-native_tcp-none-sing-box.json",
+    "artifact_sha256": "c79aacf6ea1597f92173e4f92f66fc4afe4b639f0f6cf5665314ae5a38c51bc5",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-socks5-native_tcp-none-sing-box.json",
+    "artifact_sha256": "a6bc098438842ba2db9c36d4c7d7ea4b4b7d9d7d7623d3b6f16f03b3ca35c84c",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-socks5-noauth-sing-box.json",
+    "artifact_sha256": "bb8dc2e046ad3a41424a0faf16441fbacc8c06bfd2cfd02f582c1a533ada0fd9",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-trojan-native_tcp-tls-sing-box.json",
+    "artifact_sha256": "8419c0adc1b6edf6e626e26113e587fb9f3baf15562f103a6f0e8800e28fc737",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-trojan-websocket-tls-sing-box.json",
+    "artifact_sha256": "e2da0230a205e30da05b9930a7d279411d3416a049a5b79033c8293094c0ae58",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vless-native_tcp-none-sing-box.json",
+    "artifact_sha256": "d1cd02d9f5d87287ba17a3bc4063fbfb4ebf06fda1d151dfb6f4bd2de1f1ec3a",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vless-native_tcp-reality-sing-box.json",
+    "artifact_sha256": "2ba80667026729d571f51109a4919e550a878b40c8708f74fa6867ed7d2f7630",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vless-native_tcp-tls-sing-box.json",
+    "artifact_sha256": "5261adab5bb292c8e0827e0fad92963670eac7f283f6db9dfe9b5bfa7ef41e5e",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vless-websocket-none-sing-box.json",
+    "artifact_sha256": "e9bb4d934ed73085d72bd2ac99c20e625464646bfed454a72bc5eb05f0fdf61a",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vless-websocket-tls-sing-box.json",
+    "artifact_sha256": "92625212544fcca165346f43879bd910d216323ab0f8db233f4040b496ea7df8",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vmess-native_tcp-none-sing-box.json",
+    "artifact_sha256": "f208707c2f04fe37c69ef9a88ee83abf04c08e0ab4411457541a7714e636a6f4",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vmess-native_tcp-tls-sing-box.json",
+    "artifact_sha256": "01fe5e96b8de96bd40f6bb9f8c46ae4efb7f092c9ca34a240c7ddb0a610be652",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vmess-websocket-none-sing-box.json",
+    "artifact_sha256": "df8fd1d6c1fa5b90eaac72ffeb7142780517c40ee69591f63745503eb65c7d94",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "sing-box",
+    "build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+    "build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+    "fixture": "protocol-vmess-websocket-tls-sing-box.json",
+    "artifact_sha256": "e23293fd4323c392daaf0907cea8282711dc8ec783666fe5d946dd8f278c3884",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "orchestration-mihomo.yaml",
+    "artifact_sha256": "65e3633dfe4e5f96d6d5460f3fd0ef8d4fddec3fb7bc0eb5bd01d536c9cb8fe9",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "policy-fixed-mihomo.yaml",
+    "artifact_sha256": "7b55bb7b4f2c1cf783ba6a4e5510e8064d1722859b8c9cac5360fa905f63913b",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "policy-latency_best-mihomo.yaml",
+    "artifact_sha256": "bbc4c443f21ab57d3f3b3394bb2ef5842cd5626d22414d776327b726bc61ff3e",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "policy-manual_select-mihomo.yaml",
+    "artifact_sha256": "31d258bbc6e52c760b9ae45c5f0613883841841ad1363c1ceff6e9c7931d0520",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "policy-round_robin-mihomo.yaml",
+    "artifact_sha256": "1ae2bb846792c504ccdfc9e4704888e1fe2436bfee2ed17126043322406fd768",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-http-native_tcp-none-mihomo.yaml",
+    "artifact_sha256": "984427b061430d716a9ca0ce3782de1725227428cfac24819b8c4bfc2988f297",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-http-native_tcp-tls-mihomo.yaml",
+    "artifact_sha256": "f538e8f8ba8801d909ab561c435a67e5f8bb300427632bf13f1acdf752ed786c",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-http-noauth-mihomo.yaml",
+    "artifact_sha256": "a1409ec6a335afa4f2f97ce6cb348c9959ff744800c0a0a302055a3f9e76c5cc",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-http-tls-noauth-mihomo.yaml",
+    "artifact_sha256": "1c9c4ca7fb35063525109aece3f937315dd790e867fd9e1d9a30a4b4c32e7a16",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-shadowsocks-aes-256-gcm-mihomo.yaml",
+    "artifact_sha256": "e9349c94a91ce2c7e0eaf371d2c05e3dfaa0938e78eaea4308536b3427cab6c0",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-shadowsocks-chacha20-ietf-poly1305-mihomo.yaml",
+    "artifact_sha256": "1dc8785c21281552793e4a1b6acb5b634d6b207061ffbb2731ffad440a9b36e5",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-shadowsocks-native_tcp-none-mihomo.yaml",
+    "artifact_sha256": "6122c805b0bc18ce9a9dbb31e403e250d8fd278fd8c45fd5c172bf66643bc7b9",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-socks5-native_tcp-none-mihomo.yaml",
+    "artifact_sha256": "35c8bbace526a03934d00c46bfc757a707632de211b97d6203eaa764300b2f16",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-socks5-noauth-mihomo.yaml",
+    "artifact_sha256": "4328430349da7789321827e88a31806bb340e1290bed75f28516774b2084ce62",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-trojan-native_tcp-tls-mihomo.yaml",
+    "artifact_sha256": "1aa3dd64b5fc8204b630bde880d1ca495361e0ee5ca42da2e8f0006e54d5a50f",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-trojan-websocket-tls-mihomo.yaml",
+    "artifact_sha256": "9409940ef90db1549327b9913fa49336c4d738ec37e9067d2dfb100bf14bc748",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vless-native_tcp-none-mihomo.yaml",
+    "artifact_sha256": "4089c41657ab60f54ebdc4cf4f9a54bd649b9a514c6fd2912209250155cddf55",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vless-native_tcp-reality-mihomo.yaml",
+    "artifact_sha256": "5ed2c2468c6f6ffdf35b718a90a36b6b8c76da2e592822b803ab4682fb2a82ea",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vless-native_tcp-tls-mihomo.yaml",
+    "artifact_sha256": "5e5f95c09c14f7f307ee99d3dc8afc0229434ae511b5c46ea84af1b5d751f682",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vless-websocket-none-mihomo.yaml",
+    "artifact_sha256": "c8a1a4598192fe25d6bdb9f152a03c7a992562cefc1f95b312d02e361bc502a7",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vless-websocket-tls-mihomo.yaml",
+    "artifact_sha256": "146367cb2aa41746894f0b8e6356c9757b257c4399599e92c6975851f4811915",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vmess-native_tcp-none-mihomo.yaml",
+    "artifact_sha256": "ec1db57060e6106abef657fc153b3f6497bd383482d7be43102e916322232357",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vmess-native_tcp-tls-mihomo.yaml",
+    "artifact_sha256": "1666fe0d2ebea142f88e95110205f52bc8f9f377969f33de40324907cbd3b244",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vmess-websocket-none-mihomo.yaml",
+    "artifact_sha256": "5a7ca571d4532255115a8881543be9830c3bd69d107422529c670e70de48bbeb",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  },
+  {
+    "family": "mihomo",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "fixture": "protocol-vmess-websocket-tls-mihomo.yaml",
+    "artifact_sha256": "fd8811e0762f7d4aa5dc6b350f5afcdd17f1b17a110b95bd830b3108998cf079",
+    "check": "pass",
+    "negative": "invalid protocol rejected"
+  }
+]

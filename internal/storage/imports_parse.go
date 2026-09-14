@@ -11,6 +11,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/origin"
 	"github.com/Runarry/ProxyLoom/internal/runnerprotocol"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
@@ -38,8 +39,8 @@ func (s *Imports) HandleParse(ctx context.Context, lease jobs.Lease) (jobs.Resul
 		return jobs.Result{}, nil, jobs.ErrInvalidInput
 	}
 	var format, state string
-	var envelope, wrapping []byte
-	err := s.catalog.pool.QueryRow(ctx, `SELECT format,state,raw_envelope,raw_wrapping FROM public.import_batches WHERE scope_id=$1 AND id=$2 AND job_id=$3`, dbID(lease.Job.ScopeID), dbID(lease.Job.BatchID), dbID(lease.Job.ID)).Scan(&format, &state, &envelope, &wrapping)
+	var envelope, wrapping, bound []byte
+	err := s.catalog.pool.QueryRow(ctx, `SELECT format,state,raw_envelope,raw_wrapping,catalog_limits FROM public.import_batches WHERE scope_id=$1 AND id=$2 AND job_id=$3`, dbID(lease.Job.ScopeID), dbID(lease.Job.BatchID), dbID(lease.Job.ID)).Scan(&format, &state, &envelope, &wrapping, &bound)
 	if err != nil {
 		return jobs.Result{}, nil, importError(err)
 	}
@@ -51,8 +52,12 @@ func (s *Imports) HandleParse(ctx context.Context, lease jobs.Lease) (jobs.Resul
 		return jobs.Result{}, nil, err
 	}
 	defer clear(raw)
+	limits := operations.Defaults().CatalogLimits
+	if json.Unmarshal(bound, &limits) != nil {
+		return jobs.Result{}, nil, imports.ErrUnavailable
+	}
 	parserFormat := map[string]string{"auto": "auto", "uri_list": "text", "base64_uri_list": "base64"}[format]
-	parsed, parseErr := importparse.Parse(ctx, parserFormat, raw)
+	parsed, parseErr := importparse.ParseBounded(ctx, parserFormat, raw, limits.MaxImportBytes, limits.MaxImportItems)
 	if ctx.Err() != nil {
 		return jobs.Result{}, nil, ctx.Err()
 	}

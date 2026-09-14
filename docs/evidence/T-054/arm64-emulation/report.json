@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "suite": "m3-arm64-sandbox",
+  "status": "failed",
+  "generated_at": "2026-09-13T15:17:50.790Z",
+  "source_sha256_before": "7aaafe2ebf56f086a640c92dab4145293c7ff5a78eea0643a738e4274d57c658",
+  "source_sha256_after": "7aaafe2ebf56f086a640c92dab4145293c7ff5a78eea0643a738e4274d57c658",
+  "test_binary_sha256": "11e10ca150f89b99e89a829d8670afa8c77c4102f8338c01d7dc45650445f534"
+}

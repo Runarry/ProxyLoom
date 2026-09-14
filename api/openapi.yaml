@@ -93,6 +93,12 @@ components:
       schema:
         type: "string"
         pattern: "^[A-Za-z0-9_-]{1,128}$"
+    RequiredIdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Required for atomic test admission and target creation; same actor, route and body replay the original operation.
+      schema: { type: string, pattern: '^[A-Za-z0-9_-]{1,128}$' }
     Limit:
       name: "limit"
       in: "query"
@@ -281,7 +287,7 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/ImportAcceptedResponse" }
     AuditEventListResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Implemented M3 operation response."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
@@ -322,7 +328,7 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/CompileBatchResponse" }
     CoreListResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Implemented M3 operation response."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
@@ -604,7 +610,7 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/SubscriptionResponse" }
     TestBatchResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Implemented M3 operation response."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
@@ -613,7 +619,7 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/TestBatchResponse" }
     TestResultListResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Implemented M3 operation response."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
@@ -621,7 +627,7 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/TestResultListResponse" }
     TestTargetListResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Implemented M3 operation response."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
@@ -629,7 +635,7 @@ components:
         "application/json":
           schema: { $ref: "#/components/schemas/TestTargetListResponse" }
     TestTargetResponse:
-      description: "Typed contract response. This operation is not registered by the foundation contract implementation."
+      description: "Implemented M3 operation response."
       headers:
         X-Request-ID: { $ref: "#/components/headers/RequestID" }
         Cache-Control: { $ref: "#/components/headers/NoStore" }
@@ -2698,7 +2704,7 @@ components:
         rules:
           type: "array"
           minItems: 0
-          maxItems: 1000
+          maxItems: 10000
           items: { $ref: "#/components/schemas/RoutingRule" }
         final: { $ref: "#/components/schemas/TargetRef" }
         domain_resolution_mode: { $ref: "#/components/schemas/DomainResolutionMode" }
@@ -2711,7 +2717,7 @@ components:
         rules:
           type: "array"
           minItems: 0
-          maxItems: 1000
+          maxItems: 10000
           items: { $ref: "#/components/schemas/RoutingRule" }
         final: { $ref: "#/components/schemas/TargetRef" }
         domain_resolution_mode: { $ref: "#/components/schemas/DomainResolutionMode" }
@@ -3625,6 +3631,7 @@ components:
           enum: ["queued", "compiling", "validating", "ready", "failed"]
         preview_truncated: { type: boolean }
         previous_preview_truncated: { type: boolean }
+        previous_preview_expired: { type: boolean, description: 'The comparison publication exceeded retention; no unchanged-content conclusion is available.' }
         preview: { type: string, maxLength: 32768, description: "Structurally redacted display only; never a publishable configuration." }
         previous_preview: { type: string, maxLength: 32768 }
         changed: { type: boolean }
@@ -3979,7 +3986,7 @@ components:
       additionalProperties: false
       required: ["url", "allowed_types", "expected_response", "limits", "permission_basis", "redirect_policy", "verify_certificate", "compression"]
       properties:
-        url: { $ref: "#/components/schemas/HTTPSURL" }
+        url: { $ref: "#/components/schemas/SourceURL" }
         allowed_types:
           type: "array"
           minItems: 1
@@ -4016,7 +4023,7 @@ components:
       additionalProperties: false
       required: []
       properties:
-        url: { $ref: "#/components/schemas/HTTPSURL" }
+        url: { $ref: "#/components/schemas/SourceURL" }
         allowed_types:
           type: "array"
           minItems: 1
@@ -4132,7 +4139,7 @@ components:
         subjects:
           type: "array"
           minItems: 1
-          maxItems: 200
+          maxItems: 100
           items: { $ref: "#/components/schemas/TestSubject" }
           uniqueItems: true
         core_build_id: { $ref: "#/components/schemas/UUID" }
@@ -4152,6 +4159,13 @@ components:
                 properties:
                   max_bytes:
                     minimum: 1
+          else:
+            not:
+              required: [test_target_id]
+            properties:
+              limits:
+                properties:
+                  max_bytes: { const: 0 }
       description: "Only enabled registered target IDs are accepted for network tests; no arbitrary URL, native config, executable, shell or filesystem path. The service freezes current subject revisions, epochs, approved target revision and exact build."
     Job:
       type: "object"
@@ -4357,6 +4371,7 @@ components:
       additionalProperties: false
       required: ["job_id", "attempt", "lease_seq", "result_hash", "state", "metrics"]
       properties:
+        observation: { $ref: "#/components/schemas/NetworkObservation" }
         job_id: { $ref: "#/components/schemas/UUID" }
         attempt:
           type: "integer"
@@ -4523,7 +4538,7 @@ components:
       properties:
         test_target_id: { $ref: "#/components/schemas/UUID" }
         revision: { $ref: "#/components/schemas/Revision" }
-        url: { $ref: "#/components/schemas/HTTPSURL" }
+        url: { $ref: "#/components/schemas/SourceURL" }
         validated_ips:
           type: "array"
           minItems: 1
@@ -4541,6 +4556,15 @@ components:
           type: "string"
           const: "disabled"
       description: "Immutable approved registry target for this attempt. Enforce pinned validated addresses while retaining Host/SNI and certificate verification. Revalidate safety at execution; never accept replacement URLs from a probe caller."
+    NetworkObservation:
+      type: object
+      additionalProperties: false
+      required: [location, execution_sha256, truncated_by]
+      properties:
+        location: { type: string, minLength: 1, maxLength: 128 }
+        execution_sha256: { $ref: '#/components/schemas/SHA256' }
+        truncated_by: { type: string, enum: [none, duration, bytes] }
+        cpu_throttled: { type: boolean }
     RunnerExecutionPolicy:
       type: "object"
       additionalProperties: false
@@ -4569,7 +4593,8 @@ components:
         process_limit:
           type: "integer"
           minimum: 1
-          maximum: 32
+          maximum: 128
+          description: Per-UID thread ceiling shared with the supervisor. Offline jobs use 32 and are exclusive with online work; online jobs share a 128-thread container ceiling. Seccomp forbids process forks.
     RunnerLease:
       type: "object"
       additionalProperties: false
@@ -4592,6 +4617,23 @@ components:
         execution_policy: { $ref: "#/components/schemas/RunnerExecutionPolicy" }
         payload_sha256: { $ref: "#/components/schemas/SHA256" }
         quota_reservation_id: { $ref: "#/components/schemas/UUID" }
+        approved_endpoints:
+          type: array
+          minItems: 1
+          maxItems: 2
+          items:
+            type: object
+            additionalProperties: false
+            required: [ip, port]
+            properties:
+              ip: { $ref: '#/components/schemas/IPAddress' }
+              port: { type: integer, minimum: 1, maximum: 65535 }
+        dependencies:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items: { $ref: '#/components/schemas/FrozenTestSubject' }
+        minimum_sample_bytes: { type: integer, minimum: 1, maximum: 1073741824 }
       allOf:
         -
           if:
@@ -4599,7 +4641,7 @@ components:
               type:
                 enum: ["connectivity", "download_throughput"]
           then:
-            required: ["subject", "test_target", "quota_reservation_id"]
+            required: ["subject", "test_target", "quota_reservation_id", "approved_endpoints", "dependencies", "minimum_sample_bytes"]
             properties:
               execution_policy:
                 properties:
@@ -4708,12 +4750,18 @@ components:
     TestResult:
       type: "object"
       additionalProperties: false
-      required: ["result_id", "job_id", "batch_id", "subject", "core_build_id", "core_build_sha256", "runner_id", "location", "attempt", "type", "state", "metrics", "effective_limits", "truncated_by", "cpu_throttled", "stale", "completed_at"]
+      required: ["result_id", "job_id", "batch_id", "subject", "core_build_id", "core_build_sha256", "runner_id", "location", "attempt", "type", "state", "metrics", "effective_limits", "truncated_by", "stale", "completed_at"]
       properties:
         result_id: { $ref: "#/components/schemas/UUID" }
         job_id: { $ref: "#/components/schemas/UUID" }
         batch_id: { $ref: "#/components/schemas/UUID" }
         subject: { $ref: "#/components/schemas/FrozenTestSubject" }
+        dependencies:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items: { $ref: "#/components/schemas/FrozenTestSubject" }
+        execution_sha256: { $ref: "#/components/schemas/SHA256" }
         core_build_id: { $ref: "#/components/schemas/UUID" }
         core_build_sha256: { $ref: "#/components/schemas/SHA256" }
         runner_id: { $ref: "#/components/schemas/UUID" }
@@ -4739,7 +4787,7 @@ components:
           type: "boolean"
         completed_at: { $ref: "#/components/schemas/Timestamp" }
         error: { $ref: "#/components/schemas/SafeError" }
-      description: "Frozen evidence uses the tested subject revision; stale is a live comparison with the current subject. Missing/expired network samples never become publication gates automatically."
+      description: "Frozen evidence uses the tested subject revision; stale compares every complete-chain dependency. Unknown execution load omits cpu_throttled. Missing Runner reports retain a terminal history item with empty metrics and unknown location. Missing/expired network samples never become publication gates automatically."
     TestResultListResponse:
       type: "object"
       additionalProperties: false
@@ -4764,15 +4812,15 @@ components:
         connectivity_concurrency:
           type: "integer"
           minimum: 1
-          maximum: 64
+          maximum: 4
         throughput_concurrency:
           type: "integer"
           minimum: 1
-          maximum: 16
+          maximum: 1
         max_test_duration_ms:
           type: "integer"
           minimum: 1000
-          maximum: 300000
+          maximum: 60000
         max_test_bytes:
           type: "integer"
           minimum: 1
@@ -4785,8 +4833,11 @@ components:
     RetentionSettings:
       type: "object"
       additionalProperties: false
-      required: ["job_event_days", "test_result_days", "audit_days", "idempotency_hours"]
+      required: ["job_event_days", "test_result_days", "audit_days", "idempotency_hours", "import_days", "publication_days", "publication_count"]
       properties:
+        import_days: { type: integer, minimum: 1, maximum: 365 }
+        publication_days: { type: integer, minimum: 1, maximum: 3650 }
+        publication_count: { type: integer, minimum: 1, maximum: 1000 }
         job_event_days:
           type: "integer"
           minimum: 1
@@ -4806,8 +4857,11 @@ components:
     CatalogLimits:
       type: "object"
       additionalProperties: false
-      required: ["max_import_bytes", "max_import_items", "max_dependency_resources", "max_targets_per_subscription"]
+      required: ["max_import_bytes", "max_import_items", "max_dependency_resources", "max_targets_per_subscription", "max_nodes", "max_rules", "max_outbounds"]
       properties:
+        max_nodes: { type: integer, minimum: 1, maximum: 1000000 }
+        max_rules: { type: integer, minimum: 1, maximum: 20000 }
+        max_outbounds: { type: integer, minimum: 1, maximum: 2000 }
         max_import_bytes:
           type: "integer"
           minimum: 1
@@ -4815,7 +4869,7 @@ components:
         max_import_items:
           type: "integer"
           minimum: 1
-          maximum: 100000
+          maximum: 5000
         max_dependency_resources:
           type: "integer"
           minimum: 1
@@ -4827,8 +4881,9 @@ components:
     SystemSettings:
       type: "object"
       additionalProperties: false
-      required: ["revision", "quota", "retention", "catalog_limits"]
+      required: ["revision", "quota", "retention", "catalog_limits", "cleanup_paused"]
       properties:
+        cleanup_paused: { type: boolean }
         revision: { $ref: "#/components/schemas/Revision" }
         quota: { $ref: "#/components/schemas/QuotaSettings" }
         retention: { $ref: "#/components/schemas/RetentionSettings" }
@@ -4852,15 +4907,15 @@ components:
         connectivity_concurrency:
           type: "integer"
           minimum: 1
-          maximum: 64
+          maximum: 4
         throughput_concurrency:
           type: "integer"
           minimum: 1
-          maximum: 16
+          maximum: 1
         max_test_duration_ms:
           type: "integer"
           minimum: 1000
-          maximum: 300000
+          maximum: 60000
         max_test_bytes:
           type: "integer"
           minimum: 1
@@ -4875,6 +4930,9 @@ components:
       additionalProperties: false
       required: []
       properties:
+        import_days: { type: integer, minimum: 1, maximum: 365 }
+        publication_days: { type: integer, minimum: 1, maximum: 3650 }
+        publication_count: { type: integer, minimum: 1, maximum: 1000 }
         job_event_days:
           type: "integer"
           minimum: 1
@@ -4897,6 +4955,9 @@ components:
       additionalProperties: false
       required: []
       properties:
+        max_nodes: { type: integer, minimum: 1, maximum: 1000000 }
+        max_rules: { type: integer, minimum: 1, maximum: 20000 }
+        max_outbounds: { type: integer, minimum: 1, maximum: 2000 }
         max_import_bytes:
           type: "integer"
           minimum: 1
@@ -4904,7 +4965,7 @@ components:
         max_import_items:
           type: "integer"
           minimum: 1
-          maximum: 100000
+          maximum: 5000
         max_dependency_resources:
           type: "integer"
           minimum: 1
@@ -4919,13 +4980,14 @@ components:
       additionalProperties: false
       required: []
       properties:
+        cleanup_paused: { type: boolean }
         quota: { $ref: "#/components/schemas/QuotaSettingsPatch" }
         retention: { $ref: "#/components/schemas/RetentionSettingsPatch" }
         catalog_limits: { $ref: "#/components/schemas/CatalogLimitsPatch" }
       minProperties: 1
     AuditAction:
       type: "string"
-      enum: ["setup", "login", "logout", "reauth", "create", "update", "delete", "reveal", "source_refresh", "import_commit", "compile", "publish", "rollback", "token_issue", "token_revoke", "test_create", "job_cancel", "core_disable", "settings_update", "secret_rewrap", "export"]
+      enum: ["setup", "login", "logout", "reauth", "create", "update", "delete", "reveal", "source_refresh", "import_commit", "compile", "publish", "rollback", "token_issue", "token_revoke", "test_create", "job_cancel", "core_disable", "settings_update", "secret_rewrap", "export", "cleanup", "backup", "restore", "password_reset"]
     AuditEvent:
       type: "object"
       additionalProperties: false
@@ -4965,6 +5027,32 @@ components:
           maxItems: 200
           items: { $ref: "#/components/schemas/AuditEvent" }
         page: { $ref: "#/components/schemas/PageInfo" }
+    SystemOverview:
+      type: object
+      additionalProperties: false
+      required: [resources, jobs, budget, cleanup_paused]
+      properties:
+        resources: { type: object, additionalProperties: { type: integer, minimum: 0 } }
+        jobs: { type: object, additionalProperties: { type: integer, minimum: 0 } }
+        budget:
+          type: object
+          additionalProperties: false
+          required: [utc_day, limit_bytes, reserved_bytes, settled_bytes]
+          properties:
+            utc_day: { type: string, format: date }
+            limit_bytes: { type: integer, minimum: 1 }
+            reserved_bytes: { type: integer, minimum: 0 }
+            settled_bytes: { type: integer, minimum: 0 }
+        cleanup_paused: { type: boolean }
+        last_cleanup_at: { $ref: '#/components/schemas/Timestamp' }
+        last_backup_at: { $ref: '#/components/schemas/Timestamp' }
+    SystemOverviewResponse:
+      type: object
+      additionalProperties: false
+      required: [request_id, data]
+      properties:
+        request_id: { $ref: '#/components/schemas/RequestID' }
+        data: { $ref: '#/components/schemas/SystemOverview' }
     Tag:
       type: "string"
       minLength: 1
@@ -6068,7 +6156,7 @@ paths:
   /api/v1/test-targets:
     get:
       operationId: listTestTargets
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List registered controlled test targets and their safety state
       parameters: [{$ref: '#/components/parameters/Limit'}, {$ref: '#/components/parameters/Cursor'}, {$ref: '#/components/parameters/Enabled'}]
       responses:
@@ -6078,9 +6166,10 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     post:
       operationId: createTestTarget
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Register an administrator-controlled target for safety checks
-      description: Registration alone does not make a target usable. URL, resolution, connection IP, redirects, certificate and response expectations are checked before safety_state becomes approved.
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      description: Approval validates administrator ownership declaration, HTTP(S) URL, every DNS answer and fixed response-policy bounds. Execution resolves and pins approved addresses again, denies redirects, verifies HTTPS certificates and checks the actual response. Approval is not connectivity evidence.
       requestBody:
         required: true
         content:
@@ -6098,7 +6187,7 @@ paths:
     parameters: [{$ref: '#/components/parameters/ID'}]
     get:
       operationId: getTestTarget
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read a registered test target and safety diagnostics
       responses:
         '200': {$ref: '#/components/responses/TestTargetResponse'}
@@ -6108,7 +6197,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateTestTarget
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Update target settings and invalidate approval when connection semantics change
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       requestBody:
@@ -6129,7 +6218,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     delete:
       operationId: deleteTestTarget
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Disable and soft-delete a target so it cannot be used for new tests
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
       responses:
@@ -6145,7 +6234,7 @@ paths:
   /api/v1/tests:
     post:
       operationId: createTestBatch
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Freeze subject revisions and reserve budget for a parent batch and child jobs
       description: Accepts only registered test_target_id for network tests, never a URL. Effective limits cannot exceed system, target or available quota limits. Parent cancellation requests cancellation of every unfinished child; terminal children remain immutable.
       parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
@@ -6258,7 +6347,7 @@ paths:
   /api/v1/test-results:
     get:
       operationId: listTestResults
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List traceable results bound to subject revision, core build and execution location
       parameters:
         - {$ref: '#/components/parameters/Limit'}
@@ -6267,6 +6356,9 @@ paths:
         - name: subject_id
           in: query
           schema: {$ref: '#/components/schemas/UUID'}
+        - name: type
+          in: query
+          schema: {$ref: '#/components/schemas/RunnerJobType'}
         - name: subject_revision
           in: query
           schema: {$ref: '#/components/schemas/Revision'}
@@ -6314,10 +6406,23 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
         '503': {$ref: '#/components/responses/Unavailable'}
+  /api/v1/system/overview:
+    get:
+      operationId: getSystemOverview
+      x-implementation-status: implemented
+      summary: Read workspace counts and current UTC quota usage
+      responses:
+        '200':
+          description: Bounded overview without secret or endpoint labels
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemOverviewResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { $ref: '#/components/responses/Unavailable' }
   /api/v1/system/settings:
     get:
       operationId: getSystemSettings
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Read whitelisted quota, concurrency and retention settings
       responses:
         '200': {$ref: '#/components/responses/SettingsResponse'}
@@ -6326,7 +6431,7 @@ paths:
         '503': {$ref: '#/components/responses/Unavailable'}
     patch:
       operationId: updateSystemSettings
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: Update a bounded whitelist of operational settings
       description: Database credentials, master keys, executable paths, shells, arbitrary environment variables and listener authentication are not writable settings.
       parameters: [{$ref: '#/components/parameters/IfMatch'}]
@@ -6348,7 +6453,7 @@ paths:
   /api/v1/audit-events:
     get:
       operationId: listAuditEvents
-      x-implementation-status: contract-only
+      x-implementation-status: implemented
       summary: List bounded audit metadata without request bodies or secrets
       parameters:
         - {$ref: '#/components/parameters/Limit'}

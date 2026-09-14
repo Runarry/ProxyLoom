@@ -1,0 +1,23 @@
+{"Time":"2026-09-14T01:23:46.7371838+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/catalog"}
+{"Time":"2026-09-14T01:23:46.8064563+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-14T01:23:46.8064563+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Output":"PASS\n"}
+{"Time":"2026-09-14T01:23:46.808959+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/catalog\t0.072s [no tests to run]\n"}
+{"Time":"2026-09-14T01:23:46.808959+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Elapsed":0.072}
+{"Time":"2026-09-14T01:23:48.1510597+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/storage"}
+{"Time":"2026-09-14T01:23:48.1510597+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/secretbox"}
+{"Time":"2026-09-14T01:23:48.1510597+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/config"}
+{"Time":"2026-09-14T01:23:48.2075096+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-14T01:23:48.2075096+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Output":"PASS\n"}
+{"Time":"2026-09-14T01:23:48.2090093+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/secretbox\t0.058s [no tests to run]\n"}
+{"Time":"2026-09-14T01:23:48.2090093+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Elapsed":0.058}
+{"Time":"2026-09-14T01:23:48.2300524+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/config","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-14T01:23:48.2300524+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/config","Output":"PASS\n"}
+{"Time":"2026-09-14T01:23:48.2320509+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/config","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/config\t0.081s [no tests to run]\n"}
+{"Time":"2026-09-14T01:23:48.2320509+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/config","Elapsed":0.081}
+{"Time":"2026-09-14T01:23:48.970277+08:00","Action":"run","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresRestoreAuthorizationAndUnknownUsageSettlement"}
+{"Time":"2026-09-14T01:23:48.970277+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresRestoreAuthorizationAndUnknownUsageSettlement","Output":"=== RUN   TestPostgresRestoreAuthorizationAndUnknownUsageSettlement\n"}
+{"Time":"2026-09-14T01:23:49.7996574+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresRestoreAuthorizationAndUnknownUsageSettlement","Output":"--- PASS: TestPostgresRestoreAuthorizationAndUnknownUsageSettlement (0.83s)\n"}
+{"Time":"2026-09-14T01:23:49.7996574+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresRestoreAuthorizationAndUnknownUsageSettlement","Elapsed":0.83}
+{"Time":"2026-09-14T01:23:49.7996574+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Output":"PASS\n"}
+{"Time":"2026-09-14T01:23:49.8112755+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/storage\t1.660s\n"}
+{"Time":"2026-09-14T01:23:49.8112755+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Elapsed":1.6600000000000001}

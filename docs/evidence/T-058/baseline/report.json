@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "run_id": "4b8ef367-283a-4755-ac33-575219840b38",
+  "result": "pass",
+  "environment": "native_linux_amd64_in_nested_docker",
+  "started_at": "2026-09-13T23:07:05.330Z",
+  "images": [
+    {
+      "service": "api",
+      "architecture": "amd64",
+      "tag": "proxyloom-api:m3-4db94ae3-c9e5-4efe-b9f7-0eab88458a39-amd64",
+      "image_id": "sha256:39603891c662281477d781f77c57b0000549e93fbd56e5e8778da6970919c573",
+      "os": "linux",
+      "runtime_verified": false,
+      "config_digest": "sha256:eaeb568b723637bd34a116e66268eb740a8214718f22387ec225f480b1024e05"
+    },
+    {
+      "service": "runner",
+      "architecture": "amd64",
+      "tag": "proxyloom-runner:m3-4db94ae3-c9e5-4efe-b9f7-0eab88458a39-amd64",
+      "image_id": "sha256:9f64c59823500c8edad3689ab8cf8177c707a4b78e8c409c44d8cd559ee896f6",
+      "os": "linux",
+      "runtime_verified": false,
+      "config_digest": "sha256:5a82527d15a455cea1c9f5fbd196b316956bae225a60cadd90d5cf8c3621df9e"
+    },
+    {
+      "service": "operations",
+      "architecture": "amd64",
+      "tag": "proxyloom-operations:m3-4db94ae3-c9e5-4efe-b9f7-0eab88458a39-amd64",
+      "image_id": "sha256:b7d5ce5b6a5ffc9e2742249019cf7f7747bd1f30ad230c473aa5a3fdff888792",
+      "os": "linux",
+      "runtime_verified": false,
+      "config_digest": "sha256:e2b656fa90378d4aa23baa945b639fda3563a6a4eb5960d8c604ae619c6436af"
+    },
+    {
+      "service": "postgres",
+      "architecture": "amd64",
+      "tag": "proxyloom-postgres:m3-17a3a2e7-593c-4e01-ab06-5a76c85c6da5-amd64",
+      "image_id": "sha256:7bade6d532592ca8ce7ee32def7399dad2607c4ea5583839fc4352a095a11ea6",
+      "os": "linux",
+      "runtime_verified": false,
+      "source": "postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0",
+      "config_digest": "sha256:a2ea0e68c465e0acf4c3672471b22b6b62972bb341e6f31544c855d85ba43745"
+    }
+  ],
+  "steps": [
+    {
+      "name": "build-probe",
+      "result": "pass"
+    },
+    {
+      "name": "build-capacity-probe",
+      "result": "pass"
+    },
+    {
+      "name": "inspect-legacy",
+      "result": "pass"
+    },
+    {
+      "name": "save-legacy",
+      "result": "pass"
+    },
+    {
+      "name": "legacy-manifest",
+      "result": "pass"
+    },
+    {
+      "name": "build-host",
+      "result": "pass"
+    },
+    {
+      "name": "start-host",
+      "result": "pass"
+    },
+    {
+      "name": "install-upgrade-restore",
+      "result": "pass"
+    },
+    {
+      "name": "collect-capacity",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "owned-docker-host-and-volumes",
+      "result": "pass"
+    }
+  ],
+  "capacity_baseline": true,
+  "upgrade_validation": "M2_schema_15_to_M3_then_distinct_compatible_image_and_incompatible_rejection",
+  "deployment_sha256": {
+    "compose.yaml": "28b4b3c7a326f904d7c022259a17bf80fb0d1f37ec19e39008bb2d435e758bd6",
+    "proxyloom.sh": "6b9077cac955b56e4f4eafd5e9abf7f9b0b39bb015fb3ec47280e51e58af0df9",
+    "network-guard.sh": "68a67a2b72e417608aff70828701c5a67a130896cffa95c8550e8c8c8d9eebcd",
+    "postgres-init.sh": "af850c8a66b8a99f829ac76c6243340ff727c572bd8bea1822abc1f4aa49f8ba"
+  },
+  "probe_sha256": "4f4bd2160184b834a4c777414c125c0d8216ef06d058886ef831387916225963",
+  "probe_source_sha256": "e5fcc23ea59552c173c054ab3468451a7a0e3ca7acad691eb30c4face67a0131",
+  "acceptance_script_sha256": "60e956a7ca357247071baaccbedb233b6443dc051ddfcbdba8f9b79da2e9028a",
+  "capacity_probe_sha256": "24b3c49e75824f491162ee5d1ad75244e893fb88cd21390744d78e9c29652d0c",
+  "capacity_source_sha256": "f97eeb8a175e2d13084bff5edf43097a8249a480ecbed85c9278f0f90056dafd",
+  "legacy": {
+    "schema_version": 1,
+    "commit": "246b08bed1d9490b1be4e0d946faced58f932ae6",
+    "tag": "proxyloom-api:m2-246b08b-239bfc26-2e0a-44bf-9958-4cfa1c0a727b",
+    "image_id": "sha256:902635e40ede0d8f048eefbc8d53b95cccab98540ae1505ce3dbaced7e83e017",
+    "architecture": "amd64",
+    "source_archive_sha256": "450e863af0480241c1e975d60c76b52c2260c9910d08c4812d50cd882833988b",
+    "config_digest": "sha256:b0c44fae8f280193cb93e29d553bfdc30ea28c05e33426732a29e0c87a4f4b5e"
+  },
+  "docker_version": "29.7.2",
+  "ended_at": "2026-09-13T23:35:04.358Z"
+}

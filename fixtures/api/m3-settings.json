@@ -1,0 +1,30 @@
+{
+  "revision": "1",
+  "cleanup_paused": false,
+  "quota": {
+    "daily_download_bytes": 1073741824,
+    "connectivity_concurrency": 4,
+    "throughput_concurrency": 1,
+    "max_test_duration_ms": 60000,
+    "max_test_bytes": 20971520,
+    "minimum_throughput_sample_bytes": 1048576
+  },
+  "retention": {
+    "job_event_days": 7,
+    "test_result_days": 30,
+    "audit_days": 180,
+    "idempotency_hours": 24,
+    "import_days": 7,
+    "publication_days": 90,
+    "publication_count": 20
+  },
+  "catalog_limits": {
+    "max_import_bytes": 10485760,
+    "max_import_items": 5000,
+    "max_dependency_resources": 10000,
+    "max_targets_per_subscription": 32,
+    "max_nodes": 100000,
+    "max_rules": 20000,
+    "max_outbounds": 2000
+  }
+}

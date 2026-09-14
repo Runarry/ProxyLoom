@@ -38,12 +38,20 @@ const (
 	RateLimited                 Code = "RATE_LIMITED"
 	ServiceUnavailable          Code = "SERVICE_UNAVAILABLE"
 	InternalError               Code = "INTERNAL_ERROR"
+	BudgetExceeded              Code = "BUDGET_EXCEEDED"
 )
 
 var errorDefinitions = map[Code]struct {
 	status  int
 	message string
 }{
+	BudgetExceeded:              {429, "The test budget is exhausted."},
+	"PROXY_CONNECT_FAILED":      {422, "The proxy connection could not be established."},
+	"AUTH_FAILED":               {422, "Proxy authentication failed."},
+	"TARGET_TLS_FAILED":         {422, "The target TLS handshake failed."},
+	"HTTP_EXPECTATION_FAILED":   {422, "The target response did not match its registered expectation."},
+	"TEST_TARGET_UNAVAILABLE":   {503, "The controlled target is unavailable; the node cannot be assessed."},
+	"INSUFFICIENT_SAMPLE":       {422, "The sample is too small to report throughput."},
 	CompileObsolete:             {409, "The compiled input is obsolete."},
 	PublicationBlocked:          {422, "The publication is blocked by its current safety state."},
 	PreviewConfirmationRequired: {409, "View and confirm this exact publication preview."},

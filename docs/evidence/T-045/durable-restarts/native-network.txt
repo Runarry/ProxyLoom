@@ -1,0 +1,11 @@
+=== RUN   TestPostgresM3RealNetwork
+    m3_postgres_test.go:284: PASS: xray single node and complete chain via durable mTLS queue
+    m3_postgres_test.go:284: PASS: sing-box single node and complete chain via durable mTLS queue
+    m3_postgres_test.go:284: PASS: mihomo single node and complete chain via durable mTLS queue
+    m3_postgres_test.go:332: PASS: four simultaneous native connectivity tasks on one Runner
+    m3_postgres_test.go:451: PASS: runner_restart during download; terminal=canceled, attempts=1, requests=1, active=0, recovery_ms=1209
+    m3_postgres_test.go:451: PASS: api_restart during download; terminal=failed, attempts=1, requests=1, active=0, recovery_ms=31105
+    m3_postgres_test.go:451: PASS: database_restart during download; terminal=succeeded, attempts=1, requests=1, active=0, recovery_ms=32736
+    m3_postgres_test.go:471: PASS: native cancellation, no node-failure retry, immutable history and byte settlement
+--- PASS: TestPostgresM3RealNetwork (101.95s)
+PASS

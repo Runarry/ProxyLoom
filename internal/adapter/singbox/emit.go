@@ -171,10 +171,11 @@ func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
 		return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 	}
 	return adapter.Artifact{
-		SnapshotID:  input.SnapshotID,
-		TargetKey:   input.TargetKey,
-		ContentType: ContentType,
-		Bytes:       payload,
+		SnapshotID:    input.SnapshotID,
+		TargetKey:     input.TargetKey,
+		ContentType:   ContentType,
+		Bytes:         payload,
+		OutboundCount: len(doc.Outbounds), RuleCount: rules,
 	}, nil, nil
 }
 

@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "run_id": "78dac550-d260-4214-920b-a767b03c797b",
+  "result": "pass",
+  "environment": "native_linux_amd64_in_nested_docker",
+  "started_at": "2026-09-13T19:35:34.477Z",
+  "images": [
+    {
+      "service": "api",
+      "architecture": "amd64",
+      "tag": "proxyloom-api:m3-adfc8e10-e7b5-4066-ae88-6b3fc9933dfa-amd64",
+      "image_id": "sha256:42e486e80edcdc1fb4438570237385ede7cba521d7aa96a6cc834984f81fa44d",
+      "os": "linux",
+      "runtime_verified": false,
+      "config_digest": "sha256:d33b8a7d24252925d8b7fc506c80b128c2ddfb56264f6530609b109f6d803bd4"
+    },
+    {
+      "service": "runner",
+      "architecture": "amd64",
+      "tag": "proxyloom-runner:m3-adfc8e10-e7b5-4066-ae88-6b3fc9933dfa-amd64",
+      "image_id": "sha256:d58001eea325fc5a8631ff9abcb9c89fab93c07c0ff0b98d269512967f9780d1",
+      "os": "linux",
+      "runtime_verified": false,
+      "config_digest": "sha256:78db979703e502e236a09019ec5d1076e296600a716d393f8a64684eb18831d0"
+    },
+    {
+      "service": "operations",
+      "architecture": "amd64",
+      "tag": "proxyloom-operations:m3-adfc8e10-e7b5-4066-ae88-6b3fc9933dfa-amd64",
+      "image_id": "sha256:68bfdd89d5675a14347a344f7a866dd9b23abc6d976c85ffff3cdda6b87096a6",
+      "os": "linux",
+      "runtime_verified": false,
+      "config_digest": "sha256:6c5addb45d0a075ab49a21b8d2f0c8a17a2e6f89dc7ef636ce090caf46a169ea"
+    },
+    {
+      "service": "postgres",
+      "architecture": "amd64",
+      "tag": "proxyloom-postgres:m3-4a81558e-e856-4d33-a1df-68b7490cc89b-amd64",
+      "image_id": "sha256:45cd22f8d32e189d245403954882f88e7a8714301fda80dab6da90f1265b25a3",
+      "os": "linux",
+      "runtime_verified": false,
+      "source": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+      "config_digest": "sha256:567d5d704a3e5a4864393b623a0d50eb1b5a4ad134cdac7cf19555cb2d8ffe9e"
+    }
+  ],
+  "steps": [
+    {
+      "name": "build-probe",
+      "result": "pass"
+    },
+    {
+      "name": "build-host",
+      "result": "pass"
+    },
+    {
+      "name": "start-host",
+      "result": "pass"
+    },
+    {
+      "name": "install-upgrade-restore",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "owned-docker-host-and-volumes",
+      "result": "pass"
+    }
+  ],
+  "deployment_sha256": {
+    "compose.yaml": "bf41ab96046cbc2fe5452dd07a59cac5f7106ef53606398880a304ed4bae605c",
+    "proxyloom.sh": "6b9077cac955b56e4f4eafd5e9abf7f9b0b39bb015fb3ec47280e51e58af0df9",
+    "network-guard.sh": "68a67a2b72e417608aff70828701c5a67a130896cffa95c8550e8c8c8d9eebcd",
+    "postgres-init.sh": "af850c8a66b8a99f829ac76c6243340ff727c572bd8bea1822abc1f4aa49f8ba"
+  },
+  "docker_version": "29.7.2",
+  "ended_at": "2026-09-13T19:37:19.938Z"
+}

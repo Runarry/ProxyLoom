@@ -12,6 +12,17 @@ import (
 // return no partial result. Individual URI failures remain visible candidates.
 // Text format disables envelope detection; base64 requires at least one layer.
 func Parse(ctx context.Context, format string, input []byte) (Result, error) {
+	return ParseBounded(ctx, format, input, MaxDecodedBytes, MaxEntries)
+}
+
+// EncodedLimit permits two padded Base64 layers within the decoded byte bound.
+func EncodedLimit(decoded int) int { return ((decoded+2)/3*4 + 2) / 3 * 4 }
+
+// ParseBounded applies the workspace limits frozen when a task was created.
+func ParseBounded(ctx context.Context, format string, input []byte, maxDecoded, maxEntries int) (Result, error) {
+	if maxDecoded < 1 || maxDecoded > MaxDecodedBytes || maxEntries < 1 || maxEntries > MaxEntries {
+		return Result{}, failure(InvalidValue, "/limits")
+	}
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
 	}
@@ -21,7 +32,7 @@ func Parse(ctx context.Context, format string, input []byte) (Result, error) {
 	if format != FormatAuto && format != FormatText && format != FormatBase64 {
 		return Result{}, failure(InvalidFormat, "/format")
 	}
-	if len(input) > MaxInputBytes {
+	if len(input) > EncodedLimit(maxDecoded) {
 		return Result{}, failure(InputTooLarge, "")
 	}
 	decodedSize := len(input)
@@ -68,7 +79,7 @@ func Parse(ctx context.Context, format string, input []byte) (Result, error) {
 			}
 		}
 	}
-	if decodedSize > MaxDecodedBytes {
+	if decodedSize > maxDecoded {
 		return Result{}, failure(DecodedTooLarge, "")
 	}
 	if nativeDocument(data) {
@@ -84,7 +95,7 @@ func Parse(ctx context.Context, format string, input []byte) (Result, error) {
 		}
 		if strings.TrimSpace(line) != "" {
 			count++
-			if count > MaxEntries {
+			if count > maxEntries {
 				return Result{}, failure(TooManyEntries, "")
 			}
 		}

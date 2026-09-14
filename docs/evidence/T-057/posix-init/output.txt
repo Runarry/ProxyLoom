@@ -1,0 +1,13 @@
+✔ unreadable-runtime fails before invoking psql (7.772881ms)
+✔ unreadable-migration fails before invoking psql (5.102175ms)
+✔ empty-runtime fails before invoking psql (5.616022ms)
+✔ empty-migration fails before invoking psql (5.535859ms)
+✔ valid credentials are exported to psql (6.585593ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 99.923835

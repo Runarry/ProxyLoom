@@ -14,6 +14,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/origin"
 	"github.com/Runarry/ProxyLoom/internal/override"
 	"github.com/Runarry/ProxyLoom/internal/runnerprotocol"
@@ -65,13 +66,19 @@ func (s *Sources) HandleRefresh(ctx context.Context, lease jobs.Lease) (jobs.Res
 	if document.Metadata.Revision != payload.Revision {
 		return jobs.Result{State: jobs.Failed, Verdict: jobs.Fail, Error: runnerprotocol.Safe("INVALID_CONFIG")}, nil, nil
 	}
-	fetched, fetchErr := s.fetchSource(ctx, document)
+	limits := operations.Defaults().CatalogLimits
+	if payload.Limits != nil {
+		limits = *payload.Limits
+	}
+	fetchDocument := document
+	fetchDocument.Source.FetchLimits.MaxDecodedBytes = min(fetchDocument.Source.FetchLimits.MaxDecodedBytes, importparse.EncodedLimit(limits.MaxImportBytes))
+	fetched, fetchErr := s.fetchSource(ctx, fetchDocument)
 	now := time.Now().UTC()
 	if fetchErr != nil || fetched.Status < 200 || fetched.Status > 299 || len(fetched.Body) == 0 {
 		code := refreshFetchCode(fetchErr, fetched)
 		return s.failedRefresh(document, lease.Job.ID, payload, fetched, code, now)
 	}
-	parsed, parseErr := importparse.Parse(ctx, source.ParserFormat(document.Source.Format), fetched.Body)
+	parsed, parseErr := importparse.ParseBounded(ctx, source.ParserFormat(document.Source.Format), fetched.Body, limits.MaxImportBytes, limits.MaxImportItems)
 	if ctx.Err() != nil {
 		return jobs.Result{}, nil, ctx.Err()
 	}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "scope": "One controlled scale recovery drill; daily systemd triggering and continuing backup health were not observed.",
+  "source_run": "4b8ef367-283a-4755-ac33-575219840b38",
+  "verified_backup_created_at": "2026-09-13T23:34:01.593123031Z",
+  "restored_verification_completed_at": "2026-09-13T23:35:02.805552323Z",
+  "snapshot_age_at_restore_completion_seconds": 61.212,
+  "rto_seconds": 27,
+  "all_current_revisions_decrypted": 10707,
+  "limits": {
+    "rpo_seconds": 86400,
+    "rto_seconds": 7200
+  }
+}

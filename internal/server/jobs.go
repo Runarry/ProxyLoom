@@ -79,7 +79,11 @@ func jobSafeError(input *runnerprotocol.SafeError) *apicontract.ErrorBody {
 	return &apicontract.ErrorBody{Code: apicontract.Code(safe.Code), Message: safe.Message, Details: []apicontract.Detail{}}
 }
 func jobRead(input jobs.Job) apicontract.Job {
-	return apicontract.Job{JobID: input.ID, Revision: apicontract.Revision(input.Revision), Executor: apicontract.Executor(input.Executor), Type: apicontract.JobType(input.Type), State: apicontract.JobState(input.State), Attempt: input.Attempt, LeaseSeq: apicontract.Counter(input.LeaseSeq), CancelRequested: input.CancelRequested, CreatedAt: input.CreatedAt, BatchID: input.BatchID, CoreBuildID: input.CoreBuildID, Verdict: apicontract.Verdict(input.Verdict), StartedAt: input.StartedAt, FinishedAt: input.FinishedAt, Error: jobSafeError(input.Error)}
+	var subject *apicontract.FrozenTestSubject
+	if s := input.Subject; s != nil {
+		subject = &apicontract.FrozenTestSubject{Kind: s.Kind, ID: s.ID, Revision: apicontract.Revision(s.Revision), SecurityEpoch: apicontract.Revision(s.SecurityEpoch)}
+	}
+	return apicontract.Job{JobID: input.ID, Revision: apicontract.Revision(input.Revision), Executor: apicontract.Executor(input.Executor), Type: apicontract.JobType(input.Type), State: apicontract.JobState(input.State), Attempt: input.Attempt, LeaseSeq: apicontract.Counter(input.LeaseSeq), CancelRequested: input.CancelRequested, CreatedAt: input.CreatedAt, BatchID: input.BatchID, Subject: subject, TestTargetID: input.TestTargetID, CoreBuildID: input.CoreBuildID, Verdict: apicontract.Verdict(input.Verdict), StartedAt: input.StartedAt, FinishedAt: input.FinishedAt, Error: jobSafeError(input.Error)}
 }
 func batchRead(input jobs.Batch) apicontract.TestBatch {
 	batch := apicontract.TestBatch{BatchID: input.ID, Revision: apicontract.Revision(input.Revision), State: apicontract.JobState(input.State), Verdict: apicontract.Verdict(input.Verdict), JobIDs: []ir.ID{}, Children: []apicontract.Job{}, Completed: input.Completed, Total: int32(len(input.Children)), CancelRequested: input.CancelRequested, EffectiveLimits: apicontract.TestLimits{DurationMS: input.EffectiveLimits.DurationMS, MaxBytes: input.EffectiveLimits.MaxBytes}, CreatedAt: input.CreatedAt}
@@ -153,7 +157,9 @@ func (h *jobHandler) cancel(c *gin.Context) {
 	if !h.auth.readRequest(c, "ReasonRequest", &reason, false) {
 		return
 	}
-	snapshot, err := h.store.Cancel(c.Request.Context(), jobScope(c), id, expected)
+	session, _ := SessionFromContext(c.Request.Context())
+	ctx := jobs.WithAuditActor(c.Request.Context(), jobs.AuditActor{ID: session.User.ID, RequestID: apicontract.RequestID(c.Request.Context())})
+	snapshot, err := h.store.Cancel(ctx, jobScope(c), id, expected)
 	if err != nil {
 		h.fail(c, err)
 		return

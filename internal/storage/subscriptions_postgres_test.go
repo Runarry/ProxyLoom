@@ -186,6 +186,9 @@ func TestPostgresPublicationAtomicSnapshotRevocationAndRollback(t *testing.T) {
 	if err != nil || !bytes.Equal(before.Bytes, after.Bytes) {
 		t.Fatal("ordinary editing changed published bytes")
 	}
+	if head, err := h.store.Head(h.env.ctx, h.env.scope, h.profile.Metadata.ResourceID); err != nil || head.State != "active" {
+		t.Fatal("ordinary revision drift changed the lightweight publication head", err)
+	}
 	rollback, err := h.store.Rollback(h.env.ctx, h.actor, h.profile.Metadata.ResourceID, 1, subscriptions.RollbackRequest{PublicationID: p.PublicationID, ExpectedGeneration: 1})
 	if err != nil || rollback.Generation != 2 {
 		t.Fatal("safe rollback:", err)
@@ -201,6 +204,9 @@ func TestPostgresPublicationAtomicSnapshotRevocationAndRollback(t *testing.T) {
 	}
 	if _, err = h.store.Download(h.env.ctx, issued.Token, h.keys[0]); !errors.Is(err, subscriptions.ErrBlocked) {
 		t.Fatal("old credentials remained downloadable")
+	}
+	if head, err := h.store.Head(h.env.ctx, h.env.scope, h.profile.Metadata.ResourceID); err != nil || head.State != "blocked" || len(head.BlockingReasons) != 1 {
+		t.Fatal("lightweight head missed credential revocation", err)
 	}
 	if _, err = h.store.Rollback(h.env.ctx, h.actor, h.profile.Metadata.ResourceID, 1, subscriptions.RollbackRequest{PublicationID: p.PublicationID, ExpectedGeneration: 2}); !errors.Is(err, subscriptions.ErrBlocked) {
 		t.Fatal("rollback revived old credentials")
@@ -263,7 +269,7 @@ func TestPostgresPublicationObsoleteFailureAndConcurrentPublish(t *testing.T) {
 	}
 	for _, core := range cores {
 		if core.Architecture == "amd64" {
-			if _, err = h.store.DisableCore(h.env.ctx, h.actor, core.CoreBuildID, 1); err != nil {
+			if _, err = h.store.DisableCore(h.env.ctx, h.actor, core.CoreBuildID, 1, "acceptance deactivation"); err != nil {
 				t.Fatal(err)
 			}
 			break

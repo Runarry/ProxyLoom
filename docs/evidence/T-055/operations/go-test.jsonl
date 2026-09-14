@@ -1,0 +1,35 @@
+{"Time":"2026-09-14T00:55:47.2934801+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/catalog"}
+{"Time":"2026-09-14T00:55:47.3544656+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-14T00:55:47.3544656+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Output":"PASS\n"}
+{"Time":"2026-09-14T00:55:47.3564648+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/catalog\t0.063s [no tests to run]\n"}
+{"Time":"2026-09-14T00:55:47.3564648+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/catalog","Elapsed":0.063}
+{"Time":"2026-09-14T00:55:48.8256882+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/storage"}
+{"Time":"2026-09-14T00:55:48.8256882+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/secretbox"}
+{"Time":"2026-09-14T00:55:48.8256882+08:00","Action":"start","Package":"github.com/Runarry/ProxyLoom/internal/config"}
+{"Time":"2026-09-14T00:55:48.8816461+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-14T00:55:48.8821477+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Output":"PASS\n"}
+{"Time":"2026-09-14T00:55:48.8836477+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/secretbox\t0.058s [no tests to run]\n"}
+{"Time":"2026-09-14T00:55:48.8836477+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/secretbox","Elapsed":0.058}
+{"Time":"2026-09-14T00:55:48.9026451+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/config","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-14T00:55:48.903147+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/config","Output":"PASS\n"}
+{"Time":"2026-09-14T00:55:48.9051454+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/config","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/config\t0.079s [no tests to run]\n"}
+{"Time":"2026-09-14T00:55:48.9051454+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/config","Elapsed":0.079}
+{"Time":"2026-09-14T00:55:49.6051737+08:00","Action":"run","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota"}
+{"Time":"2026-09-14T00:55:49.6051737+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota","Output":"=== RUN   TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota\n"}
+{"Time":"2026-09-14T00:55:49.9630891+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota","Output":"--- PASS: TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota (0.36s)\n"}
+{"Time":"2026-09-14T00:55:49.9630891+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota","Elapsed":0.36}
+{"Time":"2026-09-14T00:55:49.9630891+08:00","Action":"run","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision"}
+{"Time":"2026-09-14T00:55:49.9630891+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision","Output":"=== RUN   TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision\n"}
+{"Time":"2026-09-14T00:55:50.6180976+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision","Output":"--- PASS: TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision (0.66s)\n"}
+{"Time":"2026-09-14T00:55:50.6180976+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision","Elapsed":0.66}
+{"Time":"2026-09-14T00:55:50.6180976+08:00","Action":"run","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsSettingsRaceAuditAndLimits"}
+{"Time":"2026-09-14T00:55:50.6180976+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsSettingsRaceAuditAndLimits","Output":"=== RUN   TestPostgresOperationsSettingsRaceAuditAndLimits\n"}
+{"Time":"2026-09-14T00:55:51.1434141+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsSettingsRaceAuditAndLimits","Output":"--- PASS: TestPostgresOperationsSettingsRaceAuditAndLimits (0.53s)\n"}
+{"Time":"2026-09-14T00:55:51.1434141+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsSettingsRaceAuditAndLimits","Elapsed":0.53}
+{"Time":"2026-09-14T00:55:51.1434141+08:00","Action":"run","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCompileUsesFrozenExpansionLimit"}
+{"Time":"2026-09-14T00:55:51.1434141+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCompileUsesFrozenExpansionLimit","Output":"=== RUN   TestPostgresOperationsCompileUsesFrozenExpansionLimit\n"}
+{"Time":"2026-09-14T00:55:51.5980984+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCompileUsesFrozenExpansionLimit","Output":"--- PASS: TestPostgresOperationsCompileUsesFrozenExpansionLimit (0.45s)\n"}
+{"Time":"2026-09-14T00:55:51.5980984+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Test":"TestPostgresOperationsCompileUsesFrozenExpansionLimit","Elapsed":0.45}
+{"Time":"2026-09-14T00:55:51.5980984+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Output":"PASS\n"}
+{"Time":"2026-09-14T00:55:51.6091418+08:00","Action":"output","Package":"github.com/Runarry/ProxyLoom/internal/storage","Output":"ok  \tgithub.com/Runarry/ProxyLoom/internal/storage\t2.783s\n"}
+{"Time":"2026-09-14T00:55:51.6091418+08:00","Action":"pass","Package":"github.com/Runarry/ProxyLoom/internal/storage","Elapsed":2.783}

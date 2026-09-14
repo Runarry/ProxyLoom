@@ -1,0 +1,4 @@
+=== RUN   TestPostgresBackupRestoreRealToolsAndOldAuthorization
+    backup_postgres_test.go:159: PASS: encrypted custom dump, authenticated restore, no authorization revival; synthetic RTO 1.469s
+--- PASS: TestPostgresBackupRestoreRealToolsAndOldAuthorization (1.49s)
+PASS

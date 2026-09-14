@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "run_id": "b55fb219-9986-43c3-97f2-8c74295ead52",
+  "started_at": "2026-09-13T16:55:37.582Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "storage",
+  "test_filter": "TestPostgresOperations",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s -run TestPostgresOperations ./internal/catalog ./internal/storage ./internal/secretbox ./internal/config",
+  "source_manifest_sha256": "e72605f1261e3153e0455f501767b8f0a237774c4a632eb5188122b5cefea5e3",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsSettingsRaceAuditAndLimits",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsCompileUsesFrozenExpansionLimit",
+      "result": "pass"
+    }
+  ],
+  "identity_tests": [],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-13T16:55:53.242Z",
+  "source_commit": "246b08bed1d9490b1be4e0d946faced58f932ae6"
+}

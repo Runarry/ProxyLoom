@@ -10,8 +10,11 @@ import { summarizeGoFailure } from './foundation-report.mjs';
 import { assertSecretFree } from './quality-secrets.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-assert.ok(process.argv.slice(2).every((argument) => argument === '--storage-only'), 'foundation_unknown_argument');
+assert.ok(process.argv.slice(2).every((argument) => argument === '--storage-only' || /^--run=[A-Za-z0-9_^$|()]+$/.test(argument)), 'foundation_unknown_argument');
 const storageOnly = process.argv.includes('--storage-only');
+const runArguments = process.argv.slice(2).filter(argument => argument.startsWith('--run='));
+assert.ok(runArguments.length <= 1, 'foundation_duplicate_test_filter');
+const testFilter = runArguments[0]?.slice(6);
 const lock = JSON.parse(readFileSync(join(root, 'deploy/tools.lock.json'), 'utf8'));
 const runID = randomUUID();
 const name = `proxyloom-foundation-${runID}`;
@@ -48,7 +51,7 @@ function sourceManifest() {
   function walk(directory) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       if (['.git', '.cache', '.codex', '.agents', '.idea', '.vscode', 'node_modules', 'dist', 'bin', 'secrets', '.pnpm-store', 'coverage'].includes(entry.name) || entry.name.startsWith('.env')) continue;
-      if (directory === root && entry.isDirectory() && !['api', 'compat', 'deploy', 'fixtures', 'internal', 'migrations', 'proxyloom-server', 'proxyloom-runner', 'proxyloom-fixtures', 'proxyloom-web', 'schemas', 'scripts', '.github', 'docs'].includes(entry.name)) continue;
+      if (directory === root && entry.isDirectory() && !['api', 'compat', 'deploy', 'fixtures', 'internal', 'migrations', 'proxyloom-server', 'proxyloom-runner', 'proxyloom-operations', 'proxyloom-fixtures', 'proxyloom-web', 'schemas', 'scripts', '.github', 'docs'].includes(entry.name)) continue;
       const path = join(directory, entry.name);
       const name = relative(root, path).replaceAll('\\', '/');
       if (name.startsWith('docs/') && !['docs/requirements_v1.0.md', 'docs/project_design_v1.0.md'].includes(name)) continue;
@@ -126,8 +129,9 @@ try {
     PROXYLOOM_TEST_MIGRATION_DSN_FILE: join(secrets, 'migration_dsn'),
     PROXYLOOM_TEST_ADMIN_DSN_FILE: join(secrets, 'admin_dsn'), PROXYLOOM_REQUIRE_POSTGRES_TESTS: 'true' };
   const packages = storageOnly ? ['./internal/catalog', './internal/storage', './internal/secretbox', './internal/config'] : ['./internal/catalog', './internal/storage', './internal/secretbox', './internal/apicontract', './internal/identity', './internal/server', './internal/config', './proxyloom-server', './api'];
-  const args = ['test', '-mod=readonly', '-json', '-count=1', '-timeout=180s', ...packages];
+  const args = ['test', '-mod=readonly', '-json', '-count=1', '-timeout=180s', ...(testFilter ? ['-run', testFilter] : []), ...packages];
   report.mode = storageOnly ? 'storage' : 'full';
+  if (testFilter) report.test_filter = testFilter;
   report.command = `go ${args.join(' ')}`;
   const manifest = JSON.stringify({ schema_version: 1, files: sourceManifest() }, null, 2) + '\n';
   writeFileSync(join(directory, 'source-manifest.json'), manifest);
@@ -157,7 +161,7 @@ try {
   assert.ok(manifest === JSON.stringify({ schema_version: 1, files: sourceManifest() }, null, 2) + '\n', 'foundation_source_changed_during_tests');
   assert.equal(output.code, 0, 'foundation_go_tests_failed_see_local_evidence');
   assert.ok(integration.length > 0 && integration.every((event) => event.Action === 'pass') && report.postgres_skipped_tests.length === 0, 'foundation_postgres_tests_missing_or_skipped');
-  assert.ok(report.identity_tests.length > 0 && report.identity_tests.every((event) => event.result === 'pass'), 'identity_postgres_tests_missing_or_failed');
+  if (!testFilter) assert.ok(report.identity_tests.length > 0 && report.identity_tests.every((event) => event.result === 'pass'), 'identity_postgres_tests_missing_or_failed');
   pass('postgres_and_foundation_tests_executed');
 } catch (error) {
   pendingError = error;

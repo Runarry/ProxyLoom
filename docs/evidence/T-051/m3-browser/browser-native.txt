@@ -1,0 +1,3 @@
+=== RUN   TestPostgresM3RealNetwork
+--- PASS: TestPostgresM3RealNetwork (22.67s)
+PASS

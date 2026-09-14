@@ -37,8 +37,24 @@ const frontendDependencies = { ...frontend.dependencies, ...frontend.devDependen
 requireMatch(Object.keys(frontendDependencies).length === Object.keys(frontend.dependencies ?? {}).length + Object.keys(frontend.devDependencies ?? {}).length,
   'frontend duplicate direct dependency');
 requireMatch(isDeepStrictEqual(frontendDependencies, lock.frontend_direct_dependencies), 'frontend direct dependency set or versions');
+requireMatch(isDeepStrictEqual(frontend.pnpm?.overrides ?? {}, lock.frontend_overrides ?? {}), 'frontend security overrides');
 
 const images = new Set(Object.values(lock.images));
+for (const [name, scanner] of [['SBOM', lock.sbom], ['vulnerability', lock.vulnerability_scanner]]) {
+ requireMatch(/^\d+\.\d+\.\d+$/.test(scanner?.version ?? ''), `${name} scanner version`);
+ for (const platform of ['windows_amd64', 'linux_amd64']) {
+  const tool = scanner?.builds?.[platform];
+  requireMatch(tool && /^[a-f0-9]{64}$/.test(tool.sha256) && /^[a-f0-9]{64}$/.test(tool.binary_sha256), `${name} scanner ${platform} digests`);
+ }
+}
+requireMatch(read('deploy/Dockerfile.deployment-test').includes(`bash=${lock.deployment_test_packages?.bash}`), 'deployment test Bash version');
+const sourceLock = JSON.parse(read('deploy/sources.lock.json'));
+requireMatch(sourceLock.schema_version === 1 && sourceLock.sources.length === 3, 'core source inventory');
+const coreLock = read('compat/cores.lock.yaml');
+for (const item of sourceLock.sources) {
+  requireMatch(['xray', 'sing-box', 'mihomo'].includes(item.family) && /^[a-f0-9]{40}$/.test(item.commit) && /^[a-f0-9]{64}$/.test(item.sha256), 'core source identity');
+  requireMatch(coreLock.includes(`git_commit: ${item.commit}`) && item.url.endsWith('/' + item.commit) && item.archive === `${item.family}-${item.commit}.tar.gz`, 'core source commit/URL/archive');
+}
 for (const name of ['go_builder', 'node_builder', 'postgres', 'runtime']) {
   requireMatch(typeof lock.images[name] === 'string' && /^[^\s@]+@sha256:[0-9a-f]{64}$/.test(lock.images[name]), `images.${name} requires SHA-256 digest`);
 }

@@ -5,11 +5,13 @@ import (
 	"crypto/hmac"
 	"encoding/json"
 	"errors"
+	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/Runarry/ProxyLoom/internal/capability"
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/compiler"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
 	"github.com/Runarry/ProxyLoom/internal/subscriptions"
@@ -19,11 +21,12 @@ import (
 )
 
 type Subscriptions struct {
-	catalog  *Catalog
-	jobs     *Jobs
-	compiler *compiler.Compiler
-	cores    *capability.Catalog
-	pepper   []byte
+	catalog           *Catalog
+	jobs              *Jobs
+	compiler          *compiler.Compiler
+	cores             *capability.Catalog
+	pepper            []byte
+	artifactEnvelopes artifactEnvelopeCache
 }
 
 var _ subscriptions.Repository = (*Subscriptions)(nil)
@@ -62,6 +65,7 @@ type subTx = dbgen.DBTX
 type frozenPublication struct {
 	Input        ir.FrozenInput             `json:"input"`
 	Dependencies []subscriptions.Dependency `json:"dependencies"`
+	Limits       *operations.CatalogLimits  `json:"limits,omitempty"`
 }
 type storedBatch struct {
 	Scope             ir.ID
@@ -87,17 +91,30 @@ func (s *Subscriptions) seal(scope, id ir.ID, table string, data []byte) ([]byte
 func (s *Subscriptions) open(scope, id ir.ID, table string, payload, wrapping []byte) ([]byte, error) {
 	var p secretbox.Payload
 	var w secretbox.Wrapping
-	if json.Unmarshal(payload, &p) != nil || json.Unmarshal(wrapping, &w) != nil {
+	var key envelopeKey
+	cached := false
+	if table == secretbox.TableCompileOutputs {
+		key = makeEnvelopeKey(scope, id, payload, wrapping)
+		p, w, cached = s.artifactEnvelopes.get(key)
+	}
+	if !cached && (json.Unmarshal(payload, &p) != nil || json.Unmarshal(wrapping, &w) != nil) {
 		return nil, catalog.ErrCrypto
 	}
 	data, err := s.catalog.box.Open(subAAD(scope, id, table), p, w)
 	if err != nil {
 		return nil, catalog.ErrCrypto
 	}
+	if table == secretbox.TableCompileOutputs && !cached {
+		s.artifactEnvelopes.put(key, p, w)
+	}
 	return data, nil
 }
 func (s *Subscriptions) audit(ctx context.Context, tx pgx.Tx, a subscriptions.Actor, id ir.ID, action string) error {
-	_, err := tx.Exec(ctx, `INSERT INTO public.publication_audit_events(scope_id,actor_id,object_id,action) VALUES($1,$2,$3,$4)`, dbID(a.ScopeID), dbID(a.ID), dbID(id), action)
+	requestID := apicontract.RequestID(ctx)
+	if requestID == "" {
+		requestID = "system"
+	}
+	_, err := tx.Exec(ctx, `INSERT INTO public.publication_audit_events(scope_id,actor_id,object_id,action,request_id) VALUES($1,$2,$3,$4,$5)`, dbID(a.ScopeID), dbID(a.ID), dbID(id), action, requestID)
 	return err
 }
 func (s *Subscriptions) operation(ctx context.Context, tx pgx.Tx, a subscriptions.Actor, route string, request any, id ir.ID) (ir.ID, bool, error) {
@@ -216,7 +233,14 @@ func (s *Subscriptions) Compile(ctx context.Context, a subscriptions.Actor, id i
 			return subscriptions.Batch{}, subscriptions.ErrBlocked
 		}
 	}
-	plain, err := json.Marshal(frozenPublication{Input: frozen, Dependencies: deps})
+	settings, err := readSystemSettings(ctx, tx, a.ScopeID)
+	if err != nil {
+		return subscriptions.Batch{}, subError(err)
+	}
+	if len(deps) > settings.CatalogLimits.MaxDependencyResources || len(frozen.Spec().Targets) > settings.CatalogLimits.MaxTargetsPerSubscription {
+		return subscriptions.Batch{}, limitDiagnostic("/dependencies", id)
+	}
+	plain, err := json.Marshal(frozenPublication{Input: frozen, Dependencies: deps, Limits: &settings.CatalogLimits})
 	if err != nil {
 		return subscriptions.Batch{}, catalog.ErrInvalidInput
 	}
@@ -238,6 +262,15 @@ func (s *Subscriptions) Compile(ctx context.Context, a subscriptions.Actor, id i
 	}
 	_, err = tx.Exec(ctx, `INSERT INTO public.compile_batches(id,scope_id,profile_id,profile_revision,catalog_revision,auth_epoch,envelope,input_hmac,compile_job_id,base_publication_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,(SELECT publication_id FROM public.publication_heads WHERE scope_id=$2 AND profile_id=$3))`, dbID(batchID), dbID(a.ScopeID), dbID(id), expected, scope.CatalogRevision, scope.AuthEpoch, envelope, digest, dbID(job.ID))
 	if err != nil {
+		return subscriptions.Batch{}, subError(err)
+	}
+	for _, resource := range frozen.Spec().Resources {
+		m := resource.Metadata
+		if _, err = tx.Exec(ctx, `INSERT INTO public.compile_dependencies(scope_id,batch_id,resource_id,revision) VALUES($1,$2,$3,$4)`, dbID(a.ScopeID), dbID(batchID), dbID(m.ResourceID), m.Revision); err != nil {
+			return subscriptions.Batch{}, subError(err)
+		}
+	}
+	if _, err = tx.Exec(ctx, `UPDATE public.compile_batches SET dependencies_registered=true WHERE id=$1`, dbID(batchID)); err != nil {
 		return subscriptions.Batch{}, subError(err)
 	}
 	_, err = tx.Exec(ctx, `INSERT INTO public.compile_batch_wrappings(scope_id,batch_id,wrapping) VALUES($1,$2,$3)`, dbID(a.ScopeID), dbID(batchID), wrapping)

@@ -1,0 +1,1226 @@
+{
+  "task": "T-028",
+  "adapter_version": "0.2.0-m1-orchestration",
+  "goos": "linux",
+  "goarch": "amd64",
+  "cores_root_set": true,
+  "test_config_digest_scope": "SHA-256 of test-only synthetic configuration; not a production content HMAC",
+  "results": [
+    {
+      "family": "xray",
+      "scenario": "forward_chain",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "4e151197be4b943da82b44dfe8a409ae3035a391880a809a9b82c65cdf722986",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "4e151197be4b943da82b44dfe8a409ae3035a391880a809a9b82c65cdf722986",
+          "request_id": "fwd-xray",
+          "returned_request_id": "fwd-xray",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "bypass_forbidden_source",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "313721a1e0bb396092ef229d59a79ac602d5a7be5ec2f4505dc20bfc118b1b72",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "313721a1e0bb396092ef229d59a79ac602d5a7be5ec2f4505dc20bfc118b1b72",
+          "request_id": "bypass-xray",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:37556-\u003e127.0.0.1:17801: read: connection reset by peer"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "bypass-forbidden-source",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 5
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "direction_swap_original",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "41c0efca25ef265fb5176e429b866401937b26e601590a39aae0633c871b6552",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "41c0efca25ef265fb5176e429b866401937b26e601590a39aae0633c871b6552",
+          "request_id": "swap-orig-xray",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:34790-\u003e127.0.0.1:17801: i/o timeout"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "direction-swap-original",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 15
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "direction_swap_reverse",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "b5aa44de047c3602af5138cdcdc3341ac93308fb1b6b796355c466c68cc3d5c5",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "b5aa44de047c3602af5138cdcdc3341ac93308fb1b6b796355c466c68cc3d5c5",
+          "request_id": "swap-rev-xray",
+          "returned_request_id": "swap-rev-xray",
+          "exit_ip": "127.0.1.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "node_reuse",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "0a2e1e4cc89459c69b5e8e8e8089fe62560a05c69676734cad52e837a4dc77f4",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "67d4eacd956aa914df8b84a533c5e690999caedc50dd65eb3023378947284597",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "f5bc426b8ccfe33cc1317f7f43afe1899979f4a5c1b602c2c4f8fb4311b8f722",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "805e42d26fd80f504360f6b8991b8e7a05cf0a0982edf8efad0e6e731ff89573",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "eadaa6cfccd39d191a251720e76660785740bb489d5e3756794005a4486fb14a",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "0a2e1e4cc89459c69b5e8e8e8089fe62560a05c69676734cad52e837a4dc77f4",
+          "request_id": "reuse-ab",
+          "returned_request_id": "reuse-ab",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "67d4eacd956aa914df8b84a533c5e690999caedc50dd65eb3023378947284597",
+          "request_id": "reuse-ac",
+          "returned_request_id": "reuse-ac",
+          "exit_ip": "127.0.3.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "f5bc426b8ccfe33cc1317f7f43afe1899979f4a5c1b602c2c4f8fb4311b8f722",
+          "request_id": "reuse-db",
+          "returned_request_id": "reuse-db",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "805e42d26fd80f504360f6b8991b8e7a05cf0a0982edf8efad0e6e731ff89573",
+          "request_id": "reuse-ind-b",
+          "returned_request_id": "reuse-ind-b",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "eadaa6cfccd39d191a251720e76660785740bb489d5e3756794005a4486fb14a",
+          "request_id": "reuse-mixed",
+          "returned_request_id": "reuse-mixed",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "fail_closed",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "01c11f938f1ecf5ee3b0185b5c118d3aaefc01a6e051ece9eb70b82c57866d68",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "63f4beb781e698b007c852f07b7a681cb4b2578d696c009c480a7b1165d7d79c",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "f31df6b3dc6b8f96385f31cfb72fd3ceee589b899947abcd8bd77cd2087b62d9",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "01c11f938f1ecf5ee3b0185b5c118d3aaefc01a6e051ece9eb70b82c57866d68",
+          "request_id": "fail-stop-a-warm",
+          "returned_request_id": "fail-stop-a-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "01c11f938f1ecf5ee3b0185b5c118d3aaefc01a6e051ece9eb70b82c57866d68",
+          "request_id": "fail-stop-a",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:45276-\u003e127.0.0.1:17801: i/o timeout"
+        },
+        {
+          "test_config_sha256": "63f4beb781e698b007c852f07b7a681cb4b2578d696c009c480a7b1165d7d79c",
+          "request_id": "fail-stop-b-warm",
+          "returned_request_id": "fail-stop-b-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "63f4beb781e698b007c852f07b7a681cb4b2578d696c009c480a7b1165d7d79c",
+          "request_id": "fail-stop-b",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:45426-\u003e127.0.0.1:17801: read: connection reset by peer"
+        },
+        {
+          "test_config_sha256": "f31df6b3dc6b8f96385f31cfb72fd3ceee589b899947abcd8bd77cd2087b62d9",
+          "request_id": "fail-stop-chain-warm",
+          "returned_request_id": "fail-stop-chain-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "f31df6b3dc6b8f96385f31cfb72fd3ceee589b899947abcd8bd77cd2087b62d9",
+          "request_id": "fail-stop-chain",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:52690-\u003e127.0.0.1:17801: i/o timeout"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "fail-stop-a",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        },
+        {
+          "phase": "fail-stop-b",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        },
+        {
+          "phase": "fail-stop-chain",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "lifecycle",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "88bd8c3cd8f71b12201b4e6a828312b151d9c9c7b2c78bcf52bd52b5f381fe20",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "88bd8c3cd8f71b12201b4e6a828312b151d9c9c7b2c78bcf52bd52b5f381fe20",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "88bd8c3cd8f71b12201b4e6a828312b151d9c9c7b2c78bcf52bd52b5f381fe20",
+          "expected_termination": "timed_out",
+          "cleanup_status": "pass",
+          "exit_code": -1,
+          "canceled": false,
+          "timed_out": true
+        },
+        {
+          "test_config_sha256": "17aab6e0bc74542f2000d58217c6671587e04dfec17305acb39fb320199f73cb",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "88bd8c3cd8f71b12201b4e6a828312b151d9c9c7b2c78bcf52bd52b5f381fe20",
+          "request_id": "life-ok-xray",
+          "returned_request_id": "life-ok-xray",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "17aab6e0bc74542f2000d58217c6671587e04dfec17305acb39fb320199f73cb",
+          "request_id": "life-fail-xray",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:60166-\u003e127.0.0.1:17801: i/o timeout"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "lifecycle-failed-probe",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        }
+      ]
+    },
+    {
+      "family": "xray",
+      "scenario": "observation_detects_bypass",
+      "status": "pass",
+      "core_build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+      "core_build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+      "sessions": [
+        {
+          "test_config_sha256": "c790570b609717184b895cbbdbd62d32b7775e75d46dc4726c3a267fe308bbbf",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "c790570b609717184b895cbbdbd62d32b7775e75d46dc4726c3a267fe308bbbf",
+          "request_id": "obs-bypass-xray",
+          "returned_request_id": "obs-bypass-xray",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "forward_chain",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "7cc1352a60a3d004bf07b06cb9586e3c6fe605e92b40771be7421724a7daf964",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "7cc1352a60a3d004bf07b06cb9586e3c6fe605e92b40771be7421724a7daf964",
+          "request_id": "fwd-sing-box",
+          "returned_request_id": "fwd-sing-box",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "bypass_forbidden_source",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "4af460ba535b2dbeddb76aad4fa25b53fc6a9e1bacaa8fc516ea05fe42310e9a",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "4af460ba535b2dbeddb76aad4fa25b53fc6a9e1bacaa8fc516ea05fe42310e9a",
+          "request_id": "bypass-sing-box",
+          "ok": false,
+          "error": "socks5 connect failed: status 1"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "bypass-forbidden-source",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 1
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "direction_swap_original",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "731f126f0dd61efeeb06662b7fff9c76726e399199bd00f82ccd4bb14cb584df",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "731f126f0dd61efeeb06662b7fff9c76726e399199bd00f82ccd4bb14cb584df",
+          "request_id": "swap-orig-sing-box",
+          "ok": false,
+          "error": "socks5 connect failed: status 1"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "direction-swap-original",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 1
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "direction_swap_reverse",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "eb5b8c0dde1d2c53cbee6d1d9b471e07ff6f449026adfb99c3ce382ba9b2471d",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "eb5b8c0dde1d2c53cbee6d1d9b471e07ff6f449026adfb99c3ce382ba9b2471d",
+          "request_id": "swap-rev-sing-box",
+          "returned_request_id": "swap-rev-sing-box",
+          "exit_ip": "127.0.1.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "node_reuse",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "d82320295dad74326b6fd9b4f9604a866939f433ae1238401beb01a261d0083b",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "0f747062a58f80beaf8eb914bb3c8da00adef54871621e80e6857bb1da40b337",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "29dee57d1e91f212e842a432ba3a69a2a57edc282cd4f2e13efe11f30c024b96",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "80af79942e88abe802a4b84ee87bf4934165ef6711eab140132b7cde5f687ff5",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "fb2c2cd46ea3275fe5e6c1b1e14cc86486de077f072ea5948e2e02e2a137c883",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "d82320295dad74326b6fd9b4f9604a866939f433ae1238401beb01a261d0083b",
+          "request_id": "reuse-ab",
+          "returned_request_id": "reuse-ab",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "0f747062a58f80beaf8eb914bb3c8da00adef54871621e80e6857bb1da40b337",
+          "request_id": "reuse-ac",
+          "returned_request_id": "reuse-ac",
+          "exit_ip": "127.0.3.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "29dee57d1e91f212e842a432ba3a69a2a57edc282cd4f2e13efe11f30c024b96",
+          "request_id": "reuse-db",
+          "returned_request_id": "reuse-db",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "80af79942e88abe802a4b84ee87bf4934165ef6711eab140132b7cde5f687ff5",
+          "request_id": "reuse-ind-b",
+          "returned_request_id": "reuse-ind-b",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "fb2c2cd46ea3275fe5e6c1b1e14cc86486de077f072ea5948e2e02e2a137c883",
+          "request_id": "reuse-mixed",
+          "returned_request_id": "reuse-mixed",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "fail_closed",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "83fd96cd3775cd7224cdb4cdc813b530e528584de97adccf43a89a2d5e2576e7",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "277bba32e2f0f9767bc2b62c0a90e9fa6f4d09b9a5047c6bee257a6abaab0617",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "654cf0f3cde69ffa3c10f274c243da24d5d58fd22f2e31f1e232dd60d5dbb8ea",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "83fd96cd3775cd7224cdb4cdc813b530e528584de97adccf43a89a2d5e2576e7",
+          "request_id": "fail-stop-a-warm",
+          "returned_request_id": "fail-stop-a-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "83fd96cd3775cd7224cdb4cdc813b530e528584de97adccf43a89a2d5e2576e7",
+          "request_id": "fail-stop-a",
+          "ok": false,
+          "error": "socks5 connect failed: status 5"
+        },
+        {
+          "test_config_sha256": "277bba32e2f0f9767bc2b62c0a90e9fa6f4d09b9a5047c6bee257a6abaab0617",
+          "request_id": "fail-stop-b-warm",
+          "returned_request_id": "fail-stop-b-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "277bba32e2f0f9767bc2b62c0a90e9fa6f4d09b9a5047c6bee257a6abaab0617",
+          "request_id": "fail-stop-b",
+          "ok": false,
+          "error": "socks5 connect failed: status 1"
+        },
+        {
+          "test_config_sha256": "654cf0f3cde69ffa3c10f274c243da24d5d58fd22f2e31f1e232dd60d5dbb8ea",
+          "request_id": "fail-stop-chain-warm",
+          "returned_request_id": "fail-stop-chain-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "654cf0f3cde69ffa3c10f274c243da24d5d58fd22f2e31f1e232dd60d5dbb8ea",
+          "request_id": "fail-stop-chain",
+          "ok": false,
+          "error": "socks5 connect failed: status 5"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "fail-stop-a",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        },
+        {
+          "phase": "fail-stop-b",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        },
+        {
+          "phase": "fail-stop-chain",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "lifecycle",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "18328109a744292ebc43c1f9ff51cd0ca2c7e95a5696d3aa9263870befdecfdf",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "18328109a744292ebc43c1f9ff51cd0ca2c7e95a5696d3aa9263870befdecfdf",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "18328109a744292ebc43c1f9ff51cd0ca2c7e95a5696d3aa9263870befdecfdf",
+          "expected_termination": "timed_out",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": false,
+          "timed_out": true
+        },
+        {
+          "test_config_sha256": "9984f17352b8fc8c8b778e2a19903e68c1810728fee3f390b9121a902bdd136f",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "18328109a744292ebc43c1f9ff51cd0ca2c7e95a5696d3aa9263870befdecfdf",
+          "request_id": "life-ok-sing-box",
+          "returned_request_id": "life-ok-sing-box",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "9984f17352b8fc8c8b778e2a19903e68c1810728fee3f390b9121a902bdd136f",
+          "request_id": "life-fail-sing-box",
+          "ok": false,
+          "error": "socks5 connect failed: status 5"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "lifecycle-failed-probe",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        }
+      ]
+    },
+    {
+      "family": "sing-box",
+      "scenario": "observation_detects_bypass",
+      "status": "pass",
+      "core_build_id": "ebdd7efd-a425-5eb7-a63b-88667909c4b0",
+      "core_build_sha256": "57b3da14e264b6e05e8f46aee027c02d7dd7f1594d19aa39e2f4d2b9459bbd04",
+      "sessions": [
+        {
+          "test_config_sha256": "f443c7abe2eeb4c17765ce8d2a29ceeb74db3d09c0ffc389638116f4486166e4",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "f443c7abe2eeb4c17765ce8d2a29ceeb74db3d09c0ffc389638116f4486166e4",
+          "request_id": "obs-bypass-sing-box",
+          "returned_request_id": "obs-bypass-sing-box",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "forward_chain",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "36f36fb81378e76bc61109a94b6c54e2a10a7ecf591ce30c240278fdf6ed0e2a",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "36f36fb81378e76bc61109a94b6c54e2a10a7ecf591ce30c240278fdf6ed0e2a",
+          "request_id": "fwd-mihomo",
+          "returned_request_id": "fwd-mihomo",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "bypass_forbidden_source",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "588de75659deee39434a766c442c0999761a6f7502fc527d40bb56b54b324894",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "588de75659deee39434a766c442c0999761a6f7502fc527d40bb56b54b324894",
+          "request_id": "bypass-mihomo",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:41168-\u003e127.0.0.1:17803: i/o timeout"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "bypass-forbidden-source",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 10
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "direction_swap_original",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "5683f586565f38846fd54a5f7290a8e5e12d06cbbf8def9d952aab3aa3bbe81b",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "5683f586565f38846fd54a5f7290a8e5e12d06cbbf8def9d952aab3aa3bbe81b",
+          "request_id": "swap-orig-mihomo",
+          "ok": false
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "direction-swap-original",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 10
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "direction_swap_reverse",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "7aa04bd7161eb5deb5ed7b123d21a3396bccf37c0867142a5a998deef18e7c77",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "7aa04bd7161eb5deb5ed7b123d21a3396bccf37c0867142a5a998deef18e7c77",
+          "request_id": "swap-rev-mihomo",
+          "returned_request_id": "swap-rev-mihomo",
+          "exit_ip": "127.0.1.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "node_reuse",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "505be5de8debe9dac1a0f48cf23f9a1b6108eb7eaf000d47e2d977c5f7b35205",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "23719272b6f5b57924a04d074c56e030c4f33c8ee277ce1b5b47c62f2c9ea40b",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "02e8fcaadf6c163bde34a3d17047cdd94bfe5808065dba6bc7b7d2a8437f2275",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "b27da9541536c9bac37dc8c67ef6a818bbf65b744dc95fac5768c1373572b742",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "b0e278077fbb67ec3b73a0c493558d7c55b6a8a5f2d1b1006f74cefed7162152",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "505be5de8debe9dac1a0f48cf23f9a1b6108eb7eaf000d47e2d977c5f7b35205",
+          "request_id": "reuse-ab",
+          "returned_request_id": "reuse-ab",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "23719272b6f5b57924a04d074c56e030c4f33c8ee277ce1b5b47c62f2c9ea40b",
+          "request_id": "reuse-ac",
+          "returned_request_id": "reuse-ac",
+          "exit_ip": "127.0.3.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "02e8fcaadf6c163bde34a3d17047cdd94bfe5808065dba6bc7b7d2a8437f2275",
+          "request_id": "reuse-db",
+          "returned_request_id": "reuse-db",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "b27da9541536c9bac37dc8c67ef6a818bbf65b744dc95fac5768c1373572b742",
+          "request_id": "reuse-ind-b",
+          "returned_request_id": "reuse-ind-b",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "b0e278077fbb67ec3b73a0c493558d7c55b6a8a5f2d1b1006f74cefed7162152",
+          "request_id": "reuse-mixed",
+          "returned_request_id": "reuse-mixed",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "fail_closed",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "410f33fa95f435954a9e8a2a48ca086448b344f0fdd40b8cab0cff372673f6f1",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "3cc997888fed44e832019630883da78e4c7d6da19a2bbd793816379e706be2e0",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "6dd5ea529e63362e922135e3a74ad66abdb0f7872685e5d75dc1203cfd236933",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "410f33fa95f435954a9e8a2a48ca086448b344f0fdd40b8cab0cff372673f6f1",
+          "request_id": "fail-stop-a-warm",
+          "returned_request_id": "fail-stop-a-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "410f33fa95f435954a9e8a2a48ca086448b344f0fdd40b8cab0cff372673f6f1",
+          "request_id": "fail-stop-a",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:52098-\u003e127.0.0.1:17803: i/o timeout"
+        },
+        {
+          "test_config_sha256": "3cc997888fed44e832019630883da78e4c7d6da19a2bbd793816379e706be2e0",
+          "request_id": "fail-stop-b-warm",
+          "returned_request_id": "fail-stop-b-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "3cc997888fed44e832019630883da78e4c7d6da19a2bbd793816379e706be2e0",
+          "request_id": "fail-stop-b",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:33702-\u003e127.0.0.1:17803: i/o timeout"
+        },
+        {
+          "test_config_sha256": "6dd5ea529e63362e922135e3a74ad66abdb0f7872685e5d75dc1203cfd236933",
+          "request_id": "fail-stop-chain-warm",
+          "returned_request_id": "fail-stop-chain-warm",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "6dd5ea529e63362e922135e3a74ad66abdb0f7872685e5d75dc1203cfd236933",
+          "request_id": "fail-stop-chain",
+          "ok": false,
+          "error": "read tcp 127.0.0.1:33850-\u003e127.0.0.1:17803: i/o timeout"
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "fail-stop-a",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        },
+        {
+          "phase": "fail-stop-b",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        },
+        {
+          "phase": "fail-stop-chain",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "lifecycle",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "aff1cae400d00342c30baade8af54f95a975df98a3854b8d85fd5923be8571b7",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "aff1cae400d00342c30baade8af54f95a975df98a3854b8d85fd5923be8571b7",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        },
+        {
+          "test_config_sha256": "aff1cae400d00342c30baade8af54f95a975df98a3854b8d85fd5923be8571b7",
+          "expected_termination": "timed_out",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": false,
+          "timed_out": true
+        },
+        {
+          "test_config_sha256": "b3666621b2a71c33e9940625acc2d9d28828ac5ad8c2553a58c46f1fff2dfcd5",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "aff1cae400d00342c30baade8af54f95a975df98a3854b8d85fd5923be8571b7",
+          "request_id": "life-ok-mihomo",
+          "returned_request_id": "life-ok-mihomo",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        },
+        {
+          "test_config_sha256": "b3666621b2a71c33e9940625acc2d9d28828ac5ad8c2553a58c46f1fff2dfcd5",
+          "request_id": "life-fail-mihomo",
+          "ok": false
+        }
+      ],
+      "traffic": [
+        {
+          "phase": "lifecycle-failed-probe",
+          "target_accept_delta": 0,
+          "target_ok_delta": 0,
+          "a_ok_delta": 0,
+          "b_ok_delta": 0,
+          "a_forbidden_source_delta": 0,
+          "b_forbidden_source_delta": 0
+        }
+      ]
+    },
+    {
+      "family": "mihomo",
+      "scenario": "observation_detects_bypass",
+      "status": "pass",
+      "core_build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+      "core_build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+      "sessions": [
+        {
+          "test_config_sha256": "59d0a4ee19e9e55efd607c71733df0c864a1fbabab5381b1d65a11c231bde54d",
+          "expected_termination": "canceled",
+          "cleanup_status": "pass",
+          "exit_code": 0,
+          "canceled": true,
+          "timed_out": false
+        }
+      ],
+      "probes": [
+        {
+          "test_config_sha256": "59d0a4ee19e9e55efd607c71733df0c864a1fbabab5381b1d65a11c231bde54d",
+          "request_id": "obs-bypass-mihomo",
+          "returned_request_id": "obs-bypass-mihomo",
+          "exit_ip": "127.0.2.1",
+          "ok": true
+        }
+      ]
+    }
+  ]
+}

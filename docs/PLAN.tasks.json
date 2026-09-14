@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "docs/PLAN.md",
   "baseline_date": "2026-09-07",
-  "status_note": "2026-09-12 M2收口：T-030～T-038、T-050完成，累计46项done、14项not_started。订阅发布闭环通过当前源码适用验收，G2按已验内核／预设范围关闭；M3未启动。",
+  "status_note": "2026-09-14 M3实施中：54项done，6项in_progress。预算、联网、下载、故障恢复、结果历史、任务中心、系统页面和保留治理已完成工程验收；生产双架构、恢复调度、安全供应链和G3剩余门槛继续收口。arm64按用户决定保留未验。",
   "tasks": [
     {
       "id": "T-001",
@@ -848,7 +848,8 @@
         "T-043"
       ],
       "acceptance": "完整两跳实际运行；目标故障可判 inconclusive；任务状态与 verdict 分离；地址安全策略覆盖内核执行。\nAC-09、AC-18、AC-20",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-043",
@@ -866,7 +867,8 @@
         "T-039"
       ],
       "acceptance": "批量请求不超卖；重复回传仅结算一次；失联保守计量；跨日固定归属；取消失败同样计入用量。\nAC-19；NFR-05",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-044",
@@ -884,7 +886,8 @@
         "T-043"
       ],
       "acceptance": "达到上限立即停止应用读取；短样本不显示最大带宽；报告位置／目标／版本及限制原因。\nAC-18、AC-19",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-045",
@@ -904,7 +907,8 @@
         "T-044"
       ],
       "acceptance": "确认取消后清理目标 ≤5 秒；迟到结果不改状态；无永久 running、孤儿进程或重复测速；记录实测。\nAC-19；NFR-06、NFR-14",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-046",
@@ -923,7 +927,8 @@
         "T-045"
       ],
       "acceptance": "编辑节点后旧结果标历史；断线先读快照后重放，事件不重复累加；3 样本不展示误导 P95。\nAC-18、AC-19；NFR-14",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-047",
@@ -1041,7 +1046,8 @@
         "T-047"
       ],
       "acceptance": "关闭页面不误取消；任务执行失败与节点失败区分；刷新能恢复；单位、样本和截断原因可见。\nAC-18、AC-19",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-052",
@@ -1060,7 +1066,8 @@
         "T-051"
       ],
       "acceptance": "不显示伪造用户用量或主密钥；设置白名单受权限保护；未验证组合不能显示已支持。\nAC-23；FR-039 专项",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-053",
@@ -1097,7 +1104,7 @@
         "T-050"
       ],
       "acceptance": "两架构烟测；DB／Runner 无公网端口；secret 对指定 UID 可读；无 Docker Socket、特权或 TUN 依赖。\nAC-21；NFR-10、NFR-13",
-      "status": "not_started"
+      "status": "in_progress"
     },
     {
       "id": "T-055",
@@ -1117,7 +1124,8 @@
         "T-046"
       ],
       "acceptance": "活动发布与必要修订不被清理；日志截断脱敏；GC 可暂停、不长事务阻塞读取；故障手册可执行。\nAC-23；NFR-09、NFR-14",
-      "status": "not_started"
+      "status": "done",
+      "review_record": "docs/reviews/2026-09-14-m3-functional-review.md"
     },
     {
       "id": "T-056",
@@ -1138,7 +1146,7 @@
         "T-054"
       ],
       "acceptance": "旧备份令牌／会话／Runner 登记失效；任务不重跑测速；缺密钥失败；节点可解密；记录 RPO／RTO。\nAC-21、AC-22；NFR-11",
-      "status": "not_started"
+      "status": "in_progress"
     },
     {
       "id": "T-057",
@@ -1161,7 +1169,7 @@
         "T-055"
       ],
       "acceptance": "抓取安全不被当作内核沙箱；负例实际受阻；可信管理员部署边界写入交付；阻断级问题清零。\nAC-10、AC-20、AC-23",
-      "status": "not_started"
+      "status": "in_progress"
     },
     {
       "id": "T-058",
@@ -1182,7 +1190,7 @@
         "T-055"
       ],
       "acceptance": "报告包含环境、版本、样本、错误率；不把估计写成通过；80% 核心覆盖与关键不变量测试齐备。\nAC-24；NFR-01～NFR-14",
-      "status": "not_started"
+      "status": "in_progress"
     },
     {
       "id": "T-059",
@@ -1205,7 +1213,7 @@
         "T-058"
       ],
       "acceptance": "构建清单无待填版本；禁止 latest；每个 verified 能力有证据；上游更新生成新 CoreBuild 而非替换旧 ID。\nNFR-13；发布清单审查",
-      "status": "not_started"
+      "status": "in_progress"
     },
     {
       "id": "T-060",
@@ -1232,7 +1240,7 @@
         "T-059"
       ],
       "acceptance": "40 项 FR 的 P0 子项、14 项 NFR、24 个 AC 均有结论；P1 无混入；门槛不通过不得标记 v1.0 完成。\nAC-01～AC-24；NFR-01～NFR-14",
-      "status": "not_started"
+      "status": "in_progress"
     }
   ]
 }

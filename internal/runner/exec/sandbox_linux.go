@@ -131,6 +131,13 @@ func sandboxChild() error {
 	// existing adapters' exact configuration-check argv are recognized.
 	switch strings.Join(request.Arguments, " ") {
 	case "run -test -c config.json", "check -c config.json", "-t -d . -f config.yaml":
+		if request.Policy.Network != nil {
+			return ErrSandboxUnavailable
+		}
+	case "run -c config.json", "-d . -f config.yaml":
+		if request.Policy.Network == nil {
+			return ErrSandboxUnavailable
+		}
 	default:
 		return ErrSandboxUnavailable
 	}
@@ -170,11 +177,16 @@ func sandboxChild() error {
 			return ErrSandboxUnavailable
 		}
 	}
-	if err := restrictFilesystem(request.Directory, 4); err != nil {
+	if err := restrictFilesystemPolicy(request.Directory, 4, request.Policy.Network != nil); err != nil {
 		_, _ = os.Stderr.WriteString("sandbox_filesystem_policy_failed\n")
 		return ErrSandboxUnavailable
 	}
-	if err := restrictSyscalls(); err != nil {
+	if request.Policy.Network != nil {
+		if err := restrictNetwork(*request.Policy.Network); err != nil {
+			return ErrSandboxUnavailable
+		}
+	}
+	if err := restrictSyscallsPolicy(request.Policy.Network != nil); err != nil {
 		_, _ = os.Stderr.WriteString("sandbox_syscall_policy_failed\n")
 		return ErrSandboxUnavailable
 	}
@@ -225,6 +237,9 @@ func stringPointers(values []string) ([]*byte, error) {
 }
 
 func restrictFilesystem(directory string, coreFD int) error {
+	return restrictFilesystemPolicy(directory, coreFD, false)
+}
+func restrictFilesystemPolicy(directory string, coreFD int, online bool) error {
 	version, _, errno := unix.RawSyscall(unix.SYS_LANDLOCK_CREATE_RULESET, 0, 0, unix.LANDLOCK_CREATE_RULESET_VERSION)
 	if errno != 0 || version < 3 {
 		return ErrSandboxUnavailable
@@ -304,6 +319,13 @@ func restrictFilesystem(directory string, coreFD int) error {
 			}
 		}
 	}
+	if online {
+		// Minimal runtimes may omit system roots. Grant no access when absent;
+		// TLS verification still fails normally if a connection needs them.
+		if err := allow("/etc/ssl/certs", unix.LANDLOCK_ACCESS_FS_READ_FILE|unix.LANDLOCK_ACCESS_FS_READ_DIR); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
 	const workRights = unix.LANDLOCK_ACCESS_FS_READ_FILE | unix.LANDLOCK_ACCESS_FS_READ_DIR | unix.LANDLOCK_ACCESS_FS_WRITE_FILE | unix.LANDLOCK_ACCESS_FS_REMOVE_DIR | unix.LANDLOCK_ACCESS_FS_REMOVE_FILE | unix.LANDLOCK_ACCESS_FS_MAKE_DIR | unix.LANDLOCK_ACCESS_FS_MAKE_REG | unix.LANDLOCK_ACCESS_FS_TRUNCATE
 	if err := allow(directory, workRights); err != nil {
 		return err
@@ -327,6 +349,9 @@ func (fd descriptorReaderAt) ReadAt(buffer []byte, offset int64) (int, error) {
 }
 
 func restrictSyscalls() error {
+	return restrictSyscallsPolicy(false)
+}
+func restrictSyscallsPolicy(online bool) error {
 	arch := uint32(unix.AUDIT_ARCH_X86_64)
 	if runtime.GOARCH == "arm64" {
 		arch = unix.AUDIT_ARCH_AARCH64
@@ -362,6 +387,28 @@ func restrictSyscalls() error {
 		unix.SYS_FCHMOD, unix.SYS_FCHMODAT, unix.SYS_FCHOWN, unix.SYS_FCHOWNAT,
 		unix.SYS_UTIMENSAT,
 	}
+	if online {
+		// TCP data sockets and route notifications needed by sing-box are
+		// available. NETLINK_ROUTE changes still require CAP_NET_ADMIN, which
+		// the non-root deployment drops. UDP and host Unix sockets stay denied.
+		kept := blocked[:0]
+		for _, nr := range blocked {
+			switch nr {
+			case unix.SYS_SOCKET, unix.SYS_CONNECT, unix.SYS_BIND, unix.SYS_LISTEN, unix.SYS_ACCEPT, unix.SYS_ACCEPT4, unix.SYS_SENDTO, unix.SYS_SENDMSG, unix.SYS_SENDMMSG, unix.SYS_RECVFROM, unix.SYS_RECVMSG, unix.SYS_RECVMMSG:
+			default:
+				kept = append(kept, nr)
+			}
+		}
+		blocked = kept
+		sockets := []unix.SockFilter{
+			load(16), eq(unix.AF_NETLINK, 0, 7), load(32), eq(unix.NETLINK_ROUTE, 0, 4),
+			load(24), {Code: unix.BPF_ALU | unix.BPF_AND | unix.BPF_K, K: 15}, eq(unix.SOCK_RAW, 0, 1), ret(unix.SECCOMP_RET_ALLOW), ret(deny),
+			load(16), eq(unix.AF_INET, 2, 0), eq(unix.AF_INET6, 1, 0), ret(deny),
+			load(24), {Code: unix.BPF_ALU | unix.BPF_AND | unix.BPF_K, K: 15}, eq(unix.SOCK_STREAM, 1, 0), ret(deny), ret(unix.SECCOMP_RET_ALLOW),
+		}
+		filter = append(filter, eq(unix.SYS_SOCKET, 0, uint8(len(sockets))))
+		filter = append(filter, sockets...)
+	}
 	blocked = append(blocked, extraBlockedSyscalls()...)
 	for _, nr := range blocked {
 		filter = append(filter, eq(nr, 0, 1), ret(deny))
@@ -378,6 +425,40 @@ func restrictSyscalls() error {
 	filter = append(filter, ret(unix.SECCOMP_RET_ALLOW))
 	program := unix.SockFprog{Len: uint16(len(filter)), Filter: &filter[0]}
 	_, _, errno := unix.RawSyscall(unix.SYS_PRCTL, unix.PR_SET_SECCOMP, unix.SECCOMP_MODE_FILTER, uintptr(unsafe.Pointer(&program)))
+	if errno != 0 {
+		return errno
+	}
+	return nil
+}
+
+func restrictNetwork(policy NetworkPolicy) error {
+	version, _, errno := unix.RawSyscall(unix.SYS_LANDLOCK_CREATE_RULESET, 0, 0, unix.LANDLOCK_CREATE_RULESET_VERSION)
+	if errno != 0 || version < 4 {
+		return ErrSandboxUnavailable
+	}
+	attr := struct{ FS, Net uint64 }{Net: 3}
+	fd, _, errno := unix.RawSyscall(unix.SYS_LANDLOCK_CREATE_RULESET, uintptr(unsafe.Pointer(&attr)), 16, 0)
+	if errno != 0 {
+		return errno
+	}
+	defer unix.Close(int(fd))
+	add := func(port uint16, rights uint64) error {
+		rule := struct{ Rights, Port uint64 }{rights, uint64(port)}
+		_, _, e := unix.RawSyscall6(unix.SYS_LANDLOCK_ADD_RULE, fd, 2, uintptr(unsafe.Pointer(&rule)), 0, 0, 0)
+		if e != 0 {
+			return e
+		}
+		return nil
+	}
+	if err := add(policy.ListenerPort, 1); err != nil {
+		return err
+	}
+	for _, port := range policy.RemotePorts {
+		if err := add(port, 2); err != nil {
+			return err
+		}
+	}
+	_, _, errno = unix.RawSyscall(unix.SYS_LANDLOCK_RESTRICT_SELF, fd, 0, 0)
 	if errno != 0 {
 		return errno
 	}

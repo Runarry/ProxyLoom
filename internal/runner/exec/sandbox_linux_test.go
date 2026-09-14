@@ -31,20 +31,66 @@ func runSandboxProbe(filename string) (int, bool) {
 	if json.Unmarshal(data, &request) != nil || request.Probe == "" {
 		return 0, false
 	}
-	if request.Probe == "sleep" {
+	if request.Probe == "crash-ready" {
+		if os.WriteFile("core.ready", []byte(fmt.Sprint(os.Getpid())), 0600) != nil {
+			return 31, true
+		}
+	}
+	if request.Probe == "sleep" || request.Probe == "crash-ready" {
 		time.Sleep(30 * time.Second)
 		return 0, true
 	}
-	if request.Probe != "restrictions" {
+	online := request.Probe == "online_restrictions"
+	if request.Probe != "restrictions" && !online {
 		return 2, true
 	}
 	for _, socket := range []struct{ domain, kind int }{{unix.AF_INET, unix.SOCK_STREAM}, {unix.AF_INET, unix.SOCK_DGRAM}, {unix.AF_INET6, unix.SOCK_STREAM}, {unix.AF_UNIX, unix.SOCK_STREAM}} {
 		fd, err := unix.Socket(socket.domain, socket.kind, 0)
+		if online && (socket.domain == unix.AF_INET || socket.domain == unix.AF_INET6) && socket.kind == unix.SOCK_STREAM {
+			if err != nil {
+				return 21, true
+			}
+			unix.Close(fd)
+			continue
+		}
 		if err != unix.EPERM {
 			if fd >= 0 {
 				_ = unix.Close(fd)
 			}
 			return 11, true
+		}
+	}
+	if online {
+		fd, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM, 0)
+		if err != nil {
+			return 22, true
+		}
+		defer unix.Close(fd)
+		if err = unix.Bind(fd, &unix.SockaddrInet4{Port: 20071, Addr: [4]byte{127, 0, 0, 1}}); err != unix.EACCES {
+			return 23, true
+		}
+		if err = unix.Bind(fd, &unix.SockaddrInet4{Port: 20070, Addr: [4]byte{127, 0, 0, 1}}); err != nil {
+			return 24, true
+		}
+		if err = unix.Connect(fd, &unix.SockaddrInet4{Port: 20071, Addr: [4]byte{127, 0, 0, 1}}); err != unix.EACCES {
+			return 25, true
+		}
+		if err = unix.Connect(fd, &unix.SockaddrInet4{Port: 20072, Addr: [4]byte{127, 0, 0, 1}}); err != unix.ECONNREFUSED {
+			return 26, true
+		}
+		for _, protocol := range []int{unix.NETLINK_ROUTE, unix.NETLINK_USERSOCK} {
+			fd, err := unix.Socket(unix.AF_NETLINK, unix.SOCK_RAW, protocol)
+			if protocol == unix.NETLINK_ROUTE {
+				if err != nil {
+					return 27, true
+				}
+				unix.Close(fd)
+			} else if err != unix.EPERM {
+				if fd >= 0 {
+					unix.Close(fd)
+				}
+				return 28, true
+			}
 		}
 	}
 	if _, err := os.ReadFile(request.Outside); !errors.Is(err, os.ErrPermission) {
@@ -79,7 +125,11 @@ func runSandboxProbe(filename string) (int, bool) {
 	if unix.Getrlimit(unix.RLIMIT_AS, &limit) != nil || limit.Max != 1<<30 {
 		return 16, true
 	}
-	if unix.Getrlimit(unix.RLIMIT_NPROC, &limit) != nil || limit.Max != 32 {
+	processes := uint64(32)
+	if online {
+		processes = 128
+	}
+	if unix.Getrlimit(unix.RLIMIT_NPROC, &limit) != nil || limit.Max != processes {
 		return 17, true
 	}
 	if unix.Getrlimit(unix.RLIMIT_CORE, &limit) != nil || limit.Max != 0 {
@@ -148,6 +198,31 @@ func TestConfigSandboxCancellationCleansBeforeReturn(t *testing.T) {
 	entries, err := os.ReadDir(parent)
 	if err != nil || len(entries) != 0 {
 		t.Fatal("plaintext workspace was retained after cancellation")
+	}
+}
+
+func TestOnlineSandboxRetainsFileProcessIsolationAndRestrictsPorts(t *testing.T) {
+	if raceInstrumented {
+		t.Skip("production sandbox is exercised without race instrumentation")
+	}
+	id, registry, workspace := helperSetup(t)
+	defer workspace.Close()
+	digest, err := fileSHA256(registry.Files[id])
+	if err != nil {
+		t.Fatal(err)
+	}
+	registry.Builds = map[ir.ID]capability.Build{id: {ID: id, Family: ir.Xray, BinarySHA256: digest}}
+	outside := filepath.Join(t.TempDir(), "control-private-key")
+	if err = os.WriteFile(outside, []byte("EXAMPLE_CONTROL_SECRET"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	data, _ := json.Marshal(map[string]string{"runner_probe": "online_restrictions", "outside": outside})
+	policy := sandboxTestPolicy()
+	policy.Processes = 128
+	policy.Network = &NetworkPolicy{ListenerPort: 20070, RemotePorts: []uint16{20072}}
+	result, err := StartIsolated(context.Background(), registry, id, data, policy, nil)
+	if err != nil || result.ExitCode != 0 || !bytes.Contains(result.Output, []byte("SANDBOX_PROBE_OK")) {
+		t.Fatalf("online sandbox boundary failed: exit=%d err=%v output=%s", result.ExitCode, err, result.Output)
 	}
 }
 

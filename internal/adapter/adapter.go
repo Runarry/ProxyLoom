@@ -33,11 +33,13 @@ type Compiler interface {
 // Artifact bytes contain credentials. The persistence layer encrypts them before
 // storage. ContentHMAC is a keyed content digest, never an unkeyed secret hash.
 type Artifact struct {
-	SnapshotID  ir.ID
-	TargetKey   string
-	ContentType string
-	Bytes       []byte
-	ContentHMAC []byte
+	SnapshotID    ir.ID
+	TargetKey     string
+	ContentType   string
+	Bytes         []byte
+	ContentHMAC   []byte
+	OutboundCount int
+	RuleCount     int
 }
 
 func (v Artifact) Clone() Artifact {

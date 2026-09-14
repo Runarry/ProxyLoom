@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "suite": "m3-native",
+  "status": "passed",
+  "generated_at": "2026-09-13T20:17:28.852Z",
+  "source_sha256_before": "d09f5c9df5847bedd7150db226140435b670e2b35687a2145cd14af2174a076a",
+  "source_sha256_after": "d09f5c9df5847bedd7150db226140435b670e2b35687a2145cd14af2174a076a",
+  "test_binary_sha256": "432647083f84964ba03e93304c8e5795b5437056e8e9c6bf5b04e405b1beb82d"
+}

@@ -261,12 +261,17 @@ func (h *subscriptionHandler) list(c *gin.Context) {
 		return
 	}
 	data := []any{}
+	ids := make([]ir.ID, len(resources.Items))
+	for i, r := range resources.Items {
+		ids[i] = r.Metadata.ResourceID
+	}
+	heads, err := h.publications.Heads(c.Request.Context(), nodeScope(c), ids)
+	if err != nil {
+		h.fail(c, err)
+		return
+	}
 	for _, r := range resources.Items {
-		head, err := h.publications.Head(c.Request.Context(), nodeScope(c), r.Metadata.ResourceID)
-		if err != nil {
-			h.fail(c, err)
-			return
-		}
+		head := heads[r.Metadata.ResourceID]
 		data = append(data, gin.H{"metadata": apicontract.SubscriptionMetadata(r), "subscription": r.Payload, "publication_head": head})
 	}
 	info := apicontract.PageInfo{Limit: page.Limit}
@@ -439,7 +444,7 @@ func (h *subscriptionHandler) disableCore(c *gin.Context) {
 	if !h.readRequest(c, "ReasonRequest", &req) {
 		return
 	}
-	core, err := h.publications.DisableCore(c.Request.Context(), a, id, rev)
+	core, err := h.publications.DisableCore(c.Request.Context(), a, id, rev, req.Reason)
 	if err != nil {
 		h.fail(c, err)
 		return

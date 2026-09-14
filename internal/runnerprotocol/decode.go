@@ -159,7 +159,7 @@ func scanShape(decoder *json.Decoder, typ reflect.Type, depth int, nullable bool
 }
 func DecodeFrozenPayload(data []byte) (FrozenPayload, error) {
 	var value FrozenPayload
-	if DecodeStrict(data, &value) != nil || ValidateConfigPayload(value) != nil {
+	if DecodeStrict(data, &value) != nil || ValidatePayload(value) != nil {
 		return FrozenPayload{}, ErrInvalid
 	}
 	return value, nil

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "baseline_date": "2026-09-07",
-  "scope": "WP-01 M0 and M1 foundation tool baseline; not a production release or core compatibility lock",
-  "go": "1.26.0",
+  "scope": "Locked M0 through M3 dependencies and image bases; architecture and compatibility claims require separate execution evidence.",
+  "go": "1.26.8",
   "node": "24.6.0",
   "pnpm": "10.33.2",
   "observed_host": {
@@ -12,13 +12,14 @@
     "docker_compose": "5.5.0"
   },
   "go_direct_dependencies": {
+    "filippo.io/age": "v1.3.2",
     "github.com/gin-gonic/gin": "v1.11.0",
-    "github.com/jackc/pgx/v5": "v5.7.6",
+    "github.com/jackc/pgx/v5": "v5.9.2",
     "github.com/santhosh-tekuri/jsonschema/v6": "v6.0.2",
-    "gopkg.in/yaml.v3": "v3.0.1",
-    "golang.org/x/crypto": "v0.40.0",
-    "golang.org/x/net": "v0.42.0",
-    "golang.org/x/sys": "v0.35.0"
+    "golang.org/x/crypto": "v0.56.0",
+    "golang.org/x/net": "v0.58.0",
+    "golang.org/x/sys": "v0.47.0",
+    "gopkg.in/yaml.v3": "v3.0.1"
   },
   "frontend_direct_dependencies": {
     "vue": "3.5.42",
@@ -31,11 +32,15 @@
     "openapi-typescript": "7.9.1",
     "@playwright/test": "1.58.2"
   },
+  "frontend_overrides": {
+    "js-yaml": "4.3.2"
+  },
   "images": {
-    "go_builder": "golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c",
+    "go_builder": "golang:1.26.8-bookworm@sha256:9fdc884aacc3bec89b20ffc69f4bb369c78210e3e4f600387b5128b12c199f81",
     "node_builder": "node:24.6.0-bookworm-slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff",
-    "postgres": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
-    "runtime": "debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171"
+    "postgres": "postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0",
+    "runtime": "debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171",
+    "deployment_test": "docker:29.7.2-dind@sha256:3ef33f2e220b79ed3ef3b99d81746f06f306cd6340e2cb7331d17ae996e74cb6"
   },
   "verification": {
     "dependency_sources": [
@@ -71,5 +76,40 @@
       "version": "1.31.1",
       "source": "https://github.com/sqlc-dev/sqlc/releases/tag/v1.31.1"
     }
+  },
+  "sbom": {
+    "version": "1.51.1",
+    "source": "https://github.com/anchore/syft/releases/tag/v1.51.1",
+    "builds": {
+      "windows_amd64": {
+        "archive": "syft_1.51.1_windows_amd64.zip",
+        "sha256": "5e4bc3e6b6344b4625de0f7aa5351aaa72856d11d78462972de0a101ee2c1c8f",
+        "binary_sha256": "5a95b689def43f26de1505ed43dc76306cded7923140b349619e21ddc2ac5ce4"
+      },
+      "linux_amd64": {
+        "archive": "syft_1.51.1_linux_amd64.tar.gz",
+        "sha256": "8fcb33017a0dc1058298c923c436d19dfa68ae93968e0b423248542e3afb9fc3",
+        "binary_sha256": "abca2def61de9952fa06d3977bb1e064818facb9badfce502b450d3d6846a91f"
+      }
+    }
+  },
+  "vulnerability_scanner": {
+    "version": "0.118.0",
+    "source": "https://github.com/anchore/grype/releases/tag/v0.118.0",
+    "builds": {
+      "windows_amd64": {
+        "archive": "grype_0.118.0_windows_amd64.zip",
+        "sha256": "82fb07f246e61526e8f2bf187fc6bb29ed23c7450cda6e9d1868a60fb942fc98",
+        "binary_sha256": "565446b4bc9fd7cc4a72d1066468650eab6941b19ba804ca4649e504c2c2a024"
+      },
+      "linux_amd64": {
+        "archive": "grype_0.118.0_linux_amd64.tar.gz",
+        "sha256": "1d444c5e7360471815f7158f71935fcecc68a3c417d85c7344f770854300bba2",
+        "binary_sha256": "91705979c6ccb736b87e3250831f5e1a35f13767fd2032ffa85c55b1e6f58f90"
+      }
+    }
+  },
+  "deployment_test_packages": {
+    "bash": "5.3.9-r1"
   }
 }

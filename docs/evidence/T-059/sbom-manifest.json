@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "scanner": {
+    "name": "syft",
+    "version": "1.51.1",
+    "binary_sha256": "5a95b689def43f26de1505ed43dc76306cded7923140b349619e21ddc2ac5ce4"
+  },
+  "inventories": [
+    {
+      "file": "api-amd64.cdx.json",
+      "sha256": "b7d8648b57dd6c29cfcd4dd743bde93105fade88c7bdfb06c862eeff78bc5d88",
+      "components": 457,
+      "image_config_digest": "sha256:eaeb568b723637bd34a116e66268eb740a8214718f22387ec225f480b1024e05",
+      "image_manifest_digest": "sha256:39603891c662281477d781f77c57b0000549e93fbd56e5e8778da6970919c573"
+    },
+    {
+      "file": "runner-amd64.cdx.json",
+      "sha256": "bbded97db59b2049e1f5bf0da7644f5edeef683c77465614001e9c6ddcf9a0b5",
+      "components": 742,
+      "image_config_digest": "sha256:5a82527d15a455cea1c9f5fbd196b316956bae225a60cadd90d5cf8c3621df9e",
+      "image_manifest_digest": "sha256:9f64c59823500c8edad3689ab8cf8177c707a4b78e8c409c44d8cd559ee896f6"
+    },
+    {
+      "file": "operations-amd64.cdx.json",
+      "sha256": "5e65ca5cbf4bbf4ce7a80657380ca5cd5e422653ab28813f4017ddb4be0f0e4a",
+      "components": 701,
+      "image_config_digest": "sha256:e2b656fa90378d4aa23baa945b639fda3563a6a4eb5960d8c604ae619c6436af",
+      "image_manifest_digest": "sha256:b7d5ce5b6a5ffc9e2742249019cf7f7747bd1f30ad230c473aa5a3fdff888792"
+    },
+    {
+      "file": "postgres-amd64.cdx.json",
+      "sha256": "316de649fcbf704dc6b97464d6e5c2b6333f5a2e1e092e3aafc4655480c5a436",
+      "components": 685,
+      "image_config_digest": "sha256:a2ea0e68c465e0acf4c3672471b22b6b62972bb341e6f31544c855d85ba43745",
+      "image_manifest_digest": "sha256:7bade6d532592ca8ce7ee32def7399dad2607c4ea5583839fc4352a095a11ea6"
+    },
+    {
+      "file": "api-arm64.cdx.json",
+      "sha256": "d89aadea92b4bd274a121192d1ddaed382cfd73ac7c7b44faae29454d11e096d",
+      "components": 457,
+      "image_config_digest": "sha256:35d4e6867aeb2beb56df5cf50b1d22434fdf6727e3f7d58ec9ab82f4d111074e",
+      "image_manifest_digest": "sha256:0a3189a7df10aa40524e3793cae0ea6fdd4944918a5c2007d47f70e5b1e52ae7"
+    },
+    {
+      "file": "runner-arm64.cdx.json",
+      "sha256": "44f9622c9ef48368a1027db28d0dc3e6f7d910e5f21b5319dd2c4d9e259bb29b",
+      "components": 742,
+      "image_config_digest": "sha256:b0a3bc877cc767b15f65cd225c5646d3ba4985b69d670cb5960ea3aabd880bb5",
+      "image_manifest_digest": "sha256:c33acb69559b8e576e104412651652f71b94a8a8e7b45b161b9affc291e8349f"
+    },
+    {
+      "file": "operations-arm64.cdx.json",
+      "sha256": "66146c2874e41fdd9a86895a87cd65e6c0bc9171750b8b5dc70938a4e488ccef",
+      "components": 700,
+      "image_config_digest": "sha256:31880ab3946537008a85e13202d74de9f81c694af557f4cba29b4eca8b99c65d",
+      "image_manifest_digest": "sha256:80c1af9aff8c2fe3e8db2ead9025c01d365beadbddcd72f642c88012f06b00bf"
+    },
+    {
+      "file": "postgres-arm64.cdx.json",
+      "sha256": "00d98113a064007e1d9cd90cee39c0fa247b1b59a01ca040eadfd0e83ac9ce0d",
+      "components": 685,
+      "image_config_digest": "sha256:05794c28e6ee9515011cad7622a0c559780249101f324c73e0a4a45e31add205",
+      "image_manifest_digest": "sha256:b260573038b3770e3d1aba5a9a033bdd19c4b16304b104d4b4256c75d8f15123"
+    },
+    {
+      "file": "frontend-build-inputs.cdx.json",
+      "sha256": "40a90f26f59a0ee08c20806704ec61da713f1c460e679ad5eec679ae7383f764",
+      "components": 118,
+      "scope": "frontend-build-inputs-including-development-dependencies"
+    }
+  ]
+}

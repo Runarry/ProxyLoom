@@ -14,6 +14,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
 	"github.com/jackc/pgx/v5"
@@ -102,19 +103,16 @@ func (c *Catalog) open(row dbgen.GetResourceRevisionRow) (ir.Resource, error) {
 		return ir.Resource{}, catalog.ErrCrypto
 	}
 	defer clear(plain)
+	// persistPlain authenticates these exact plaintext bytes. Check them before
+	// decoding instead of re-validating and re-serializing the decoded object.
+	digest, err := c.box.Digest(secretbox.PurposeResourceContent, plain)
+	if err != nil || !hmac.Equal(digest, row.ContentHmac) {
+		return ir.Resource{}, catalog.ErrCrypto
+	}
 	resource, err := ir.DecodeResource(plain)
 	if err != nil || resource.Metadata.ScopeID != aad.ScopeID || resource.Metadata.ResourceID != aad.ObjectID ||
 		resource.Metadata.Revision != aad.Revision || resource.Metadata.SchemaVersion != aad.SchemaVersion ||
 		resource.Metadata.SecurityEpoch != row.SecurityEpoch {
-		return ir.Resource{}, catalog.ErrCrypto
-	}
-	canonical, err := catalog.Canonical(resource)
-	if err != nil {
-		return ir.Resource{}, catalog.ErrCrypto
-	}
-	defer clear(canonical)
-	digest, err := c.box.Digest(secretbox.PurposeResourceContent, canonical)
-	if err != nil || !hmac.Equal(digest, row.ContentHmac) {
 		return ir.Resource{}, catalog.ErrCrypto
 	}
 	return resource, nil
@@ -126,14 +124,16 @@ func recordContext(r dbgen.GetResourceRevisionRow) secretbox.Context {
 }
 
 type catalogTx struct {
-	mu     sync.Mutex
-	store  *Catalog
-	tx     pgx.Tx
-	q      *dbgen.Queries
-	scope  ir.ID
-	active bool
-	dirty  bool
-	failed error
+	mu        sync.Mutex
+	store     *Catalog
+	tx        pgx.Tx
+	q         *dbgen.Queries
+	scope     ir.ID
+	active    bool
+	dirty     bool
+	failed    error
+	limits    *operations.CatalogLimits
+	nodeCount *int
 }
 
 // Transact serializes writes by scope before locking related resource IDs in
@@ -243,6 +243,9 @@ func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.R
 		if err != nil {
 			return ir.Resource{}, err
 		}
+		if err := t.checkOperationalLimits(ctx, r, true); err != nil {
+			return ir.Resource{}, err
+		}
 		if err := t.checkPolicyMembers(ctx, r); err != nil {
 			return ir.Resource{}, err
 		}
@@ -271,6 +274,9 @@ func (t *catalogTx) Create(ctx context.Context, input catalog.CreateInput) (ir.R
 func (t *catalogTx) Update(ctx context.Context, id ir.ID, expected int64, input catalog.UpdateInput) (ir.Resource, error) {
 	return t.change(ctx, id, expected, false, func(old ir.Resource) (ir.Resource, error) {
 		next, err := catalog.Apply(old, input)
+		if err == nil {
+			err = t.checkOperationalLimits(ctx, next, false)
+		}
 		if err == nil {
 			err = t.checkPolicyMembers(ctx, next)
 		}
@@ -330,7 +336,11 @@ func (t *catalogTx) change(ctx context.Context, id ir.ID, expected int64, delete
 		if err := t.lockAndCheckRefs(ctx, ids, refs); err != nil {
 			return ir.Resource{}, err
 		}
-		return next, t.persist(ctx, next, refs, deleted)
+		err = t.persist(ctx, next, refs, deleted)
+		if err == nil && deleted && old.Metadata.Kind == ir.KindNode && t.nodeCount != nil {
+			*t.nodeCount--
+		}
+		return next, err
 	})
 }
 
@@ -514,6 +524,10 @@ func irID(id pgtype.UUID) ir.ID {
 func catalogError(err error) error {
 	if err == nil {
 		return nil
+	}
+	var diagnostics ir.Diagnostics
+	if errors.As(err, &diagnostics) {
+		return diagnostics
 	}
 	for _, safe := range []error{catalog.ErrNotFound, catalog.ErrRevisionConflict, catalog.ErrInvalidReference,
 		catalog.ErrInvalidInput, catalog.ErrUnavailable, catalog.ErrCrypto, catalog.ErrIdempotencyConflict,

@@ -14,6 +14,9 @@ import (
 type RunnerTransport struct {
 	HTTPAddr, APIURL, RunnerID, CoreRoot string
 	CAFile, CertificateFile, KeyFile     string
+	NetworkEnabled                       bool
+	Location                             string
+	NetworkGuardFile                     string
 }
 
 // RunnerListener is optional on the API process. If configured, all TLS and
@@ -27,7 +30,9 @@ func LoadRunnerTransport(environ []string) (RunnerTransport, error) {
 		"PROXYLOOM_HTTP_ADDR": true, "PROXYLOOM_RUNNER_API_URL": true,
 		"PROXYLOOM_RUNNER_ID": true, "PROXYLOOM_RUNNER_CORE_ROOT": true,
 		"PROXYLOOM_RUNNER_CA_FILE": true, "PROXYLOOM_RUNNER_CERT_FILE": true,
-		"PROXYLOOM_RUNNER_KEY_FILE": true,
+		"PROXYLOOM_RUNNER_KEY_FILE":        true,
+		"PROXYLOOM_RUNNER_NETWORK_ENABLED": true, "PROXYLOOM_RUNNER_LOCATION": true,
+		"PROXYLOOM_RUNNER_NETWORK_GUARD_FILE": true,
 	}
 	values := make(map[string]string)
 	for _, entry := range environ {
@@ -55,7 +60,18 @@ func LoadRunnerTransport(environ []string) (RunnerTransport, error) {
 		HTTPAddr: health.HTTPAddr, APIURL: values["PROXYLOOM_RUNNER_API_URL"],
 		RunnerID: values["PROXYLOOM_RUNNER_ID"], CoreRoot: values["PROXYLOOM_RUNNER_CORE_ROOT"],
 		CAFile: values["PROXYLOOM_RUNNER_CA_FILE"], CertificateFile: values["PROXYLOOM_RUNNER_CERT_FILE"],
-		KeyFile: values["PROXYLOOM_RUNNER_KEY_FILE"],
+		KeyFile:        values["PROXYLOOM_RUNNER_KEY_FILE"],
+		NetworkEnabled: values["PROXYLOOM_RUNNER_NETWORK_ENABLED"] == "true", Location: values["PROXYLOOM_RUNNER_LOCATION"],
+		NetworkGuardFile: values["PROXYLOOM_RUNNER_NETWORK_GUARD_FILE"],
+	}
+	if v := values["PROXYLOOM_RUNNER_NETWORK_ENABLED"]; v != "" && v != "true" && v != "false" {
+		return RunnerTransport{}, configError("PROXYLOOM_RUNNER_NETWORK_ENABLED", "invalid_boolean")
+	}
+	if len(c.Location) > 128 || strings.ContainsAny(c.Location, "\r\n\x00") {
+		return RunnerTransport{}, configError("PROXYLOOM_RUNNER_LOCATION", "invalid_location")
+	}
+	if c.NetworkEnabled && (!filepath.IsAbs(c.NetworkGuardFile) || !validKeyPath(c.NetworkGuardFile)) {
+		return RunnerTransport{}, configError("PROXYLOOM_RUNNER_NETWORK_GUARD_FILE", "absolute_path_required")
 	}
 	u, err := url.Parse(c.APIURL)
 	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Path != "" || u.RawPath != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.Opaque != "" || strings.Contains(c.APIURL, "#") || (u.Port() != "" && !validPort(u.Port())) || strings.HasSuffix(u.Host, ":") {

@@ -221,7 +221,7 @@ func TestPostgresCatalogReferenceScopeKindAndFixedRevision(t *testing.T) {
 			if _, err := q.LockScope(e.ctx, dbID(e.scope)); err != nil {
 				t.Fatal("cannot lock scope")
 			}
-			bound := &catalogTx{store: e.store, q: q, scope: e.scope, active: true}
+			bound := &catalogTx{store: e.store, q: q, tx: tx, scope: e.scope, active: true}
 			source, err := bound.Create(e.ctx, constraintChainInput(a.Metadata.ResourceID, b.Metadata.ResourceID))
 			if err != nil {
 				t.Fatal("cannot prepare fresh reference source")

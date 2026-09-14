@@ -1,0 +1,8 @@
+=== RUN   TestPostgresM3RealNetwork
+    m3_postgres_test.go:264: PASS: xray single node and complete chain via durable mTLS queue
+    m3_postgres_test.go:264: PASS: sing-box single node and complete chain via durable mTLS queue
+    m3_postgres_test.go:264: PASS: mihomo single node and complete chain via durable mTLS queue
+    m3_postgres_test.go:312: PASS: four simultaneous native connectivity tasks on one Runner
+    m3_postgres_test.go:368: PASS: native cancellation, no node-failure retry, immutable history and byte settlement
+--- PASS: TestPostgresM3RealNetwork (28.87s)
+PASS

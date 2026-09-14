@@ -55,7 +55,7 @@ func (s *Jobs) CreateBatch(ctx context.Context, input jobs.BatchInput) (jobs.Bat
 	return batch, nil
 }
 func (s *Jobs) CreateBatchTx(ctx context.Context, tx pgx.Tx, input jobs.BatchInput) (jobs.Batch, error) {
-	if tx == nil || input.ScopeID.Validate() != nil || len(input.Children) < 1 || len(input.Children) > 200 || (input.ID != "" && input.ID.Validate() != nil) || input.EffectiveLimits.MaxBytes != 0 || input.EffectiveLimits.DurationMS < 1 || input.EffectiveLimits.DurationMS > 300000 {
+	if tx == nil || input.ScopeID.Validate() != nil || len(input.Children) < 1 || len(input.Children) > 100 || (input.ID != "" && input.ID.Validate() != nil) || input.EffectiveLimits.MaxBytes < 0 || input.EffectiveLimits.MaxBytes > 1<<30 || input.EffectiveLimits.DurationMS < 1 || input.EffectiveLimits.DurationMS > 300000 {
 		return jobs.Batch{}, jobs.ErrInvalidInput
 	}
 	if input.ID == "" {
@@ -188,6 +188,10 @@ func cancelChild(ctx context.Context, tx pgx.Tx, job jobs.Job) error {
 	if job.State == jobs.Queued {
 		phase = "completed"
 		completed = 1
+		zero := int64(0)
+		if _, err = settleAttempt(ctx, tx, job, job.Attempt+1, &zero); err != nil {
+			return err
+		}
 	}
 	_, err = appendJobEvent(ctx, tx, job, jobs.EventInput{EventID: newJobID(), Phase: phase, Completed: completed, Total: 1, Error: runnerprotocol.Safe("CANCELED")})
 	return err
@@ -203,10 +207,12 @@ func (s *Jobs) Cancel(ctx context.Context, scope, id ir.ID, expectedRevision int
 	defer tx.Rollback(ctx)
 	job, err := scanJob(tx.QueryRow(ctx, `SELECT `+jobColumns+` FROM public.jobs WHERE scope_id=$1 AND id=$2 FOR UPDATE`, dbID(scope), dbID(id)))
 	var snapshot jobs.Snapshot
+	changed := false
 	if err == nil {
 		if job.Revision != expectedRevision {
 			return snapshot, jobs.ErrRevisionConflict
 		}
+		changed = !job.State.Terminal() && !job.CancelRequested
 		if err = cancelChild(ctx, tx, job); err != nil {
 			return snapshot, err
 		}
@@ -221,6 +227,7 @@ func (s *Jobs) Cancel(ctx context.Context, scope, id ir.ID, expectedRevision int
 			return snapshot, jobs.ErrRevisionConflict
 		}
 		if !batch.State.Terminal() && !batch.CancelRequested {
+			changed = true
 			if _, err = tx.Exec(ctx, `UPDATE public.job_batches SET cancel_requested_at=clock_timestamp(),revision=revision+1 WHERE id=$1`, dbID(id)); err != nil {
 				return snapshot, jobError(err)
 			}
@@ -237,6 +244,18 @@ func (s *Jobs) Cancel(ctx context.Context, scope, id ir.ID, expectedRevision int
 	}
 	if err != nil {
 		return jobs.Snapshot{}, err
+	}
+	if changed {
+		a := jobs.AuditActorFrom(ctx)
+		if a.ID != "" && a.ID.Validate() != nil {
+			return jobs.Snapshot{}, jobs.ErrInvalidInput
+		}
+		if a.RequestID == "" {
+			a.RequestID = "system"
+		}
+		if _, err = tx.Exec(ctx, `INSERT INTO public.system_audit_events(scope_id,actor_id,object_id,action,request_id) VALUES($1,$2,$3,'job_cancel',$4)`, dbID(scope), nullableID(a.ID), dbID(id), a.RequestID); err != nil {
+			return jobs.Snapshot{}, jobError(err)
+		}
 	}
 	if err = tx.Commit(ctx); err != nil {
 		return jobs.Snapshot{}, jobError(err)
@@ -263,7 +282,11 @@ func (s *Jobs) Events(ctx context.Context, scope, id ir.ID, after int64, limit i
 		return page, jobs.ErrInvalidInput
 	}
 	var first int64
-	err = tx.QueryRow(ctx, `SELECT COALESCE(min(seq),$2+1) FROM public.job_events WHERE job_id=$1 AND created_at>=clock_timestamp()-interval '7 days'`, dbID(id), page.LatestSeq).Scan(&first)
+	settings, err := readSystemSettings(ctx, tx, scope)
+	if err != nil {
+		return page, jobs.ErrUnavailable
+	}
+	err = tx.QueryRow(ctx, `SELECT COALESCE(min(seq),$2+1) FROM public.job_events WHERE job_id=$1 AND created_at>=clock_timestamp()-make_interval(days=>$3)`, dbID(id), page.LatestSeq, settings.Retention.JobEventDays).Scan(&first)
 	if err != nil {
 		return page, jobError(err)
 	}
@@ -271,7 +294,7 @@ func (s *Jobs) Events(ctx context.Context, scope, id ir.ID, after int64, limit i
 		page.Reset = true
 		return page, nil
 	}
-	rows, err := tx.Query(ctx, `SELECT event FROM public.job_events WHERE job_id=$1 AND seq>$2 AND created_at>=clock_timestamp()-interval '7 days' ORDER BY seq LIMIT $3`, dbID(id), after, limit)
+	rows, err := tx.Query(ctx, `SELECT event FROM public.job_events WHERE job_id=$1 AND seq>$2 AND created_at>=clock_timestamp()-make_interval(days=>$4) ORDER BY seq LIMIT $3`, dbID(id), after, limit, settings.Retention.JobEventDays)
 	if err != nil {
 		return page, jobError(err)
 	}
