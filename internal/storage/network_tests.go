@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"net/netip"
 	"net/url"
 	"slices"
 	"sort"
@@ -341,13 +342,23 @@ func (s *NetworkTests) Create(ctx context.Context, a networktest.Actor, request 
 	}
 	var addresses map[ir.ID]string
 	var targetIPs []string
+	resolver := s.resolver
 	if online {
+		settings, err := readSystemSettings(ctx, s.catalog.pool, a.ScopeID)
+		if err != nil {
+			return "", err
+		}
+		prefixes, err := settings.PrivateProxyPrefixes()
+		if err != nil {
+			return "", jobs.ErrUnavailable
+		}
+		resolver.ProxyAllowNets = prefixes
 		resolveCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 		addresses = map[ir.ID]string{}
 		for id, r := range resources {
 			if node, ok := r.Payload.(*ir.Node); ok {
-				ips, err := s.resolver.Resolve(resolveCtx, node.Endpoint.Host)
+				ips, err := resolver.ResolveEndpoint(resolveCtx, node.Endpoint.Host)
 				if err != nil {
 					return "", err
 				}
@@ -355,7 +366,7 @@ func (s *NetworkTests) Create(ctx context.Context, a networktest.Actor, request 
 			}
 		}
 		u, _ := url.Parse(target.Config.URL)
-		targetIPs, err = s.resolver.Resolve(resolveCtx, u.Hostname())
+		targetIPs, err = resolver.Resolve(resolveCtx, u.Hostname())
 		if err != nil {
 			return "", err
 		}
@@ -382,6 +393,15 @@ func (s *NetworkTests) Create(ctx context.Context, a networktest.Actor, request 
 		artifact, endpoints, err := networktest.Compile(build.Family, jobs.NewID(), r, resources, addresses)
 		if err != nil {
 			return "", err
+		}
+		if online {
+			for i := range endpoints {
+				ip, parseErr := netip.ParseAddr(endpoints[i].IP)
+				if parseErr != nil {
+					return "", jobs.ErrUnavailable
+				}
+				endpoints[i].PrivateAuthorized = resolver.PrivateEndpointAuthorized(ip)
+			}
 		}
 		deps := []runnerprotocol.FrozenSubject{frozenSubject(r)}
 		if chain, ok := r.Payload.(*ir.Chain); ok {

@@ -27,8 +27,9 @@ type FrozenTestTarget struct {
 	Compression       string          `json:"compression"`
 }
 type ApprovedEndpoint struct {
-	IP   string `json:"ip"`
-	Port int    `json:"port"`
+	IP                string `json:"ip"`
+	Port              int    `json:"port"`
+	PrivateAuthorized bool   `json:"private_authorized,omitempty"`
 }
 
 type NetworkObservation struct {

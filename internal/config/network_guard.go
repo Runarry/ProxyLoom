@@ -26,7 +26,7 @@ func (g NetworkGuard) Matches(runnerID, bootID, namespace, nonce string) bool {
 }
 
 func (c RunnerTransport) WaitNetworkGuard(ctx context.Context) error {
-	if !c.NetworkEnabled {
+	if !c.NetworkEnabled || c.DevelopmentNetwork {
 		return nil
 	}
 	boot, err := os.ReadFile("/proc/sys/kernel/random/boot_id")

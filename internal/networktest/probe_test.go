@@ -224,3 +224,13 @@ func TestAddressPolicyRejectsMixedAnswersAndProtectedIPs(t *testing.T) {
 		t.Fatal("accepted a mixed public/private answer")
 	}
 }
+
+func TestProxyEndpointAllowlistDoesNotApplyToTestTarget(t *testing.T) {
+	r := Resolver{ProxyAllowNets: []netip.Prefix{netip.MustParsePrefix("192.168.5.0/24")}}
+	if values, err := r.ResolveEndpoint(context.Background(), "192.168.5.65"); err != nil || len(values) != 1 || values[0] != "192.168.5.65" {
+		t.Fatalf("allowlisted proxy endpoint rejected: %v %#v", err, values)
+	}
+	if _, err := r.Resolve(context.Background(), "192.168.5.65"); err == nil {
+		t.Fatal("private test target inherited the proxy allowlist")
+	}
+}

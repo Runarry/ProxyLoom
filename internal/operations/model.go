@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/netip"
+	"slices"
+	"sort"
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/ir"
@@ -33,15 +36,16 @@ type CatalogLimits struct {
 	MaxOutbounds              int `json:"max_outbounds"`
 }
 type Settings struct {
-	Revision      runnerprotocol.Sequence `json:"revision"`
-	Quota         jobs.Quota              `json:"quota"`
-	Retention     Retention               `json:"retention"`
-	CatalogLimits CatalogLimits           `json:"catalog_limits"`
-	CleanupPaused bool                    `json:"cleanup_paused"`
+	Revision          runnerprotocol.Sequence `json:"revision"`
+	Quota             jobs.Quota              `json:"quota"`
+	Retention         Retention               `json:"retention"`
+	CatalogLimits     CatalogLimits           `json:"catalog_limits"`
+	PrivateProxyCIDRs []string                `json:"private_proxy_cidrs"`
+	CleanupPaused     bool                    `json:"cleanup_paused"`
 }
 
 func Defaults() Settings {
-	return Settings{Revision: 1, Quota: jobs.DefaultQuota(), Retention: Retention{7, 30, 180, 24, 7, 90, 20}, CatalogLimits: CatalogLimits{10 << 20, 5000, 10000, 32, 100000, 20000, 2000}}
+	return Settings{Revision: 1, Quota: jobs.DefaultQuota(), Retention: Retention{7, 30, 180, 24, 7, 90, 20}, CatalogLimits: CatalogLimits{10 << 20, 5000, 10000, 32, 100000, 20000, 2000}, PrivateProxyCIDRs: []string{}}
 }
 func (s Settings) Validate() error {
 	q, r, c := s.Quota, s.Retention, s.CatalogLimits
@@ -51,7 +55,39 @@ func (s Settings) Validate() error {
 	if c.MaxImportBytes < 1 || c.MaxImportBytes > 10<<20 || c.MaxImportItems < 1 || c.MaxImportItems > 5000 || c.MaxDependencyResources < 1 || c.MaxDependencyResources > 10000 || c.MaxTargetsPerSubscription < 1 || c.MaxTargetsPerSubscription > 32 || c.MaxNodes < 1 || c.MaxNodes > 1000000 || c.MaxRules < 1 || c.MaxRules > 20000 || c.MaxOutbounds < 1 || c.MaxOutbounds > 2000 {
 		return ErrInvalid
 	}
-	return nil
+	_, err := s.PrivateProxyPrefixes()
+	return err
+}
+
+// PrivateProxyPrefixes is the narrowly scoped exception for self-hosted proxy
+// endpoints. It never applies to registered HTTP test targets.
+func (s Settings) PrivateProxyPrefixes() ([]netip.Prefix, error) {
+	if len(s.PrivateProxyCIDRs) > 16 {
+		return nil, ErrInvalid
+	}
+	values := make([]netip.Prefix, 0, len(s.PrivateProxyCIDRs))
+	for _, value := range s.PrivateProxyCIDRs {
+		prefix, err := netip.ParsePrefix(value)
+		if err != nil || prefix != prefix.Masked() || !privateProxyPrefix(prefix) || slices.Contains(values, prefix) {
+			return nil, ErrInvalid
+		}
+		values = append(values, prefix)
+	}
+	sort.Slice(values, func(i, j int) bool { return values[i].String() < values[j].String() })
+	return values, nil
+}
+
+func privateProxyPrefix(prefix netip.Prefix) bool {
+	for _, parent := range []netip.Prefix{
+		netip.MustParsePrefix("10.0.0.0/8"),
+		netip.MustParsePrefix("172.16.0.0/12"),
+		netip.MustParsePrefix("192.168.0.0/16"),
+	} {
+		if prefix.Bits() >= parent.Bits() && parent.Contains(prefix.Addr()) {
+			return true
+		}
+	}
+	return false
 }
 
 type Actor struct {

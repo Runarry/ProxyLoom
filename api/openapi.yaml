@@ -4881,13 +4881,18 @@ components:
     SystemSettings:
       type: "object"
       additionalProperties: false
-      required: ["revision", "quota", "retention", "catalog_limits", "cleanup_paused"]
+      required: ["revision", "quota", "retention", "catalog_limits", "private_proxy_cidrs", "cleanup_paused"]
       properties:
         cleanup_paused: { type: boolean }
         revision: { $ref: "#/components/schemas/Revision" }
         quota: { $ref: "#/components/schemas/QuotaSettings" }
         retention: { $ref: "#/components/schemas/RetentionSettings" }
         catalog_limits: { $ref: "#/components/schemas/CatalogLimits" }
+        private_proxy_cidrs:
+          type: array
+          minItems: 0
+          maxItems: 16
+          items: { type: string, minLength: 1, maxLength: 18 }
     SettingsResponse:
       type: "object"
       additionalProperties: false
@@ -4984,6 +4989,11 @@ components:
         quota: { $ref: "#/components/schemas/QuotaSettingsPatch" }
         retention: { $ref: "#/components/schemas/RetentionSettingsPatch" }
         catalog_limits: { $ref: "#/components/schemas/CatalogLimitsPatch" }
+        private_proxy_cidrs:
+          type: array
+          minItems: 0
+          maxItems: 16
+          items: { type: string, minLength: 1, maxLength: 18 }
       minProperties: 1
     AuditAction:
       type: "string"

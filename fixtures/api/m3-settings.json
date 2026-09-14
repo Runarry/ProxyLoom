@@ -1,6 +1,7 @@
 {
   "revision": "1",
   "cleanup_paused": false,
+  "private_proxy_cidrs": [],
   "quota": {
     "daily_download_bytes": 1073741824,
     "connectivity_concurrency": 4,

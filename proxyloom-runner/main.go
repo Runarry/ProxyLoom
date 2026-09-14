@@ -62,12 +62,14 @@ func run(ctx context.Context, args []string, lookup config.Lookup, environ []str
 		if err != nil {
 			return err
 		}
-		if cfg.NetworkEnabled {
+		if cfg.NetworkEnabled && !cfg.DevelopmentNetwork {
 			logger.Info("network_guard_waiting")
 			if err := cfg.WaitNetworkGuard(ctx); err != nil {
 				return err
 			}
 			logger.Info("network_guard_ready")
+		} else if cfg.DevelopmentNetwork {
+			logger.Warn("development_network_guard_disabled")
 		}
 		return runner.ServeClient(ctx, cfg.HTTPAddr, client, logger)
 	}
