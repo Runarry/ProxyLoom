@@ -10,7 +10,9 @@ import (
 )
 
 func sysProcAttr() *syscall.SysProcAttr {
-	return &syscall.SysProcAttr{Setpgid: true}
+	attr := &syscall.SysProcAttr{Setpgid: true}
+	bindParentLifetime(attr)
+	return attr
 }
 
 func terminate(cmd *ose.Cmd) error {

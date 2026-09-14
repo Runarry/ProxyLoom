@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "run_id": "01d4ad7f-20c6-43c2-96fa-177f2e4a63d3",
+  "started_at": "2026-09-13T17:23:41.992Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "storage",
+  "test_filter": "TestPostgresRestore",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s -run TestPostgresRestore ./internal/catalog ./internal/storage ./internal/secretbox ./internal/config",
+  "source_manifest_sha256": "a4808bfc333d3c78a16f8c79619480b447b8a2218186b3abdb4eb6d5f83d0bba",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresRestoreAuthorizationAndUnknownUsageSettlement",
+      "result": "pass"
+    }
+  ],
+  "identity_tests": [],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-13T17:23:51.435Z",
+  "source_commit": "246b08bed1d9490b1be4e0d946faced58f932ae6"
+}

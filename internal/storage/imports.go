@@ -15,6 +15,7 @@ import (
 
 	"github.com/Runarry/ProxyLoom/internal/apicontract"
 	"github.com/Runarry/ProxyLoom/internal/catalog"
+	"github.com/Runarry/ProxyLoom/internal/importparse"
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
@@ -109,8 +110,20 @@ func (s *Imports) Create(ctx context.Context, input imports.CreateInput) (import
 				return nil
 			}
 		}
-		_, err := t.tx.Exec(ctx, `INSERT INTO public.import_batches(id,scope_id,actor_id,job_id,format,raw_envelope,raw_wrapping)
-			VALUES($1,$2,$3,$4,$5,$6,$7)`, dbID(batch), dbID(input.ScopeID), dbID(input.PrincipalID), dbID(job), input.InputFormat, envelope, wrapping)
+		limits, err := t.operationalLimits(ctx)
+		if err != nil {
+			return err
+		}
+		maximum := importparse.EncodedLimit(limits.MaxImportBytes)
+		if input.InputFormat == "uri_list" {
+			maximum = limits.MaxImportBytes
+		}
+		if len(input.Text) > maximum {
+			return limitDiagnostic("/text", batch)
+		}
+		bound, _ := json.Marshal(limits)
+		_, err = t.tx.Exec(ctx, `INSERT INTO public.import_batches(id,scope_id,actor_id,job_id,format,raw_envelope,raw_wrapping,catalog_limits)
+			VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, dbID(batch), dbID(input.ScopeID), dbID(input.PrincipalID), dbID(job), input.InputFormat, envelope, wrapping, bound)
 		if err != nil {
 			return err
 		}

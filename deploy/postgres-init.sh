@@ -1,5 +1,5 @@
 #!/bin/sh
-# Only called on an empty development PostgreSQL volume. Never print credentials.
+# Only called on an empty PostgreSQL volume. Never print credentials.
 set -eu
 PROXYLOOM_DB_RUNTIME_PASSWORD="$(cat /run/secrets/db_runtime_password)"
 PROXYLOOM_DB_MIGRATION_PASSWORD="$(cat /run/secrets/db_migration_password)"
@@ -15,6 +15,9 @@ REVOKE ALL ON DATABASE proxyloom FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 CREATE ROLE proxyloom LOGIN PASSWORD :'runtime_password';
 CREATE ROLE proxyloom_migrator LOGIN PASSWORD :'migration_password';
+-- Restore recreates the public schema. The dedicated migration identity owns
+-- this database, but has no superuser or cluster-wide create-role privilege.
+ALTER DATABASE proxyloom OWNER TO proxyloom_migrator;
 GRANT CONNECT ON DATABASE proxyloom TO proxyloom, proxyloom_migrator;
 GRANT USAGE ON SCHEMA public TO proxyloom;
 GRANT USAGE, CREATE ON SCHEMA public TO proxyloom_migrator;

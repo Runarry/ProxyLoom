@@ -61,7 +61,7 @@ func (s State) Terminal() bool {
 }
 func (s State) Valid() bool { return s == Queued || s == Leased || s == Running || s.Terminal() }
 func ValidType(executor Executor, kind Type) bool {
-	return executor == APIWorker && (kind == ImportParse || kind == SourceRefresh || kind == Compile) || executor == Runner && kind == ConfigValidate
+	return executor == APIWorker && (kind == ImportParse || kind == SourceRefresh || kind == Compile) || executor == Runner && (kind == ConfigValidate || kind.Network())
 }
 func (kind Type) Valid() bool {
 	return kind == ImportParse || kind == ConfigValidate || kind == SourceRefresh || kind == Compile || kind == Connectivity || kind == DownloadThroughput
@@ -82,6 +82,8 @@ type Job struct {
 	StartedAt       *time.Time
 	FinishedAt      *time.Time
 	CoreBuildID     ir.ID
+	Subject         *runnerprotocol.FrozenSubject
+	TestTargetID    ir.ID
 	Verdict         Verdict
 	Error           *runnerprotocol.SafeError
 }
@@ -99,10 +101,12 @@ func (EnqueueInput) Format(s fmt.State, _ rune) { _, _ = fmt.Fprint(s, "[REDACTE
 func (EnqueueInput) LogValue() slog.Value       { return slog.StringValue("[REDACTED]") }
 
 type ClaimInput struct {
-	Executor     Executor
-	WorkerID     ir.ID
-	Types        []Type
-	CoreBuildIDs []ir.ID
+	Executor       Executor
+	WorkerID       ir.ID
+	Types          []Type
+	CoreBuildIDs   []ir.ID
+	AvailableSlots runnerprotocol.Slots
+	MaximumSlots   runnerprotocol.Slots
 }
 type LeaseIdentity struct {
 	JobID    ir.ID
@@ -148,11 +152,12 @@ type Event struct {
 }
 type EventReceipt = runnerprotocol.EventReceipt
 type Result struct {
-	State   State
-	Verdict Verdict
-	Metrics runnerprotocol.Metrics
-	Error   *runnerprotocol.SafeError
-	Hash    string
+	State       State
+	Verdict     Verdict
+	Metrics     runnerprotocol.Metrics
+	Error       *runnerprotocol.SafeError
+	Hash        string
+	Observation *runnerprotocol.NetworkObservation
 }
 type ResultReceipt = runnerprotocol.ResultReceipt
 type CommitFunc func(context.Context, pgx.Tx) error

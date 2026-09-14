@@ -1,0 +1,24 @@
+{
+  "name": "Synthetic controlled HTTP target",
+  "target": {
+    "url": "http://controlled.example.invalid/check",
+    "allowed_types": [
+      "connectivity"
+    ],
+    "expected_response": {
+      "status_codes": [
+        200
+      ],
+      "max_response_bytes": 65536,
+      "egress_ip_response": false
+    },
+    "limits": {
+      "duration_ms": 10000,
+      "max_bytes": 196608
+    },
+    "permission_basis": "self_owned",
+    "redirect_policy": "deny",
+    "verify_certificate": true,
+    "compression": "disabled"
+  }
+}

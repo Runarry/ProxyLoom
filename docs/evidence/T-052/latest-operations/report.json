@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "run_id": "d4d3a8a4-ac2d-4e35-bba3-3fa8b77d597d",
+  "started_at": "2026-09-13T19:27:34.787Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "storage",
+  "test_filter": "TestPostgres(Operations|Restore)",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s -run TestPostgres(Operations|Restore) ./internal/catalog ./internal/storage ./internal/secretbox ./internal/config",
+  "source_manifest_sha256": "dfeb5f89e4cef5fa2dd8eb7f398f6b2dd14f4a9d986c1e17570e866bbbc3b9fe",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresRestoreAuthorizationAndUnknownUsageSettlement",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsCleanupProtectsPendingBatchesAndQuota",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsCleanupKeepsPublicationAndReferencedRevision",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsCleanupExpiredComparisonKeepsActiveDownload",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsSettingsRaceAuditAndLimits",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresOperationsCompileUsesFrozenExpansionLimit",
+      "result": "pass"
+    }
+  ],
+  "identity_tests": [],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-13T19:27:57.057Z",
+  "source_commit": "246b08bed1d9490b1be4e0d946faced58f932ae6"
+}

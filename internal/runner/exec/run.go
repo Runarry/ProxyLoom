@@ -38,6 +38,7 @@ type Options struct {
 	LogLimit int
 	Redact   func([]byte) []byte
 	Sandbox  *SandboxPolicy
+	Started  func(int)
 }
 
 type Result struct {
@@ -189,8 +190,13 @@ func Run(ctx context.Context, registry Registry, spec adapter.CommandSpec, works
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 	limit := &limitBuffer{limit: opts.LogLimit}
+	unpin := pinParentThread()
+	defer unpin()
 	if err := cmd.Start(); err != nil {
 		return Result{}, errors.Join(err, logWriter.Close())
+	}
+	if opts.Started != nil {
+		opts.Started(cmd.Process.Pid)
 	}
 	var pipeErr error
 	if err := logWriter.Close(); err != nil {

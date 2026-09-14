@@ -20,6 +20,11 @@ import (
 // Commands accept secret file paths, never password values on the command line.
 // All returned errors are fixed safe codes; even filesystem paths are omitted.
 func adminCommand(ctx context.Context, args []string, lookup config.Lookup, output io.Writer) error {
+	if len(args) > 0 {
+		if args[0] == "init-deployment" || args[0] == "init-runner-identity" {
+			return adminBootstrap(args, output)
+		}
+	}
 	if len(args) == 3 && args[0] == "create-setup-token" && args[1] == "--output" {
 		return createSetupToken(args[2], output)
 	}

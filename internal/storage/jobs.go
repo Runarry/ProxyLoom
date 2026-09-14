@@ -36,7 +36,7 @@ func jobError(err error) error {
 	if err == nil {
 		return nil
 	}
-	for _, safe := range []error{jobs.ErrInvalidInput, jobs.ErrUnavailable, jobs.ErrNotFound, jobs.ErrLeaseLost, jobs.ErrConflict, jobs.ErrRevisionConflict, jobs.ErrCanceled, context.Canceled, context.DeadlineExceeded} {
+	for _, safe := range []error{jobs.ErrInvalidInput, jobs.ErrUnavailable, jobs.ErrNotFound, jobs.ErrLeaseLost, jobs.ErrConflict, jobs.ErrRevisionConflict, jobs.ErrCanceled, jobs.ErrBudgetExceeded, context.Canceled, context.DeadlineExceeded} {
 		if errors.Is(err, safe) {
 			return safe
 		}
@@ -66,12 +66,14 @@ func jobAAD(scope, id ir.ID) secretbox.Context {
 }
 
 const jobColumns = `id::text,scope_id::text,COALESCE(batch_id::text,''),revision,executor,type,state,attempt,lease_seq,
-    cancel_requested_at IS NOT NULL,created_at,started_at,finished_at,COALESCE(core_build_id::text,''),COALESCE(verdict,''),safe_error`
+    cancel_requested_at IS NOT NULL,created_at,started_at,finished_at,COALESCE(core_build_id::text,''),COALESCE(verdict,''),safe_error,
+    (SELECT subject FROM public.test_jobs WHERE job_id=public.jobs.id),
+    COALESCE((SELECT test_target_id::text FROM public.test_jobs WHERE job_id=public.jobs.id),'')`
 
 func scanJob(row pgx.Row) (jobs.Job, error) {
 	var job jobs.Job
-	var safe []byte
-	err := row.Scan(&job.ID, &job.ScopeID, &job.BatchID, &job.Revision, &job.Executor, &job.Type, &job.State, &job.Attempt, &job.LeaseSeq, &job.CancelRequested, &job.CreatedAt, &job.StartedAt, &job.FinishedAt, &job.CoreBuildID, &job.Verdict, &safe)
+	var safe, subject []byte
+	err := row.Scan(&job.ID, &job.ScopeID, &job.BatchID, &job.Revision, &job.Executor, &job.Type, &job.State, &job.Attempt, &job.LeaseSeq, &job.CancelRequested, &job.CreatedAt, &job.StartedAt, &job.FinishedAt, &job.CoreBuildID, &job.Verdict, &safe, &subject, &job.TestTargetID)
 	if err != nil {
 		return jobs.Job{}, jobError(err)
 	}
@@ -80,6 +82,9 @@ func scanJob(row pgx.Row) (jobs.Job, error) {
 	}
 	if job.Error != nil {
 		job.Error = runnerprotocol.Safe(job.Error.Code)
+	}
+	if len(subject) > 0 && json.Unmarshal(subject, &job.Subject) != nil {
+		return jobs.Job{}, jobs.ErrUnavailable
 	}
 	return job, nil
 }
@@ -107,7 +112,7 @@ func (s *Jobs) EnqueueTx(ctx context.Context, tx pgx.Tx, input jobs.EnqueueInput
 	}
 	if input.Executor == jobs.Runner {
 		frozen, err := runnerprotocol.DecodeFrozenPayload(input.Payload)
-		if err != nil || input.CoreBuildID != frozen.Core.CoreBuildID {
+		if err != nil || input.CoreBuildID != frozen.Core.CoreBuildID || string(input.Type) != frozen.Type {
 			return jobs.Job{}, jobs.ErrInvalidInput
 		}
 	} else if input.CoreBuildID != "" {
@@ -116,16 +121,32 @@ func (s *Jobs) EnqueueTx(ctx context.Context, tx pgx.Tx, input jobs.EnqueueInput
 	if input.ID == "" {
 		input.ID = newJobID()
 	}
-	payload, wrapping, err := s.box.Seal(jobAAD(input.ScopeID, input.ID), input.Payload)
+	job, err := scanJob(tx.QueryRow(ctx, `INSERT INTO public.jobs(id,scope_id,batch_id,executor,type,core_build_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING `+jobColumns, dbID(input.ID), dbID(input.ScopeID), nullableID(input.BatchID), string(input.Executor), string(input.Type), nullableID(input.CoreBuildID)))
+	if err != nil {
+		return jobs.Job{}, err
+	}
+	plain := input.Payload
+	if job.Type.Network() {
+		frozen, err := runnerprotocol.DecodeFrozenPayload(plain)
+		if err != nil {
+			return jobs.Job{}, jobs.ErrInvalidInput
+		}
+		frozen.QuotaReservationID, err = reserveAttempt(ctx, tx, job, 1, frozen.Limits.MaxBytes)
+		if err != nil {
+			return jobs.Job{}, err
+		}
+		plain, err = json.Marshal(frozen)
+		if err != nil {
+			return jobs.Job{}, jobs.ErrInvalidInput
+		}
+		defer clear(plain)
+	}
+	payload, wrapping, err := s.box.Seal(jobAAD(input.ScopeID, input.ID), plain)
 	if err != nil {
 		return jobs.Job{}, jobs.ErrUnavailable
 	}
 	envelope, _ := json.Marshal(payload)
 	wrap, _ := json.Marshal(wrapping)
-	job, err := scanJob(tx.QueryRow(ctx, `INSERT INTO public.jobs(id,scope_id,batch_id,executor,type,core_build_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING `+jobColumns, dbID(input.ID), dbID(input.ScopeID), nullableID(input.BatchID), string(input.Executor), string(input.Type), nullableID(input.CoreBuildID)))
-	if err != nil {
-		return jobs.Job{}, err
-	}
 	if _, err = tx.Exec(ctx, `INSERT INTO public.job_payloads(scope_id,job_id,envelope) VALUES($1,$2,$3)`, dbID(input.ScopeID), dbID(input.ID), envelope); err != nil {
 		return jobs.Job{}, jobError(err)
 	}
@@ -172,22 +193,15 @@ func (s *Jobs) Claim(ctx context.Context, input jobs.ClaimInput) (*jobs.Lease, e
 	}
 	defer tx.Rollback(ctx)
 	if input.Executor == jobs.Runner {
-		// Registered M1 Runner capacity is one validation slot. The transaction
-		// lock and persisted active leases survive API/Runner process restarts.
-		if _, err = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,539432))`, string(input.WorkerID)); err != nil {
+		// Serialize the short global admission decision, not execution. This
+		// closes cross-Runner races while persisted leases own occupied slots.
+		if _, err = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(539432)`); err != nil {
 			return nil, jobError(err)
-		}
-		var busy bool
-		if err = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM public.jobs WHERE executor='runner' AND worker_id=$1 AND state IN ('leased','running') AND lease_until>clock_timestamp())`, dbID(input.WorkerID)).Scan(&busy); err != nil {
-			return nil, jobError(err)
-		}
-		if busy {
-			return nil, nil
 		}
 	}
-	job, err := scanJob(tx.QueryRow(ctx, `SELECT `+jobColumns+` FROM public.jobs WHERE state='queued' AND cancel_requested_at IS NULL AND executor=$1 AND type=ANY($2::text[]) AND ($1='api_worker' OR core_build_id::text=ANY($3::text[])) ORDER BY created_at,id LIMIT 1 FOR UPDATE SKIP LOCKED`, string(input.Executor), kinds, cores))
+	job, err := claimCandidate(ctx, tx, input, kinds, cores)
 	if errors.Is(err, jobs.ErrNotFound) {
-		return nil, nil
+		return nil, jobError(tx.Commit(ctx))
 	}
 	if err != nil {
 		return nil, err
@@ -212,6 +226,23 @@ func (s *Jobs) Claim(ctx context.Context, input jobs.ClaimInput) (*jobs.Lease, e
 	plain, err := s.box.Open(jobAAD(job.ScopeID, job.ID), payload, wrapping)
 	if err != nil {
 		return nil, jobs.ErrUnavailable
+	}
+	if job.Type.Network() {
+		frozen, decodeErr := runnerprotocol.DecodeFrozenPayload(plain)
+		if decodeErr != nil {
+			clear(plain)
+			return nil, jobs.ErrInvalidInput
+		}
+		err = tx.QueryRow(ctx, `SELECT id::text FROM public.quota_reservations WHERE job_id=$1 AND attempt=$2 AND settled_at IS NULL AND reserved_bytes=$3`, dbID(job.ID), job.Attempt, frozen.Limits.MaxBytes).Scan(&frozen.QuotaReservationID)
+		if err != nil {
+			clear(plain)
+			return nil, jobError(err)
+		}
+		clear(plain)
+		plain, err = json.Marshal(frozen)
+		if err != nil {
+			return nil, jobs.ErrUnavailable
+		}
 	}
 	if _, err = appendJobEvent(ctx, tx, job, jobs.EventInput{EventID: newJobID(), Phase: "leased", Total: 1}); err != nil {
 		clear(plain)
@@ -255,8 +286,19 @@ func (s *Jobs) ReapExpired(ctx context.Context) (int, error) {
 		if job.CancelRequested {
 			state = jobs.Canceled
 			failure = runnerprotocol.Safe("CANCELED")
-		} else if job.Attempt >= 2 {
+		} else if job.Attempt >= 2 || job.Type == jobs.DownloadThroughput {
 			state = jobs.Failed
+		}
+		if _, err = settleAttempt(ctx, tx, job, job.Attempt, nil); err != nil {
+			return 0, err
+		}
+		if state == jobs.Queued && job.Type.Network() {
+			if err = reserveRetry(ctx, tx, job); errors.Is(err, jobs.ErrBudgetExceeded) {
+				state = jobs.Failed
+				failure = runnerprotocol.Safe("BUDGET_EXCEEDED")
+			} else if err != nil {
+				return 0, err
+			}
 		}
 		data, _ := json.Marshal(failure)
 		_, err = tx.Exec(ctx, `UPDATE public.jobs SET state=$2,revision=revision+1,lease_until=NULL,safe_error=$3,finished_at=CASE WHEN $2='queued' THEN NULL ELSE clock_timestamp() END WHERE id=$1 AND state IN ('leased','running') AND lease_until<=clock_timestamp()`, dbID(job.ID), string(state), data)
@@ -302,7 +344,7 @@ func (s *Jobs) Heartbeat(ctx context.Context, id jobs.LeaseIdentity) (jobs.Heart
 		return jobs.Heartbeat{}, jobs.ErrInvalidInput
 	}
 	var result jobs.Heartbeat
-	err := s.pool.QueryRow(ctx, `UPDATE public.jobs SET lease_until=clock_timestamp()+interval '30 seconds' WHERE id=$1 AND worker_id=$2 AND attempt=$3 AND lease_seq=$4 AND state IN ('leased','running') AND lease_until>clock_timestamp() RETURNING lease_until,cancel_requested_at IS NOT NULL`, dbID(id.JobID), dbID(id.WorkerID), id.Attempt, id.LeaseSeq).Scan(&result.ExpiresAt, &result.CancelRequested)
+	err := s.pool.QueryRow(ctx, `UPDATE public.jobs SET lease_until=clock_timestamp()+interval '30 seconds',cancel_requested_at=CASE WHEN `+testRevokedSQL+` THEN COALESCE(cancel_requested_at,clock_timestamp()) ELSE cancel_requested_at END,revision=revision+CASE WHEN cancel_requested_at IS NULL AND `+testRevokedSQL+` THEN 1 ELSE 0 END WHERE id=$1 AND worker_id=$2 AND attempt=$3 AND lease_seq=$4 AND state IN ('leased','running') AND lease_until>clock_timestamp() RETURNING lease_until,cancel_requested_at IS NOT NULL`, dbID(id.JobID), dbID(id.WorkerID), id.Attempt, id.LeaseSeq).Scan(&result.ExpiresAt, &result.CancelRequested)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return result, jobs.ErrLeaseLost
 	}

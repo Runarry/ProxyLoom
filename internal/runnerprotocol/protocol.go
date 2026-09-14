@@ -84,14 +84,18 @@ type FrozenSubject struct {
 // FrozenPayload is the canonical hash preimage. Attempt, lease expiry and
 // fencing sequence are intentionally outside this immutable value.
 type FrozenPayload struct {
-	SchemaVersion      int             `json:"schema_version"`
-	Type               string          `json:"type"`
-	Core               CoreIdentity    `json:"core"`
-	Artifact           Artifact        `json:"artifact"`
-	Subject            *FrozenSubject  `json:"subject,omitempty"`
-	Limits             Limits          `json:"limits"`
-	ExecutionPolicy    ExecutionPolicy `json:"execution_policy"`
-	QuotaReservationID ir.ID           `json:"quota_reservation_id,omitempty"`
+	SchemaVersion      int                `json:"schema_version"`
+	Type               string             `json:"type"`
+	Core               CoreIdentity       `json:"core"`
+	Artifact           Artifact           `json:"artifact"`
+	Subject            *FrozenSubject     `json:"subject,omitempty"`
+	Limits             Limits             `json:"limits"`
+	ExecutionPolicy    ExecutionPolicy    `json:"execution_policy"`
+	QuotaReservationID ir.ID              `json:"quota_reservation_id,omitempty"`
+	TestTarget         *FrozenTestTarget  `json:"test_target,omitempty"`
+	ApprovedEndpoints  []ApprovedEndpoint `json:"approved_endpoints,omitempty"`
+	Dependencies       []FrozenSubject    `json:"dependencies,omitempty"`
+	MinimumSampleBytes int64              `json:"minimum_sample_bytes,omitempty"`
 }
 
 func (FrozenPayload) Format(state fmt.State, _ rune) { _, _ = fmt.Fprint(state, "[REDACTED]") }
@@ -175,18 +179,25 @@ func Safe(code string) *SafeError {
 }
 
 var safeMessages = map[string]string{
-	"CORE_CONFIG_INVALID":    "The generated configuration was rejected by the core.",
-	"CORE_BINARY_MISMATCH":   "The registered core binary did not match its build.",
-	"RUNNER_RESOURCE_LIMIT":  "The runner could not reserve execution resources.",
-	"PORT_BUSY":              "The reserved local port was unavailable.",
-	"CANCELED":               "Cancellation was requested.",
-	"JOB_TIMEOUT":            "The job exceeded its time limit.",
-	"LEASE_LOST":             "The job lease is no longer valid.",
-	"INVALID_CONFIG":         "The input configuration is invalid.",
-	"CAPABILITY_UNSUPPORTED": "The requested capability is unsupported.",
-	"VALIDATION_FAILED":      "The merged resource is not valid.",
-	"SERVICE_UNAVAILABLE":    "The operation is temporarily unavailable.",
-	"INTERNAL_ERROR":         "The operation could not be completed.",
+	"BUDGET_EXCEEDED":         "The test budget is exhausted.",
+	"PROXY_CONNECT_FAILED":    "The proxy connection could not be established.",
+	"AUTH_FAILED":             "Proxy authentication failed.",
+	"TARGET_TLS_FAILED":       "The target TLS handshake failed.",
+	"HTTP_EXPECTATION_FAILED": "The target response did not match its registered expectation.",
+	"TEST_TARGET_UNAVAILABLE": "The controlled target is unavailable; the node cannot be assessed.",
+	"INSUFFICIENT_SAMPLE":     "The sample is too small to report throughput.",
+	"CORE_CONFIG_INVALID":     "The generated configuration was rejected by the core.",
+	"CORE_BINARY_MISMATCH":    "The registered core binary did not match its build.",
+	"RUNNER_RESOURCE_LIMIT":   "The runner could not reserve execution resources.",
+	"PORT_BUSY":               "The reserved local port was unavailable.",
+	"CANCELED":                "Cancellation was requested.",
+	"JOB_TIMEOUT":             "The job exceeded its time limit.",
+	"LEASE_LOST":              "The job lease is no longer valid.",
+	"INVALID_CONFIG":          "The input configuration is invalid.",
+	"CAPABILITY_UNSUPPORTED":  "The requested capability is unsupported.",
+	"VALIDATION_FAILED":       "The merged resource is not valid.",
+	"SERVICE_UNAVAILABLE":     "The operation is temporarily unavailable.",
+	"INTERNAL_ERROR":          "The operation could not be completed.",
 }
 
 func KnownError(code string) bool { _, ok := safeMessages[code]; return ok }
@@ -225,14 +236,15 @@ type EventReceipt struct {
 	Replayed bool     `json:"replayed"`
 }
 type ResultRequest struct {
-	JobID      ir.ID      `json:"job_id"`
-	Attempt    int32      `json:"attempt"`
-	LeaseSeq   Sequence   `json:"lease_seq"`
-	ResultHash string     `json:"result_hash"`
-	State      string     `json:"state"`
-	Verdict    string     `json:"verdict,omitempty"`
-	Metrics    Metrics    `json:"metrics"`
-	Error      *SafeError `json:"error,omitempty"`
+	JobID       ir.ID               `json:"job_id"`
+	Attempt     int32               `json:"attempt"`
+	LeaseSeq    Sequence            `json:"lease_seq"`
+	ResultHash  string              `json:"result_hash"`
+	State       string              `json:"state"`
+	Verdict     string              `json:"verdict,omitempty"`
+	Metrics     Metrics             `json:"metrics"`
+	Error       *SafeError          `json:"error,omitempty"`
+	Observation *NetworkObservation `json:"observation,omitempty"`
 }
 type ResultReceipt struct {
 	JobID        ir.ID    `json:"job_id"`
@@ -276,11 +288,12 @@ func ResultHash(result ResultRequest) (string, error) {
 		safe = Safe(result.Error.Code)
 	}
 	value := struct {
-		State   string     `json:"state"`
-		Verdict string     `json:"verdict,omitempty"`
-		Metrics Metrics    `json:"metrics"`
-		Error   *SafeError `json:"error,omitempty"`
-	}{result.State, result.Verdict, result.Metrics, safe}
+		State       string              `json:"state"`
+		Verdict     string              `json:"verdict,omitempty"`
+		Metrics     Metrics             `json:"metrics"`
+		Error       *SafeError          `json:"error,omitempty"`
+		Observation *NetworkObservation `json:"observation,omitempty"`
+	}{result.State, result.Verdict, result.Metrics, safe, result.Observation}
 	data, err := json.Marshal(value)
 	if err != nil {
 		return "", ErrInvalid
@@ -291,6 +304,9 @@ func ResultHash(result ResultRequest) (string, error) {
 // ValidateConfigPayload deliberately accepts only this milestone's offline
 // configuration validation. Future network tasks require a separate validator.
 func ValidateConfigPayload(payload FrozenPayload) error {
+	if payload.TestTarget != nil || len(payload.ApprovedEndpoints) != 0 || len(payload.Dependencies) != 0 || payload.MinimumSampleBytes != 0 {
+		return ErrInvalid
+	}
 	p := payload.ExecutionPolicy
 	if payload.SchemaVersion != 1 || payload.Type != "config_validate" || payload.Core.CoreBuildID.Validate() != nil || !ValidDigest(payload.Core.BuildSHA256) || (payload.QuotaReservationID != "" && payload.QuotaReservationID.Validate() != nil) || payload.Core.Version == "" || payload.Core.AdapterVersion == "" || payload.Core.Platform != "linux" || (payload.Core.Architecture != "amd64" && payload.Core.Architecture != "arm64") || payload.Limits.DurationMS < 1 || payload.Limits.DurationMS > 300000 || payload.Limits.MaxBytes != 0 || p.Network != "none" || p.AllowEnvironmentProxy || p.AllowCoreDownloads || p.AllowShell || p.TerminationGraceMS < 100 || p.TerminationGraceMS > 10000 || p.MemoryLimitBytes < 1048576 || p.MemoryLimitBytes > 2147483647 || p.ProcessLimit < 1 || p.ProcessLimit > 32 {
 		return ErrInvalid

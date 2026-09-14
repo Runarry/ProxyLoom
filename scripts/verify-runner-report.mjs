@@ -8,7 +8,7 @@ const sha = (data) => createHash('sha256').update(data).digest('hex');
 export function runnerEvidence(root, suite, secrets = []) {
   const sourceHash = () => {
     const result = spawnSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--',
-      'internal', 'compat', 'api', 'migrations', 'proxyloom-runner', 'go.mod', 'go.sum', 'fixtures/runner/validate', 'deploy/tools.lock.json', 'scripts/verify-runner-*.mjs'], { cwd: root, encoding: 'utf8', shell: false });
+      'internal', 'compat', 'api', 'migrations', 'proxyloom-runner', 'go.mod', 'go.sum', 'fixtures/runner/validate', 'deploy/tools.lock.json', 'scripts/verify-runner-*.mjs', 'scripts/verify-m3-native.mjs'], { cwd: root, encoding: 'utf8', shell: false });
     assert.equal(result.status, 0, 'Cannot identify verification source inputs');
     const files = [...new Set(result.stdout.trim().split(/\r?\n/).filter((path) => /\.(?:go|json|ya?ml|sql|mjs)$/.test(path) || /^go\.(mod|sum)$/.test(path)))].sort();
     return sha(JSON.stringify(files.map((path) => [path, sha(readFileSync(join(root, path)))])));

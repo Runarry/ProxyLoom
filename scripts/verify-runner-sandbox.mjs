@@ -6,21 +6,24 @@ import { fileURLToPath } from 'node:url';
 import { runnerEvidence } from './verify-runner-report.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const work = join(root, '.cache', 'runner-sandbox');
+assert.ok(process.argv.length === 2 || process.argv.length === 3 && process.argv[2] === '--full', 'runner_verifier_arguments');
+const full = process.argv[2] === '--full';
+const suite = full ? 'runner-exec' : 'runner-sandbox';
+const work = join(root, '.cache', suite);
 mkdirSync(work, { recursive: true });
 const lock = JSON.parse(readFileSync(join(root, 'deploy', 'tools.lock.json'), 'utf8'));
 assert.match(lock.images.runtime, /@sha256:[0-9a-f]{64}$/);
-const evidence = runnerEvidence(root, 'runner-sandbox');
+const evidence = runnerEvidence(root, suite);
 let status = 'failed';
 function run(command, args, extra = {}) {
-  const result = spawnSync(command, args, { cwd: root, shell: false, encoding: 'utf8', timeout: 180000, maxBuffer: 2 * 1024 * 1024, ...extra });
+  const result = spawnSync(command, args, { cwd: root, shell: false, encoding: 'utf8', timeout: full ? 360000 : 180000, maxBuffer: 2 * 1024 * 1024, ...extra });
   if (result.error) throw result.error;
   evidence.forward(result.stdout, result.stderr);
   assert.equal(result.status, 0, `${command} failed with status ${result.status}`);
 }
 try {
 run('go', ['test', '-mod=readonly', '-c', '-o', join(work, 'exec.test'), './internal/runner/exec'], {
-  env: { ...process.env, GOOS: 'linux', GOARCH: 'amd64', CGO_ENABLED: '0', GOCACHE: join(root, '.cache', 'go-build') },
+  env: { ...process.env, GOOS: 'linux', GOARCH: 'amd64', CGO_ENABLED: '0', GOCACHE: join(root, '.cache', 'go-build'), GOPATH: join(root, '.cache/gopath'), GOMODCACHE: join(root, '.cache/gomod') },
 });
 evidence.binary(join(work, 'exec.test'));
 // The supervisor deliberately has an ordinary Docker network. Tests prove that
@@ -31,7 +34,7 @@ run('docker', ['run', '--rm', '--user', '10002:10002', '--read-only', '--cap-dro
   '--mount', `type=bind,source=${join(root, '.cache', 'cores')},target=/cores,readonly`,
   '--mount', `type=bind,source=${join(root, 'fixtures', 'runner', 'validate')},target=/fixtures,readonly`,
   '-e', 'GOMAXPROCS=2', '-e', 'PROXYLOOM_RUNNER_REAL_CORES=/cores', '-e', 'PROXYLOOM_RUNNER_FIXTURE_ROOT=/fixtures',
-  lock.images.runtime, '/suite/exec.test', '-test.v', '-test.run', 'TestConfigSandbox|TestRealConfigSandbox|TestSealedExecutable', '-test.timeout', '90s']);
-console.log('PASS: enforced Linux checker sandbox and all three locked core checks.');
+  lock.images.runtime, '/suite/exec.test', '-test.v', '-test.run', full ? '^Test' : 'TestConfigSandbox|TestOnlineSandbox|TestRealConfigSandbox|TestSealedExecutable', '-test.timeout', full ? '300s' : '90s']);
+console.log(full ? 'PASS: full Linux process and sandbox regression.' : 'PASS: enforced Linux checker sandbox and all three locked core checks.');
 status = 'passed';
 } finally { evidence.finish(status); }

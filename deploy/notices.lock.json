@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "notices": [
+    {
+      "kind": "go",
+      "name": "c2sp.org/CCTV/age",
+      "version": "v0.0.0-20260829155415-4448f2097b2d",
+      "url": "https://raw.githubusercontent.com/C2SP/CCTV/4448f2097b2daa812c91a26141f9f36c2096b9ca/age/README.md",
+      "commit": "4448f2097b2daa812c91a26141f9f36c2096b9ca",
+      "file": "c2sp.org%2FCCTV%2Fage@v0.0.0-20260829155415-4448f2097b2d.txt",
+      "sha256": "fdbd4b06044f3803c72bdaf2df7681fdce3a45a326a2898e75640eae906606ad",
+      "license_text_status": "full_text"
+    },
+    {
+      "kind": "npm",
+      "name": "uri-js-replace",
+      "version": "1.0.1",
+      "url": "https://raw.githubusercontent.com/andreinwald/uri-js-replace/38927505b51a74b53444dc723be10e0d2e53823c/package.json",
+      "commit": "38927505b51a74b53444dc723be10e0d2e53823c",
+      "file": "uri-js-replace@1.0.1.txt",
+      "sha256": "04ffc581c5b1fc6314bfc1b255b53d937406b2a9420183330fdc072616594d20",
+      "license_text_status": "declaration_only"
+    },
+    {
+      "kind": "npm",
+      "name": "@redocly/openapi-core",
+      "version": "1.34.19",
+      "url": "https://raw.githubusercontent.com/Redocly/redocly-cli/11f4afd7642595ca4a62ec132994930ec77fc33e/LICENSE.md",
+      "commit": "11f4afd7642595ca4a62ec132994930ec77fc33e",
+      "file": "%40redocly%2Fopenapi-core@1.34.19.txt",
+      "sha256": "f6bf9ce4d84b47c1cdda9d8988ac977efc314f00ad65e498fc514ddf118440b5",
+      "license_text_status": "full_text"
+    },
+    {
+      "kind": "npm",
+      "name": "@vue/devtools-api",
+      "version": "6.6.4",
+      "url": "https://raw.githubusercontent.com/vuejs/vue-devtools/df6ab6bb7791a7a525a97990de73b3ea5e9a1941/LICENSE",
+      "commit": "df6ab6bb7791a7a525a97990de73b3ea5e9a1941",
+      "file": "%40vue%2Fdevtools-api@6.6.4.txt",
+      "sha256": "050bbca6960784db52ff387271bf2ecc5cbed7cf8581b415d528a6ecb6585015",
+      "license_text_status": "full_text"
+    },
+    {
+      "kind": "npm",
+      "name": "change-case",
+      "version": "5.4.4",
+      "url": "https://raw.githubusercontent.com/blakeembrey/change-case/8aaff31471c918d3eac2b40939c601bee37375dd/LICENSE",
+      "commit": "8aaff31471c918d3eac2b40939c601bee37375dd",
+      "file": "change-case@5.4.4.txt",
+      "sha256": "4eeb3271453a891df609e5a9f4ee79a68307f730c13417a3bfeffa604ac8cf25",
+      "license_text_status": "full_text"
+    }
+  ]
+}

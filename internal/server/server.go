@@ -20,6 +20,8 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/imports"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/networktest"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/subscriptions"
 	"github.com/gin-gonic/gin"
 )
@@ -35,16 +37,20 @@ type Dependencies struct {
 	Database func(context.Context) error
 	Secrets  func() error
 	// A nil Identity preserves the health/static bootstrap handler.
-	Identity       identity.Service
-	PublicURL      string
-	Development    bool
-	TrustedProxies []string
-	Nodes          *NodeDependencies
-	Sources        SourceRepository
-	Imports        imports.Repository
-	Jobs           jobs.ManagementRepository
-	JobCursor      *apicontract.CursorCodec
-	Subscriptions  subscriptions.Repository
+	Identity        identity.Service
+	PublicURL       string
+	Development     bool
+	TrustedProxies  []string
+	Nodes           *NodeDependencies
+	Sources         SourceRepository
+	Imports         imports.Repository
+	Jobs            jobs.ManagementRepository
+	JobCursor       *apicontract.CursorCodec
+	Subscriptions   subscriptions.Repository
+	Tests           networktest.Repository
+	Operations      operations.Repository
+	MetricsToken    []byte
+	MetricsSnapshot func(context.Context) (operations.Overview, error)
 }
 
 type Handler struct {
@@ -58,6 +64,9 @@ func init() { gin.SetMode(gin.ReleaseMode) }
 func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (*Handler, error) {
 	if dependencies.Database == nil || dependencies.Secrets == nil || logger == nil {
 		return nil, errors.New("server_dependencies_invalid")
+	}
+	if len(dependencies.MetricsToken) > 0 && (len(dependencies.MetricsToken) != 43 || dependencies.MetricsSnapshot == nil) {
+		return nil, errors.New("metrics_dependencies_invalid")
 	}
 	var authentication *Authentication
 	if dependencies.Identity != nil {
@@ -84,7 +93,11 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 	router.RedirectFixedPath = false
 	_ = router.SetTrustedProxies(nil)
 	handler := &Handler{router: router, web: root}
-	router.Use(safeAccessLog(logger), safeRecovery(logger), securityHeaders(), managementDeadline())
+	metrics := newHTTPMetrics(dependencies.MetricsToken, dependencies.MetricsSnapshot)
+	router.Use(safeAccessLog(logger), metrics.middleware(), safeRecovery(logger), securityHeaders(), managementDeadline())
+	if len(dependencies.MetricsToken) > 0 {
+		router.GET("/metrics", metrics.serve)
+	}
 	live := func(c *gin.Context) { respond(c, http.StatusOK, gin.H{"status": "ok"}) }
 	ready := func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), ReadinessTimeout)
@@ -165,6 +178,26 @@ func NewHandler(webDir string, dependencies Dependencies, logger *slog.Logger) (
 			return nil, errors.New("subscription_catalog_required")
 		}
 		if err := mountSubscriptions(router, authentication, *dependencies.Nodes, dependencies.Subscriptions); err != nil {
+			root.Close()
+			return nil, err
+		}
+	}
+	if dependencies.Operations != nil {
+		if dependencies.Nodes == nil {
+			root.Close()
+			return nil, errors.New("operations_dependencies_required")
+		}
+		if err := mountOperations(router, authentication, *dependencies.Nodes, dependencies.Operations); err != nil {
+			root.Close()
+			return nil, err
+		}
+	}
+	if dependencies.Tests != nil {
+		if dependencies.Nodes == nil || dependencies.Jobs == nil {
+			root.Close()
+			return nil, errors.New("network_test_dependencies_required")
+		}
+		if err := mountNetworkTests(router, authentication, *dependencies.Nodes, dependencies.Tests, dependencies.Jobs); err != nil {
 			root.Close()
 			return nil, err
 		}

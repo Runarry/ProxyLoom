@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "run_id": "be52fd60-f7e2-42c6-9856-6a75700457f9",
+  "mode": "all",
+  "started_at": "2026-09-13T16:04:22.555Z",
+  "result": "fail",
+  "steps": [
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "postgres",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "native-network",
+      "result": "pass"
+    },
+    {
+      "name": "browser",
+      "result": "fail"
+    },
+    {
+      "name": "browser-native-server",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "fixture-network",
+      "result": "pass"
+    },
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "source_manifest_sha256": "22fcc69187435ace28a7bda1bb102222a4192a66a4bbf08a005c27d25dc6ec54",
+  "core_lock_sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18",
+  "test_binary_sha256": "5e84ae322d63a6f787f0addef42290f1162ae24f92bc377d9fe53717f9ba1c24",
+  "error": "AssertionError [ERR_ASSERTION]: browser_failed\n\n1 !== 0\n",
+  "ended_at": "2026-09-13T16:06:59.195Z"
+}

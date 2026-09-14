@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "run_id": "7310ae34-fff3-4ff5-a2c0-8070cefa5632",
+  "started_at": "2026-09-13T15:43:13.157Z",
+  "postgres_image": "postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+  "checks": [
+    {
+      "check": "isolated_locked_postgres_with_separate_roles",
+      "result": "pass"
+    },
+    {
+      "check": "postgres_and_foundation_tests_executed",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "result": "pass"
+    },
+    {
+      "kind": "network",
+      "result": "pass"
+    }
+  ],
+  "result": "pass",
+  "postgres_platform": "linux/amd64",
+  "test_platform": "win32/x64",
+  "mode": "storage",
+  "test_filter": "TestPostgres(Network|Quota|Jobs)",
+  "command": "go test -mod=readonly -json -count=1 -timeout=180s -run TestPostgres(Network|Quota|Jobs) ./internal/catalog ./internal/storage ./internal/secretbox ./internal/config",
+  "source_manifest_sha256": "ff9babb4142ea217815a0e54a9154f70c44a3c0835cb30bf7175fc9d4096ccb7",
+  "go_version": "go version go1.26.0 windows/amd64",
+  "postgres_tests": [
+    {
+      "name": "TestPostgresJobsHTTPAuthorizationCursorCancelAndSSE",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsHTTPDatabaseFailureDeniesSnapshot",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsConcurrentClaimsEncryptedPayloadAndRestart",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsAtomicCompletionRollbackReplayAndExpiry",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsCancellationBatchAggregationAndEvents",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsRunnerCapacityRetryClassificationAndExhaustion",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresJobsEnqueueTransactionScopeAndList",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresQuotaConcurrentAdmissionAndBatchRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresQuotaCancelRetryFencingAndSettlement",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresQuotaLostDownloadNeverRetriesAndKeepsOriginalBucket",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresQuotaGlobalSlotsAndCanceledAttempt",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresQuotaReservationRollback",
+      "result": "pass"
+    },
+    {
+      "name": "TestPostgresNetworkFreezeIdempotencyHistoryAndTargetRevision",
+      "result": "pass"
+    }
+  ],
+  "identity_tests": [],
+  "postgres_skipped_tests": [],
+  "failed_tests": [],
+  "ended_at": "2026-09-13T15:43:37.348Z",
+  "source_commit": "246b08bed1d9490b1be4e0d946faced58f932ae6"
+}

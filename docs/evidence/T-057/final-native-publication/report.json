@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "b93036eb-8a39-4035-9097-a7b7c7fbdc4b",
+  "mode": "native",
+  "started_at": "2026-09-13T23:36:09.510Z",
+  "result": "pass",
+  "steps": [
+    {
+      "name": "publication-evidence-integrity",
+      "result": "pass"
+    },
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "native-publication",
+      "result": "pass"
+    },
+    {
+      "name": "source-stability",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "source_manifest_sha256": "791e40ee2aacfc345016c2ace8a58909dfc5952528382293e69556befc3c784d",
+  "core_lock_sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18",
+  "test_binary_sha256": "ea32c6b0af3e444557f8157d48a136a1868b814883dd1236a3f6604f4b3609c3",
+  "ended_at": "2026-09-13T23:37:18.482Z"
+}

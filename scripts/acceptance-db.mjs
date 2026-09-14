@@ -9,13 +9,14 @@ import { spawnSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const [mode, argument] = process.argv.slice(2);
-assert.ok(mode === 'start' && argument === undefined || mode === 'stop' && /^[0-9a-f-]{36}$/.test(argument), 'acceptance_db_arguments');
+assert.ok(mode === 'start' && (argument === undefined || argument === '--durable') || mode === 'stop' && /^[0-9a-f-]{36}$/.test(argument), 'acceptance_db_arguments');
+const durable = mode === 'start' && argument === '--durable';
 const id = mode === 'start' ? randomUUID() : argument;
 const name = `proxyloom-acceptance-${id}`;
 const label = 'io.proxyloom.acceptance';
 const directory = join(root, '.cache/acceptance-db', id);
 const secrets = join(directory, 'secrets');
-const owned = { container: false, network: false };
+const owned = { container: false, network: false, volume: false };
 const sensitive = [];
 function docker(args) {
   const r = spawnSync('docker', args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 180000, maxBuffer: 1024 * 1024 });
@@ -24,11 +25,12 @@ function docker(args) {
   return r.stdout.trim();
 }
 function cleanup() {
-  for (const kind of ['container', 'network']) {
+  for (const kind of ['container', 'volume', 'network']) {
     if (!owned[kind]) continue;
     const format = kind === 'container' ? `{{index .Config.Labels "${label}"}}` : `{{index .Labels "${label}"}}`;
-    assert.equal(docker([kind, 'inspect', '--format', format, name]), id, 'acceptance_db_ownership');
-    docker(kind === 'container' ? ['container', 'rm', '--force', '--volumes', name] : ['network', 'rm', name]);
+    const target = kind === 'volume' ? name + '-data' : name;
+    assert.equal(docker([kind, 'inspect', '--format', format, target]), id, 'acceptance_db_ownership');
+    docker(kind === 'container' ? ['container', 'rm', '--force', '--volumes', target] : [kind, 'rm', target]);
     owned[kind] = false;
   }
 }
@@ -36,6 +38,7 @@ if (mode === 'stop') {
   const state = JSON.parse(readFileSync(join(directory, 'state.json'), 'utf8'));
   assert.equal(state.id, id); assert.equal(state.name, name);
   owned.container = state.owned.container; owned.network = state.owned.network;
+  owned.volume = state.owned.volume === true;
   cleanup();
   writeFileSync(join(directory, 'state.json'), JSON.stringify({ id, name, owned, stopped_at: new Date().toISOString() }, null, 2));
   console.log('PASS: owned acceptance database and network removed.');
@@ -51,9 +54,10 @@ if (mode === 'stop') {
     const cached = spawnSync('docker', ['image', 'inspect', lock.images.postgres], { encoding: 'utf8', windowsHide: true });
     if (cached.error || cached.status !== 0) docker(['pull', lock.images.postgres]);
     docker(['network', 'create', '--label', `${label}=${id}`, name]); owned.network = true;
+    if (durable) { docker(['volume', 'create', '--label', `${label}=${id}`, name + '-data']); owned.volume = true; }
     docker(['create', '--name', name, '--label', `${label}=${id}`, '--network', name,
       '--publish', '127.0.0.1::5432', '--memory', '512m', '--cpus', '1', '--pids-limit', '128',
-      '--tmpfs', '/var/lib/postgresql/data:rw,size=536870912',
+      ...(durable ? ['--mount', `type=volume,source=${name}-data,target=/var/lib/postgresql/data`] : ['--tmpfs', '/var/lib/postgresql/data:rw,size=536870912']),
       ...['bootstrap', 'runtime', 'migration'].flatMap(role => ['--mount', `type=bind,source=${join(secrets, `db_${role}_password`)},target=/run/secrets/db_${role}_password,readonly`]),
       '--mount', `type=bind,source=${join(root, 'deploy/postgres-init.sh')},target=/docker-entrypoint-initdb.d/10-proxyloom.sh,readonly`,
       '--env', 'POSTGRES_DB=proxyloom', '--env', 'POSTGRES_USER=proxyloom_bootstrap',

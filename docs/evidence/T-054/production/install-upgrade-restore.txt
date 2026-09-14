@@ -1,0 +1,204 @@
+{"schema_version":1,"architecture":"amd64","runner_id":"10431e65-7e18-47ad-b105-04c8e64311e1","created_at":"2026-09-13T19:35:53.659114555Z"}
+Initialized. Preserve an independent key export, then run start and install-timers.
+ Network proxyloom_data Creating 
+ Volume proxyloom_pgdata Creating 
+ Volume proxyloom_pgdata Creating 
+ Network proxyloom_data Creating 
+ Volume proxyloom_pgdata Created 
+ Volume proxyloom_pgdata Created 
+ Network proxyloom_data Created 
+ Network proxyloom_data Created 
+ Container proxyloom-postgres-1 Creating 
+ Container proxyloom-postgres-1 Created 
+ Container proxyloom-postgres-1 Starting 
+ Container proxyloom-postgres-1 Started 
+ Container proxyloom-postgres-1 Waiting 
+ Container proxyloom-postgres-1 Healthy 
+ Container proxyloom-migrate-run-d2cc9e298135 Creating 
+ Container proxyloom-migrate-run-d2cc9e298135 Created 
+{"applied":23,"pending":0,"latest":23,"current":true}
+ Network proxyloom_control Creating 
+ Network proxyloom_control Creating 
+ Network proxyloom_front Creating 
+ Network proxyloom_front Creating 
+ Network proxyloom_control Created 
+ Network proxyloom_control Created 
+ Network proxyloom_front Created 
+ Network proxyloom_front Created 
+ Container proxyloom-api-1 Creating 
+ Container proxyloom-api-1 Created 
+ Container proxyloom-api-1 Starting 
+ Container proxyloom-api-1 Started 
+ Container proxyloom-api-1 Waiting 
+ Container proxyloom-api-1 Healthy 
+ Network proxyloom_egress Creating 
+ Network proxyloom_egress Creating 
+ Network proxyloom_egress Created 
+ Network proxyloom_egress Created 
+ Container proxyloom-runner-1 Creating 
+ Container proxyloom-runner-1 Created 
+ Container proxyloom-runner-1 Starting 
+ Container proxyloom-runner-1 Started 
+network_guard_ready
+ Container proxyloom-runner-1 Running 
+ Container proxyloom-runner-1 Waiting 
+ Container proxyloom-runner-1 Healthy 
+PASS: embedded-core-validation-xray
+PASS: embedded-core-validation-sing-box
+PASS: embedded-core-validation-mihomo
+PASS: deployment-init
+PASS: production-service-layout-and-embedded-cores
+ Container proxyloom-runner-1 Recreate 
+ Container proxyloom-runner-1 Recreated 
+ Container proxyloom-runner-1 Starting 
+ Container proxyloom-runner-1 Started 
+PASS: network-dial-allow
+{"time":"2026-09-13T19:36:12.433816466Z","level":"ERROR","msg":"command_failed","error_code":"healthcheck_failed"}
+network_guard_ready
+PASS: network-dial-deny
+PASS: network-dial-allow
+ Container proxyloom-runner-1 Running 
+ Container proxyloom-runner-1 Waiting 
+ Container proxyloom-runner-1 Healthy 
+PASS: stale-guard-and-private-network-isolation
+ Container proxyloom-postgres-1 Restarting 
+ Container proxyloom-runner-1 Restarting 
+ Container proxyloom-api-1 Restarting 
+ Container proxyloom-postgres-1 Started 
+ Container proxyloom-runner-1 Started 
+ Container proxyloom-api-1 Started 
+ Container proxyloom-postgres-1 Running 
+ Container proxyloom-postgres-1 Waiting 
+ Container proxyloom-postgres-1 Healthy 
+ Container proxyloom-migrate-run-33ff19b48d0f Creating 
+ Container proxyloom-migrate-run-33ff19b48d0f Created 
+{"applied":23,"pending":0,"latest":23,"current":true}
+ Container proxyloom-api-1 Running 
+ Container proxyloom-api-1 Waiting 
+ Container proxyloom-api-1 Healthy 
+ Container proxyloom-runner-1 Recreate 
+ Container proxyloom-runner-1 Recreated 
+ Container proxyloom-runner-1 Starting 
+ Container proxyloom-runner-1 Started 
+network_guard_ready
+ Container proxyloom-runner-1 Running 
+ Container proxyloom-runner-1 Waiting 
+ Container proxyloom-runner-1 Healthy 
+PASS: deployment-persisted
+Independent key export created. Store it separately from database backups.
+ Container proxyloom-operations-run-6ddf4635034c Creating 
+ Container proxyloom-operations-run-6ddf4635034c Created 
+{"backup_id":"98cd3e35-ae3d-4965-a8b4-3042bd3b7e7c","created_at":"2026-09-13T19:36:30.23748763Z","database_schema":23,"sha256":"36416e77de81fca6afdace12f2ff5ea383a258fdae8c022ce4fe4c6956ee4fe9"}
+ Container proxyloom-operations-run-b20a553356f4 Creating 
+ Container proxyloom-operations-run-b20a553356f4 Created 
+{"backup_id":"98cd3e35-ae3d-4965-a8b4-3042bd3b7e7c","created_at":"2026-09-13T19:36:30.23748763Z","database_schema":23,"verified":true}
+ Container proxyloom-operations-run-1fa505ef5be5 Creating 
+ Container proxyloom-operations-run-1fa505ef5be5 Created 
+{"backup_id":"c229a58e-d370-4e50-b76d-4818c7585f1e","created_at":"2026-09-13T19:36:31.283662702Z","database_schema":23,"sha256":"67e0b3fe3a526afda04c554364595cb7a064fed7a26d9e72e2941ed3ddfb7234"}
+ Container proxyloom-runner-1 Stopping 
+ Container proxyloom-api-1 Stopping 
+ Container proxyloom-runner-1 Stopped 
+ Container proxyloom-api-1 Stopped 
+ Container proxyloom-postgres-1 Running 
+ Container proxyloom-postgres-1 Waiting 
+ Container proxyloom-postgres-1 Healthy 
+ Container proxyloom-migrate-run-c2183aab7e9b Creating 
+ Container proxyloom-migrate-run-c2183aab7e9b Created 
+{"applied":23,"pending":0,"latest":23,"current":true}
+ Container proxyloom-api-1 Starting 
+ Container proxyloom-api-1 Started 
+ Container proxyloom-api-1 Waiting 
+ Container proxyloom-api-1 Healthy 
+ Container proxyloom-runner-1 Starting 
+ Container proxyloom-runner-1 Started 
+network_guard_ready
+ Container proxyloom-runner-1 Running 
+ Container proxyloom-runner-1 Waiting 
+ Container proxyloom-runner-1 Healthy 
+PASS: deployment-persisted
+ Container proxyloom-migrate-run-9b8136778a45 Creating 
+ Container proxyloom-migrate-run-9b8136778a45 Created 
+ Container proxyloom-runner-1 Stopping 
+ Container proxyloom-api-1 Stopping 
+ Container proxyloom-runner-1 Stopped 
+ Container proxyloom-api-1 Stopped 
+ Container proxyloom-postgres-1 Running 
+ Container proxyloom-postgres-1 Waiting 
+ Container proxyloom-postgres-1 Healthy 
+ Container proxyloom-migrate-run-eeaaffc8efde Creating 
+ Container proxyloom-migrate-run-eeaaffc8efde Created 
+{"applied":23,"pending":0,"latest":23,"current":true}
+ Container proxyloom-api-1 Starting 
+ Container proxyloom-api-1 Started 
+ Container proxyloom-api-1 Waiting 
+ Container proxyloom-api-1 Healthy 
+ Container proxyloom-runner-1 Starting 
+ Container proxyloom-runner-1 Started 
+network_guard_ready
+ Container proxyloom-runner-1 Running 
+ Container proxyloom-runner-1 Waiting 
+ Container proxyloom-runner-1 Healthy 
+PASS: deployment-persisted
+ Container proxyloom-runner-1 Stopping 
+ Container proxyloom-api-1 Stopping 
+ Container proxyloom-runner-1 Stopped 
+ Container proxyloom-api-1 Stopped 
+ Container proxyloom-postgres-1 Stopping 
+ Container proxyloom-postgres-1 Stopped 
+{"schema_version":1,"architecture":"amd64","runner_id":"92507a7f-d3c5-41a1-a308-ae867c716aee","created_at":"2026-09-13T19:36:59.293070942Z"}
+ Network proxyloom-recovered_data Creating 
+ Network proxyloom-recovered_data Creating 
+ Volume proxyloom-recovered_pgdata Creating 
+ Volume proxyloom-recovered_pgdata Creating 
+ Volume proxyloom-recovered_pgdata Created 
+ Volume proxyloom-recovered_pgdata Created 
+ Network proxyloom-recovered_data Created 
+ Network proxyloom-recovered_data Created 
+ Container proxyloom-recovered-postgres-1 Creating 
+ Container proxyloom-recovered-postgres-1 Created 
+ Container proxyloom-recovered-postgres-1 Starting 
+ Container proxyloom-recovered-postgres-1 Started 
+ Container proxyloom-recovered-postgres-1 Waiting 
+ Container proxyloom-recovered-postgres-1 Healthy 
+ Container proxyloom-recovered-operations-run-921b6b96eaca Creating 
+ Container proxyloom-recovered-operations-run-921b6b96eaca Created 
+{"schema_version":1,"architecture":"amd64","runner_id":"0f1fa5cc-20f7-4de0-9783-134cfb0d5728","authorization_epoch":"57f88e1d-810d-4484-8cb3-b750c82a1631","created_at":"2026-09-13T19:37:03.106432509Z"}
+Restore completed with new authorization and Runner identity. Run start, then log in again.
+ Container proxyloom-recovered-postgres-1 Running 
+ Container proxyloom-recovered-postgres-1 Waiting 
+ Container proxyloom-recovered-postgres-1 Healthy 
+ Container proxyloom-recovered-migrate-run-b29eef16588d Creating 
+ Container proxyloom-recovered-migrate-run-b29eef16588d Created 
+{"applied":23,"pending":0,"latest":23,"current":true}
+ Network proxyloom-recovered_front Creating 
+ Network proxyloom-recovered_front Creating 
+ Network proxyloom-recovered_control Creating 
+ Network proxyloom-recovered_control Creating 
+ Network proxyloom-recovered_front Created 
+ Network proxyloom-recovered_front Created 
+ Network proxyloom-recovered_control Created 
+ Network proxyloom-recovered_control Created 
+ Container proxyloom-recovered-api-1 Creating 
+ Container proxyloom-recovered-api-1 Created 
+ Container proxyloom-recovered-api-1 Starting 
+ Container proxyloom-recovered-api-1 Started 
+ Container proxyloom-recovered-api-1 Waiting 
+ Container proxyloom-recovered-api-1 Healthy 
+ Network proxyloom-recovered_egress Creating 
+ Network proxyloom-recovered_egress Creating 
+ Network proxyloom-recovered_egress Created 
+ Network proxyloom-recovered_egress Created 
+ Container proxyloom-recovered-runner-1 Creating 
+ Container proxyloom-recovered-runner-1 Created 
+ Container proxyloom-recovered-runner-1 Starting 
+ Container proxyloom-recovered-runner-1 Started 
+network_guard_ready
+ Container proxyloom-recovered-runner-1 Running 
+ Container proxyloom-recovered-runner-1 Waiting 
+ Container proxyloom-recovered-runner-1 Healthy 
+PASS: embedded-core-validation-xray
+PASS: embedded-core-validation-sing-box
+PASS: embedded-core-validation-mihomo
+PASS: deployment-restored
+PASS: isolated-restore-seconds=19
+PASS: production-deployment-acceptance

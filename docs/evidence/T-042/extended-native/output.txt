@@ -1,0 +1,9 @@
+=== RUN   TestNativeM3ThreeCoreNetwork
+=== RUN   TestNativeM3ThreeCoreNetwork/xray
+=== RUN   TestNativeM3ThreeCoreNetwork/sing-box
+=== RUN   TestNativeM3ThreeCoreNetwork/mihomo
+--- PASS: TestNativeM3ThreeCoreNetwork (101.39s)
+    --- PASS: TestNativeM3ThreeCoreNetwork/xray (26.13s)
+    --- PASS: TestNativeM3ThreeCoreNetwork/sing-box (35.52s)
+    --- PASS: TestNativeM3ThreeCoreNetwork/mihomo (39.71s)
+PASS

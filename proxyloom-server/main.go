@@ -15,6 +15,8 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/config"
 	"github.com/Runarry/ProxyLoom/internal/identity"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/networktest"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/runnercontrol"
 	"github.com/Runarry/ProxyLoom/internal/safefetch"
 	"github.com/Runarry/ProxyLoom/internal/secretbox"
@@ -117,6 +119,19 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	if err = publicationStore.EnsureCoreBuilds(ctx); err != nil {
 		return errors.New("core_build_initialization_failed")
 	}
+	testStore, err := storage.NewNetworkTests(catalogStore, jobStore, networktest.Resolver{})
+	if err != nil {
+		return errors.New("network_test_configuration_invalid")
+	}
+	operationStore, err := storage.NewOperations(catalogStore, jobStore)
+	if err != nil {
+		return errors.New("operations_configuration_invalid")
+	}
+	metricsToken, err := cfg.ReadMetricsToken()
+	if err != nil {
+		return err
+	}
+	defer clear(metricsToken)
 	worker, err := jobs.NewWorker(jobStore, jobs.WorkerConfig{
 		WorkerID: jobs.NewID(), Handlers: map[jobs.Type]jobs.Handler{jobs.ImportParse: importStore.HandleParse, jobs.SourceRefresh: sourceStore.HandleRefresh, jobs.Compile: publicationStore.HandleCompile},
 	})
@@ -137,7 +152,7 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		if err != nil {
 			return errors.New("runner_tls_invalid")
 		}
-		internalListener, err = runnercontrol.New(runnercontrol.Config{TLS: tlsConfig, Registrations: registered, Jobs: jobStore})
+		internalListener, err = runnercontrol.New(runnercontrol.Config{TLS: tlsConfig, Registrations: registered, Jobs: jobStore, AuthorizationEpoch: func(ctx context.Context) (string, error) { return storage.ControlAuthorizationEpoch(ctx, pool) }})
 		if err != nil {
 			return errors.New("runner_listener_configuration_invalid")
 		}
@@ -155,7 +170,12 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 		TrustedProxies: cfg.TrustedProxies(),
 		Nodes:          &server.NodeDependencies{Repository: catalogStore, Cursor: cursor},
 		Subscriptions:  publicationStore,
-		Sources:        sourceStore, Imports: importStore, Jobs: jobStore, JobCursor: cursor,
+		Tests:          testStore,
+		Operations:     operationStore,
+		MetricsToken:   metricsToken, MetricsSnapshot: func(ctx context.Context) (operations.Overview, error) {
+			return operationStore.Overview(ctx, identity.DefaultScopeID)
+		},
+		Sources: sourceStore, Imports: importStore, Jobs: jobStore, JobCursor: cursor,
 	}, logger)
 	if err != nil {
 		return err
@@ -171,7 +191,7 @@ func serve(ctx context.Context, lookup config.Lookup, logger *slog.Logger) error
 	go func() { finished <- server.Serve(runCtx, cfg.HTTPAddr, handler, logger) }()
 	go func() { finished <- worker.Run(runCtx) }()
 	go func() { finished <- publicationStore.Run(runCtx) }()
-	go func() { finished <- expireImports(runCtx, importStore, logger) }()
+	go func() { finished <- maintainHistory(runCtx, operationStore, logger) }()
 	go func() { finished <- scheduleSources(runCtx, sourceStore, logger) }()
 	if internalListener != nil {
 		count++

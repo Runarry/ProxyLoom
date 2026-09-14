@@ -299,27 +299,76 @@ func (s *Subscriptions) readPublication(ctx context.Context, tx subTx, scope, id
 	return p, err
 }
 func (s *Subscriptions) Head(ctx context.Context, scope, profile ir.ID) (subscriptions.Head, error) {
-	h := subscriptions.Head{State: "not_ready", BlockingReasons: []ir.Diagnostic{}}
+	heads, err := s.Heads(ctx, scope, []ir.ID{profile})
+	return heads[profile], err
+}
+
+// Heads keeps one bounded read transaction for the page. Unpublished profiles
+// require no per-profile query; active heads retain every live safety check.
+func (s *Subscriptions) Heads(ctx context.Context, scope ir.ID, profiles []ir.ID) (map[ir.ID]subscriptions.Head, error) {
+	if scope.Validate() != nil || len(profiles) > 200 {
+		return nil, catalog.ErrInvalidInput
+	}
+	heads := make(map[ir.ID]subscriptions.Head, len(profiles))
+	ids := make([]string, len(profiles))
+	for i, profile := range profiles {
+		if profile.Validate() != nil {
+			return nil, catalog.ErrInvalidInput
+		}
+		ids[i] = string(profile)
+		heads[profile] = subscriptions.Head{State: "not_ready", BlockingReasons: []ir.Diagnostic{}}
+	}
+	if len(profiles) == 0 {
+		return heads, nil
+	}
 	tx, err := s.catalog.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly})
 	if err != nil {
-		return h, catalog.ErrUnavailable
+		return nil, catalog.ErrUnavailable
 	}
 	defer tx.Rollback(ctx)
-	id, gen, err := s.headID(ctx, tx, scope, profile)
+	rows, err := tx.Query(ctx, `SELECT h.profile_id::text,p.id::text,p.generation FROM public.publication_heads h JOIN public.publications p ON p.scope_id=h.scope_id AND p.id=h.publication_id WHERE h.scope_id=$1 AND h.profile_id=ANY($2::uuid[]) ORDER BY h.profile_id`, dbID(scope), ids)
 	if err != nil {
-		return h, subError(err)
+		return nil, subError(err)
 	}
-	if id != "" {
-		p, err := s.readPublication(ctx, tx, scope, id)
-		if err != nil {
-			return h, subError(err)
+	type published struct {
+		profile, id ir.ID
+		generation  int64
+	}
+	var active []published
+	for rows.Next() {
+		var item published
+		if err = rows.Scan(&item.profile, &item.id, &item.generation); err != nil {
+			rows.Close()
+			return nil, subError(err)
 		}
-		h.PublicationID = id
-		h.Generation = subscriptions.Counter(gen)
-		h.State = p.State
-		h.BlockingReasons = p.BlockingReasons
+		active = append(active, item)
 	}
-	return h, subError(tx.Commit(ctx))
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return nil, subError(err)
+	}
+	for _, item := range active {
+		profile, id := item.profile, item.id
+		h := heads[profile]
+		h.PublicationID = id
+		h.Generation = subscriptions.Counter(item.generation)
+		h.State = "active"
+		// The list needs the current authorization status, not a reconstructed
+		// compile input or artifact. Reuse the same relational checks as GET /s.
+		current, err := s.profile(ctx, tx, scope, profile)
+		if err == nil {
+			err = s.safePublished(ctx, tx, scope, id, current)
+		}
+		if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, catalog.ErrNotFound) || errors.Is(err, subscriptions.ErrBlocked) {
+			h.State = "blocked"
+			h.BlockingReasons = append(h.BlockingReasons, subscriptions.Diagnostic(ir.ResourceDisabled, profile, "/publication", ""))
+		} else if err != nil {
+			return nil, subError(err)
+		}
+		heads[profile] = h
+	}
+	return heads, subError(tx.Commit(ctx))
 }
 func (s *Subscriptions) Publications(ctx context.Context, scope, profile, after ir.ID, limit int) ([]subscriptions.Publication, error) {
 	if !validIDs(scope, profile) || limit < 1 || limit > 201 {

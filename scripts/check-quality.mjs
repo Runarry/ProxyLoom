@@ -16,7 +16,7 @@ function sourceManifest() {
   });
   if (inventory.error || inventory.status !== 0) throw new Error('quality_source_inventory_failed');
   return [...new Set(inventory.stdout.split('\0').filter(Boolean))].filter((path) =>
-    /^(?:api|compat|deploy|fixtures|internal|migrations|proxyloom-server|proxyloom-runner|proxyloom-fixtures|proxyloom-web|schemas|scripts|\.github)\//.test(path)
+    /^(?:api|compat|deploy|fixtures|internal|migrations|proxyloom-server|proxyloom-runner|proxyloom-operations|proxyloom-fixtures|proxyloom-web|schemas|scripts|\.github)\//.test(path)
     || ['README.md', 'go.mod', 'go.sum', 'sqlc.yaml', '.gitignore', '.gitattributes',
       'docs/PLAN.md', 'docs/PLAN.tasks.json', 'docs/requirements_v1.0.md', 'docs/project_design_v1.0.md'].includes(path))
     .filter((path) => existsSync(join(root, path))).sort()

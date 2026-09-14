@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Runarry/ProxyLoom/internal/ir"
+	"github.com/Runarry/ProxyLoom/internal/runnerprotocol"
 )
 
 type Executor string
@@ -149,14 +150,15 @@ type TestMetrics struct {
 	FailureCount   *int32   `json:"failure_count,omitempty"`
 }
 type RunnerJobResultRequest struct {
-	JobID      ir.ID       `json:"job_id"`
-	Attempt    int32       `json:"attempt"`
-	LeaseSeq   Revision    `json:"lease_seq"`
-	ResultHash string      `json:"result_hash"`
-	State      JobState    `json:"state"`
-	Verdict    Verdict     `json:"verdict,omitempty"`
-	Metrics    TestMetrics `json:"metrics"`
-	Error      *ErrorBody  `json:"error,omitempty"`
+	JobID       ir.ID                              `json:"job_id"`
+	Attempt     int32                              `json:"attempt"`
+	LeaseSeq    Revision                           `json:"lease_seq"`
+	ResultHash  string                             `json:"result_hash"`
+	State       JobState                           `json:"state"`
+	Verdict     Verdict                            `json:"verdict,omitempty"`
+	Metrics     TestMetrics                        `json:"metrics"`
+	Error       *ErrorBody                         `json:"error,omitempty"`
+	Observation *runnerprotocol.NetworkObservation `json:"observation,omitempty"`
 }
 
 type JobEvent struct {

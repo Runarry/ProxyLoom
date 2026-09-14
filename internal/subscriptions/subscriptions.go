@@ -71,6 +71,7 @@ type Output struct {
 	Diagnostics              []ir.Diagnostic `json:"diagnostics"`
 	PreviewTruncated         bool            `json:"preview_truncated,omitempty"`
 	PreviousPreviewTruncated bool            `json:"previous_preview_truncated,omitempty"`
+	PreviousPreviewExpired   bool            `json:"previous_preview_expired,omitempty"`
 	Preview                  string          `json:"preview,omitempty"`
 	PreviousPreview          string          `json:"previous_preview,omitempty"`
 	Changed                  bool            `json:"changed"`
@@ -146,6 +147,7 @@ type Core struct {
 	Enabled          bool       `json:"enabled"`
 	RegisteredAt     time.Time  `json:"registered_at"`
 	DisabledAt       *time.Time `json:"disabled_at,omitempty"`
+	DisableReason    string     `json:"disable_reason,omitempty"`
 	CapabilityStatus string     `json:"capability_status"`
 }
 type Download struct {
@@ -163,12 +165,13 @@ type Repository interface {
 	Publish(context.Context, Actor, ir.ID, int64, PublishRequest) (Publication, error)
 	Rollback(context.Context, Actor, ir.ID, int64, RollbackRequest) (Publication, error)
 	Head(context.Context, ir.ID, ir.ID) (Head, error)
+	Heads(context.Context, ir.ID, []ir.ID) (map[ir.ID]Head, error)
 	Publications(context.Context, ir.ID, ir.ID, ir.ID, int) ([]Publication, error)
 	IssueToken(context.Context, Actor, ir.ID, TokenRequest) (TokenIssue, error)
 	Tokens(context.Context, ir.ID, ir.ID, ir.ID, int) ([]TokenMetadata, error)
 	RevokeToken(context.Context, Actor, ir.ID, int64) (TokenMetadata, error)
 	Download(context.Context, string, string) (Download, error)
 	Cores(context.Context) ([]Core, error)
-	DisableCore(context.Context, Actor, ir.ID, int64) (Core, error)
+	DisableCore(context.Context, Actor, ir.ID, int64, string) (Core, error)
 	Export(context.Context, Actor, ir.ID, []string, ir.OutputFormat, bool) ([]apicontract.ExportedArtifact, error)
 }

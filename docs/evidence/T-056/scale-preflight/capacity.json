@@ -1,0 +1,184 @@
+{
+  "baseline_run": false,
+  "compile": {
+    "mihomo": {
+      "artifact_sha256": "e1508cb866ccc73c610aedacbefd889533c22b7a493310d74d4d9c6424ac9d45",
+      "bytes": 1127958,
+      "duration": {
+        "max_ms": 510.546796,
+        "p50_ms": 477.892193,
+        "p95_ms": 510.546796,
+        "p99_ms": 510.546796,
+        "samples": 5
+      },
+      "identical_repeats": 5,
+      "native_outbounds": 500,
+      "native_rules": 2001,
+      "subject_outbounds": 500
+    },
+    "sing-box": {
+      "artifact_sha256": "38a963aeb618e1d4c8190af9884309e6f2634fdabc3f9bddc01b6c0858b74669",
+      "bytes": 1141797,
+      "duration": {
+        "max_ms": 444.893097,
+        "p50_ms": 441.302785,
+        "p95_ms": 444.893097,
+        "p99_ms": 444.893097,
+        "samples": 5
+      },
+      "identical_repeats": 5,
+      "native_outbounds": 500,
+      "native_rules": 2001,
+      "subject_outbounds": 500
+    },
+    "xray": {
+      "artifact_sha256": "eb9de9476efa5cc6468623c3fe4aaee8f4dccbb94f0fc2109238e82f1b488199",
+      "bytes": 1249001,
+      "duration": {
+        "max_ms": 479.024896,
+        "p50_ms": 444.328567,
+        "p95_ms": 479.024896,
+        "p99_ms": 479.024896,
+        "samples": 5
+      },
+      "identical_repeats": 5,
+      "native_outbounds": 501,
+      "native_rules": 2002,
+      "subject_outbounds": 500
+    }
+  },
+  "dataset": {
+    "chain": 500,
+    "client_preset": 5,
+    "dns_profile": 1,
+    "node": 10000,
+    "routing_profile": 1,
+    "subscription_profile": 200
+  },
+  "environment": "real_production_services_in_owned_linux_amd64_docker_host",
+  "finished_at": "2026-09-13T23:06:06.224967693Z",
+  "limits": {
+    "api_cpus": 2,
+    "api_memory_bytes": 536870912,
+    "host_cpus": 4,
+    "host_memory_bytes": 6442450944,
+    "postgres_cpus": 1,
+    "postgres_memory_bytes": 1073741824,
+    "runner_cpus": 2,
+    "runner_memory_bytes": 1073741824
+  },
+  "management": {
+    "concurrency": 10,
+    "elapsed_seconds": 10.222404007,
+    "error_rate": 0,
+    "errors": 0,
+    "latency": {
+      "max_ms": 384.892988,
+      "p50_ms": 236.381397,
+      "p95_ms": 301.517202,
+      "p99_ms": 350.938551,
+      "samples": 446
+    },
+    "requests": 446,
+    "routes": {
+      "/api/v1/chains": {
+        "errors": 0,
+        "latency": {
+          "max_ms": 268.435583,
+          "p50_ms": 169.619836,
+          "p95_ms": 210.859359,
+          "p99_ms": 249.140739,
+          "samples": 147
+        },
+        "requests": 147
+      },
+      "/api/v1/nodes": {
+        "errors": 0,
+        "latency": {
+          "max_ms": 365.454849,
+          "p50_ms": 260.653376,
+          "p95_ms": 316.393217,
+          "p99_ms": 364.826262,
+          "samples": 151
+        },
+        "requests": 151
+      },
+      "/api/v1/subscriptions": {
+        "errors": 0,
+        "latency": {
+          "max_ms": 384.892988,
+          "p50_ms": 244.434427,
+          "p95_ms": 294.341684,
+          "p99_ms": 367.32598,
+          "samples": 148
+        },
+        "requests": 148
+      }
+    },
+    "ttfb": {
+      "max_ms": 383.953737,
+      "p50_ms": 235.274919,
+      "p95_ms": 300.898721,
+      "p99_ms": 350.366354,
+      "samples": 446
+    }
+  },
+  "publication": {
+    "bytes": 1249001,
+    "real_kernel_validation": true,
+    "sha256": "eb9de9476efa5cc6468623c3fe4aaee8f4dccbb94f0fc2109238e82f1b488199",
+    "target": "xray"
+  },
+  "publication_validation_state": "validating",
+  "restoration": {
+    "all_current_revisions_decrypted": 10707,
+    "dataset": {
+      "chain": 500,
+      "client_preset": 5,
+      "dns_profile": 1,
+      "node": 10000,
+      "routing_profile": 1,
+      "subscription_profile": 200
+    },
+    "result": "pass",
+    "verification_seconds": 6.970481036
+  },
+  "result": "pass",
+  "schema_version": 1,
+  "seed_seconds": 24.104798473,
+  "started_at": "2026-09-13T23:03:45.852284839Z",
+  "subscription": {
+    "concurrency": 50,
+    "elapsed_seconds": 10.335009156,
+    "error_rate": 0,
+    "errors": 0,
+    "latency": {
+      "max_ms": 479.121882,
+      "p50_ms": 359.963265,
+      "p95_ms": 417.580889,
+      "p99_ms": 462.07412,
+      "samples": 1410
+    },
+    "requests": 1410,
+    "routes": {
+      "subscription": {
+        "errors": 0,
+        "latency": {
+          "max_ms": 479.121882,
+          "p50_ms": 359.963265,
+          "p95_ms": 417.580889,
+          "p99_ms": 462.07412,
+          "samples": 1410
+        },
+        "requests": 1410
+      }
+    },
+    "ttfb": {
+      "max_ms": 476.704873,
+      "p50_ms": 358.574092,
+      "p95_ms": 416.210753,
+      "p99_ms": 460.403277,
+      "samples": 1410
+    }
+  }
+}

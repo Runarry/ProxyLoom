@@ -94,5 +94,15 @@
     "file": "subscription-first-publish.json",
     "schema": "PublishRequest",
     "valid": true
+  },
+  {
+    "file": "m3-test-target.json",
+    "schema": "TestTargetCreateRequest",
+    "valid": true
+  },
+  {
+    "file": "m3-settings.json",
+    "schema": "SystemSettings",
+    "valid": true
   }
 ]

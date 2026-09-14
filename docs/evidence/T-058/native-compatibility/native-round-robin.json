@@ -1,0 +1,22 @@
+[
+  {
+    "all_unavailable": "fail_closed",
+    "artifact_sha256": "bcdba9bfcf641201fc2b10bca1980794ed68f0feacc1a6f88ec337a721cd6902",
+    "build_id": "42f06ab1-ac85-524b-87e5-6bc1e9a82409",
+    "build_sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+    "direct_bypass": "none",
+    "family": "xray",
+    "health_destination": "local fixture only",
+    "round_robin": "3 requests per member"
+  },
+  {
+    "all_unavailable": "fail_closed",
+    "artifact_sha256": "17f58ca838c55bd83c0b3587dd4f7a0156d3ad25f1dc2390ca8937894f9eb9e3",
+    "build_id": "81407b9e-61c5-5473-b359-29fa2730567e",
+    "build_sha256": "3e92df24f5e80e86b9cf9183ceb7bb575f0bd132a9dc4081dae42e80f21076ae",
+    "direct_bypass": "none",
+    "family": "mihomo",
+    "health_destination": "local fixture only",
+    "round_robin": "3 requests per member"
+  }
+]

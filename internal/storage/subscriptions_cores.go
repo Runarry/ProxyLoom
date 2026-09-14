@@ -11,6 +11,8 @@ import (
 	dbgen "github.com/Runarry/ProxyLoom/internal/storage/generated"
 	"github.com/Runarry/ProxyLoom/internal/subscriptions"
 	"github.com/jackc/pgx/v5"
+	"strings"
+	"unicode/utf8"
 )
 
 func (s *Subscriptions) EnsureCoreBuilds(ctx context.Context) error {
@@ -30,7 +32,7 @@ func (s *Subscriptions) core(ctx context.Context, tx subTx, id ir.ID) (subscript
 	c := subscriptions.Core{CapabilityStatus: "unverified"}
 	var manifest []byte
 	var rev int64
-	err := tx.QueryRow(ctx, `SELECT manifest,revision,enabled,registered_at,disabled_at FROM public.core_builds WHERE id=$1`, dbID(id)).Scan(&manifest, &rev, &c.Enabled, &c.RegisteredAt, &c.DisabledAt)
+	err := tx.QueryRow(ctx, `SELECT manifest,revision,enabled,registered_at,disabled_at,COALESCE(disable_reason,'') FROM public.core_builds WHERE id=$1`, dbID(id)).Scan(&manifest, &rev, &c.Enabled, &c.RegisteredAt, &c.DisabledAt, &c.DisableReason)
 	if err != nil {
 		return c, err
 	}
@@ -51,8 +53,8 @@ func (s *Subscriptions) Cores(ctx context.Context) ([]subscriptions.Core, error)
 	}
 	return out, nil
 }
-func (s *Subscriptions) DisableCore(ctx context.Context, a subscriptions.Actor, id ir.ID, expected int64) (subscriptions.Core, error) {
-	if !validIDs(a.ScopeID, a.ID, id) || expected < 1 {
+func (s *Subscriptions) DisableCore(ctx context.Context, a subscriptions.Actor, id ir.ID, expected int64, reason string) (subscriptions.Core, error) {
+	if !validIDs(a.ScopeID, a.ID, id) || expected < 1 || strings.TrimSpace(reason) == "" || !utf8.ValidString(reason) || utf8.RuneCountInString(reason) > 256 || strings.ContainsAny(reason, "\r\n\x00") {
 		return subscriptions.Core{}, catalog.ErrInvalidInput
 	}
 	tx, err := s.catalog.pool.Begin(ctx)
@@ -71,7 +73,7 @@ func (s *Subscriptions) DisableCore(ctx context.Context, a subscriptions.Actor, 
 		return c, catalog.ErrRevisionConflict
 	}
 	if c.Enabled {
-		_, err = tx.Exec(ctx, `UPDATE public.core_builds SET enabled=false,revision=revision+1,disabled_at=clock_timestamp() WHERE id=$1`, dbID(id))
+		_, err = tx.Exec(ctx, `UPDATE public.core_builds SET enabled=false,revision=revision+1,disabled_at=clock_timestamp(),disable_reason=$2 WHERE id=$1`, dbID(id), reason)
 		if err == nil {
 			err = s.audit(ctx, tx, a, id, "core_disable")
 		}

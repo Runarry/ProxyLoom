@@ -63,6 +63,13 @@ func (s *Imports) expireOne(ctx context.Context, scope, batch ir.ID) (bool, erro
 		return false, imports.ErrUnavailable
 	}
 	defer rollbackImport(tx)
+	settings, err := readSystemSettings(ctx, tx, scope)
+	if err != nil {
+		return false, imports.ErrUnavailable
+	}
+	if settings.CleanupPaused {
+		return false, nil
+	}
 	var job ir.ID
 	err = tx.QueryRow(ctx, `SELECT job_id FROM public.import_batches WHERE scope_id=$1 AND id=$2 AND expires_at<=CURRENT_TIMESTAMP AND state<>'expired'`, dbID(scope), dbID(batch)).Scan(&job)
 	if errors.Is(err, pgx.ErrNoRows) {

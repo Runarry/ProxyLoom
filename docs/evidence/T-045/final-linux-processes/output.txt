@@ -1,0 +1,66 @@
+=== RUN   TestRunKeepsOtherRunsAdoptedDescendantsAlive
+--- PASS: TestRunKeepsOtherRunsAdoptedDescendantsAlive (0.16s)
+=== RUN   TestRunDoesNotSignalOrWaitForUnrelatedChildren
+--- PASS: TestRunDoesNotSignalOrWaitForUnrelatedChildren (0.13s)
+=== RUN   TestRunCleansDescendantHoldingLogsAfterRootExit
+--- PASS: TestRunCleansDescendantHoldingLogsAfterRootExit (0.02s)
+=== RUN   TestRunEscalatesWithinBoundsWhenTERMIgnored
+=== RUN   TestRunEscalatesWithinBoundsWhenTERMIgnored/normal
+=== RUN   TestRunEscalatesWithinBoundsWhenTERMIgnored/cancel
+=== RUN   TestRunEscalatesWithinBoundsWhenTERMIgnored/timeout
+--- PASS: TestRunEscalatesWithinBoundsWhenTERMIgnored (7.04s)
+    --- PASS: TestRunEscalatesWithinBoundsWhenTERMIgnored/normal (2.02s)
+    --- PASS: TestRunEscalatesWithinBoundsWhenTERMIgnored/cancel (2.01s)
+    --- PASS: TestRunEscalatesWithinBoundsWhenTERMIgnored/timeout (3.00s)
+=== RUN   TestRunReportsLogDeadlineForHandleOutsideItsGroup
+--- PASS: TestRunReportsLogDeadlineForHandleOutsideItsGroup (4.02s)
+=== RUN   TestRunClearsProxyEnvironmentAndUsesJobDirectory
+--- PASS: TestRunClearsProxyEnvironmentAndUsesJobDirectory (0.01s)
+=== RUN   TestRunRejectsShellAndEscapingArgs
+--- PASS: TestRunRejectsShellAndEscapingArgs (0.00s)
+=== RUN   TestRunRejectsSymlinkToShell
+--- PASS: TestRunRejectsSymlinkToShell (0.00s)
+=== RUN   TestTimeoutAndCancelReapHelper
+--- PASS: TestTimeoutAndCancelReapHelper (0.40s)
+=== RUN   TestConcurrentRunDoesNotStealWait
+--- PASS: TestConcurrentRunDoesNotStealWait (0.60s)
+=== RUN   TestLogLimitTruncatesWithoutBlocking
+--- PASS: TestLogLimitTruncatesWithoutBlocking (0.01s)
+=== RUN   TestRunPreservesExitStatusAndBothLogStreams
+--- PASS: TestRunPreservesExitStatusAndBothLogStreams (0.01s)
+=== RUN   TestRunWaitsForRootAfterLogEOF
+--- PASS: TestRunWaitsForRootAfterLogEOF (0.31s)
+=== RUN   TestExecutePropagatesWorkspaceCleanupFailure
+--- PASS: TestExecutePropagatesWorkspaceCleanupFailure (0.01s)
+=== RUN   TestDiskRegistryRejectsMissingAndWrongDigest
+--- PASS: TestDiskRegistryRejectsMissingAndWrongDigest (0.00s)
+=== RUN   TestWorkspacePermissions
+--- PASS: TestWorkspacePermissions (0.00s)
+=== RUN   TestValidateConfigUsesFamilyAdapterArgv
+--- PASS: TestValidateConfigUsesFamilyAdapterArgv (0.01s)
+=== RUN   TestStartCancelsFamilyAdapterProcess
+--- PASS: TestStartCancelsFamilyAdapterProcess (0.20s)
+=== RUN   TestConfigSandboxSupervisorCrash
+    parent_linux_test.go:108: PASS: killed supervisor's sandbox core reaped in 10 ms
+--- PASS: TestConfigSandboxSupervisorCrash (0.20s)
+=== RUN   TestConfigSandboxEnforcesNetworkFilesystemProcessAndMemory
+--- PASS: TestConfigSandboxEnforcesNetworkFilesystemProcessAndMemory (0.12s)
+=== RUN   TestConfigSandboxCancellationCleansBeforeReturn
+--- PASS: TestConfigSandboxCancellationCleansBeforeReturn (0.25s)
+=== RUN   TestOnlineSandboxRetainsFileProcessIsolationAndRestrictsPorts
+--- PASS: TestOnlineSandboxRetainsFileProcessIsolationAndRestrictsPorts (0.12s)
+=== RUN   TestConfigSandboxRejectsInvalidBounds
+--- PASS: TestConfigSandboxRejectsInvalidBounds (0.00s)
+=== RUN   TestConfigSandboxClassifiesFatalRuntimeExit
+--- PASS: TestConfigSandboxClassifiesFatalRuntimeExit (0.12s)
+=== RUN   TestSealedExecutableSurvivesReplacement
+--- PASS: TestSealedExecutableSurvivesReplacement (0.00s)
+=== RUN   TestRealConfigSandbox
+=== RUN   TestRealConfigSandbox/xray
+=== RUN   TestRealConfigSandbox/sing-box
+=== RUN   TestRealConfigSandbox/mihomo
+--- PASS: TestRealConfigSandbox (7.07s)
+    --- PASS: TestRealConfigSandbox/xray (1.53s)
+    --- PASS: TestRealConfigSandbox/sing-box (3.41s)
+    --- PASS: TestRealConfigSandbox/mihomo (2.13s)
+PASS

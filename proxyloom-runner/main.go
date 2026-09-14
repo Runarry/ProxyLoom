@@ -58,9 +58,16 @@ func run(ctx context.Context, args []string, lookup config.Lookup, environ []str
 		if err != nil {
 			return err
 		}
-		client, err := runner.NewClient(runner.ClientConfig{RunnerID: ir.ID(cfg.RunnerID), APIURL: cfg.APIURL, TLS: tlsConfig, CoreRoot: cfg.CoreRoot})
+		client, err := runner.NewClient(runner.ClientConfig{RunnerID: ir.ID(cfg.RunnerID), APIURL: cfg.APIURL, TLS: tlsConfig, CoreRoot: cfg.CoreRoot, NetworkEnabled: cfg.NetworkEnabled, Location: cfg.Location})
 		if err != nil {
 			return err
+		}
+		if cfg.NetworkEnabled {
+			logger.Info("network_guard_waiting")
+			if err := cfg.WaitNetworkGuard(ctx); err != nil {
+				return err
+			}
+			logger.Info("network_guard_ready")
 		}
 		return runner.ServeClient(ctx, cfg.HTTPAddr, client, logger)
 	}

@@ -204,5 +204,8 @@
   ],
   "/api/v1/subscriptions/{id}/clone": [
     "post"
+  ],
+  "/api/v1/system/overview": [
+    "get"
   ]
 }

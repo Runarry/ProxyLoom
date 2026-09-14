@@ -2,6 +2,9 @@ package safefetch
 
 import "net/netip"
 
+// BlockedAddress shares the protected-address policy with frozen network tests.
+func BlockedAddress(ip netip.Addr) bool { return blocked(ip) }
+
 func blocked(ip netip.Addr) bool {
 	ip = ip.Unmap()
 	if !ip.IsValid() || ip.IsUnspecified() || ip.IsLoopback() || ip.IsPrivate() || ip.IsMulticast() ||

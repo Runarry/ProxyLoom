@@ -4,7 +4,10 @@ import { useAuthStore } from './stores/auth'
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/nodes' },
+    { path: '/', redirect: '/overview' },
+    { path: '/overview', name: 'overview', component: () => import('./views/OverviewPage.vue') },
+    { path: '/cores', name: 'cores', component: () => import('./views/CoresPage.vue') },
+    { path: '/system', name: 'system', component: () => import('./views/SystemPage.vue') },
     { path: '/login', name: 'login', component: () => import('./views/AuthPage.vue'), meta: { public: true } },
     { path: '/setup', name: 'setup', component: () => import('./views/AuthPage.vue'), meta: { public: true } },
     { path: '/nodes', name: 'nodes', component: () => import('./views/NodesPage.vue') },
@@ -40,6 +43,11 @@ export const router = createRouter({
     { path: '/subscriptions/:id', name: 'subscription-detail', component: () => import('./views/SubscriptionDetailPage.vue') },
     { path: '/subscriptions/:id/edit', name: 'subscription-edit', component: () => import('./views/SubscriptionEditorPage.vue') },
     { path: '/client-presets', name: 'client-presets', component: () => import('./views/ClientPresetsPage.vue') },
+    { path: '/tests', name: 'tests', component: () => import('./views/TestsPage.vue') },
+    { path: '/test-targets', name: 'test-targets', component: () => import('./views/TestTargetsPage.vue') },
+    { path: '/test-results', name: 'test-results', component: () => import('./views/TestResultsPage.vue') },
+    { path: '/jobs', name: 'jobs', component: () => import('./views/JobsPage.vue') },
+    { path: '/jobs/:id', name: 'job-detail', component: () => import('./views/JobDetailPage.vue') },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('./views/NotFoundPage.vue'), meta: { public: true } },
   ],
   scrollBehavior: () => ({ top: 0 }),

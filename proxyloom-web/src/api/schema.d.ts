@@ -948,6 +948,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/system/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read workspace counts and current UTC quota usage */
+        get: operations["getSystemOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/settings": {
         parameters: {
             query?: never;
@@ -998,7 +1015,7 @@ export interface paths {
         put?: never;
         /**
          * Register an administrator-controlled target for safety checks
-         * @description Registration alone does not make a target usable. URL, resolution, connection IP, redirects, certificate and response expectations are checked before safety_state becomes approved.
+         * @description Approval validates administrator ownership declaration, HTTP(S) URL, every DNS answer and fixed response-policy bounds. Execution resolves and pins approved addresses again, denies redirects, verifies HTTPS certificates and checks the actual response. Approval is not connectivity evidence.
          */
         post: operations["createTestTarget"];
         delete?: never;
@@ -1215,7 +1232,7 @@ export interface components {
         /** @enum {string} */
         Architecture: "amd64" | "arm64";
         /** @enum {string} */
-        AuditAction: "setup" | "login" | "logout" | "reauth" | "create" | "update" | "delete" | "reveal" | "source_refresh" | "import_commit" | "compile" | "publish" | "rollback" | "token_issue" | "token_revoke" | "test_create" | "job_cancel" | "core_disable" | "settings_update" | "secret_rewrap" | "export";
+        AuditAction: "setup" | "login" | "logout" | "reauth" | "create" | "update" | "delete" | "reveal" | "source_refresh" | "import_commit" | "compile" | "publish" | "rollback" | "token_issue" | "token_revoke" | "test_create" | "job_cancel" | "core_disable" | "settings_update" | "secret_rewrap" | "export" | "cleanup" | "backup" | "restore" | "password_reset";
         /** @description Allowlisted metadata only. Never includes original request/response, credential values, token HMACs, ciphertext, native configuration, arbitrary JSON metadata or raw logs. */
         AuditEvent: {
             action: components["schemas"]["AuditAction"];
@@ -1307,12 +1324,18 @@ export interface components {
             max_dependency_resources: number;
             max_import_bytes: number;
             max_import_items: number;
+            max_nodes: number;
+            max_outbounds: number;
+            max_rules: number;
             max_targets_per_subscription: number;
         };
         CatalogLimitsPatch: {
             max_dependency_resources?: number;
             max_import_bytes?: number;
             max_import_items?: number;
+            max_nodes?: number;
+            max_outbounds?: number;
+            max_rules?: number;
             max_targets_per_subscription?: number;
         };
         Chain: {
@@ -1432,6 +1455,8 @@ export interface components {
             preview?: string;
             preview_truncated?: boolean;
             previous_preview?: string;
+            /** @description The comparison publication exceeded retention; no unchanged-content conclusion is available. */
+            previous_preview_expired?: boolean;
             previous_preview_truncated?: boolean;
             /** @enum {string} */
             state: "queued" | "compiling" | "validating" | "ready" | "failed";
@@ -1650,7 +1675,7 @@ export interface components {
             redirect_policy: "deny";
             revision: components["schemas"]["Revision"];
             test_target_id: components["schemas"]["UUID"];
-            url: components["schemas"]["HTTPSURL"];
+            url: components["schemas"]["SourceURL"];
             validated_ips: components["schemas"]["IPAddress"][];
             /** @constant */
             verify_certificate: true;
@@ -1909,6 +1934,13 @@ export interface components {
         NativeTCPTransport: {
             /** @constant */
             kind: "native_tcp";
+        };
+        NetworkObservation: {
+            cpu_throttled?: boolean;
+            execution_sha256: components["schemas"]["SHA256"];
+            location: string;
+            /** @enum {string} */
+            truncated_by: "none" | "duration" | "bytes";
         };
         NoAuth: {
             /** @constant */
@@ -2316,13 +2348,19 @@ export interface components {
         RetentionSettings: {
             audit_days: number;
             idempotency_hours: number;
+            import_days: number;
             job_event_days: number;
+            publication_count: number;
+            publication_days: number;
             test_result_days: number;
         };
         RetentionSettingsPatch: {
             audit_days?: number;
             idempotency_hours?: number;
+            import_days?: number;
             job_event_days?: number;
+            publication_count?: number;
+            publication_days?: number;
             test_result_days?: number;
         };
         /** @description Canonical positive decimal int64 string, 1..9223372036854775807. String encoding preserves exact values in browser clients. No signs or leading zeros. */
@@ -2455,6 +2493,7 @@ export interface components {
             memory_limit_bytes: number;
             /** @enum {string} */
             network: "none" | "controlled_target_only";
+            /** @description Per-UID thread ceiling shared with the supervisor. Offline jobs use 32 and are exclusive with online work; online jobs share a 128-thread container ceiling. Seccomp forbids process forks. */
             process_limit: number;
             termination_grace_ms: number;
         };
@@ -2538,6 +2577,7 @@ export interface components {
             job_id: components["schemas"]["UUID"];
             lease_seq: components["schemas"]["Revision"];
             metrics: components["schemas"]["TestMetrics"];
+            observation?: components["schemas"]["NetworkObservation"];
             result_hash: components["schemas"]["SHA256"];
             state: components["schemas"]["TerminalJobState"];
             verdict?: components["schemas"]["Verdict"];
@@ -2550,14 +2590,20 @@ export interface components {
         RunnerJobType: "config_validate" | "connectivity" | "download_throughput";
         /** @description Server-assigned bounded lease. payload_sha256 binds the canonical frozen payload. Paths, argv and controlled local listener ports are allocated by the registered Runner adapter, never supplied by users. Expired renewal requires local stop before expiry. */
         RunnerLease: {
+            approved_endpoints?: {
+                ip: components["schemas"]["IPAddress"];
+                port: number;
+            }[];
             artifact: components["schemas"]["RunnerArtifact"];
             attempt: number;
             core: components["schemas"]["CoreIdentity"];
+            dependencies?: components["schemas"]["FrozenTestSubject"][];
             execution_policy: components["schemas"]["RunnerExecutionPolicy"];
             job_id: components["schemas"]["UUID"];
             lease_expires_at: components["schemas"]["Timestamp"];
             lease_seq: components["schemas"]["Revision"];
             limits: components["schemas"]["TestLimits"];
+            minimum_sample_bytes?: number;
             payload_sha256: components["schemas"]["SHA256"];
             quota_reservation_id?: components["schemas"]["UUID"];
             schema_version: components["schemas"]["SchemaVersion"];
@@ -2606,6 +2652,7 @@ export interface components {
         };
         SettingsPatchRequest: {
             catalog_limits?: components["schemas"]["CatalogLimitsPatch"];
+            cleanup_paused?: boolean;
             quota?: components["schemas"]["QuotaSettingsPatch"];
             retention?: components["schemas"]["RetentionSettingsPatch"];
         };
@@ -2834,8 +2881,31 @@ export interface components {
         };
         /** @description sub_<public_id>.<base64url 32 random bytes>. Public ID only locates a verification record; all authority comes from live database checks. Never log this path value. */
         SubscriptionToken: string;
+        SystemOverview: {
+            budget: {
+                limit_bytes: number;
+                reserved_bytes: number;
+                settled_bytes: number;
+                /** Format: date */
+                utc_day: string;
+            };
+            cleanup_paused: boolean;
+            jobs: {
+                [key: string]: number;
+            };
+            last_backup_at?: components["schemas"]["Timestamp"];
+            last_cleanup_at?: components["schemas"]["Timestamp"];
+            resources: {
+                [key: string]: number;
+            };
+        };
+        SystemOverviewResponse: {
+            data: components["schemas"]["SystemOverview"];
+            request_id: components["schemas"]["RequestID"];
+        };
         SystemSettings: {
             catalog_limits: components["schemas"]["CatalogLimits"];
+            cleanup_paused: boolean;
             quota: components["schemas"]["QuotaSettings"];
             retention: components["schemas"]["RetentionSettings"];
             revision: components["schemas"]["Revision"];
@@ -2898,17 +2968,19 @@ export interface components {
             target_tls_ms?: number;
             throughput_mbps?: number;
         };
-        /** @description Frozen evidence uses the tested subject revision; stale is a live comparison with the current subject. Missing/expired network samples never become publication gates automatically. */
+        /** @description Frozen evidence uses the tested subject revision; stale compares every complete-chain dependency. Unknown execution load omits cpu_throttled. Missing Runner reports retain a terminal history item with empty metrics and unknown location. Missing/expired network samples never become publication gates automatically. */
         TestResult: {
             attempt: number;
             batch_id: components["schemas"]["UUID"];
             completed_at: components["schemas"]["Timestamp"];
             core_build_id: components["schemas"]["UUID"];
             core_build_sha256: components["schemas"]["SHA256"];
-            cpu_throttled: boolean;
+            cpu_throttled?: boolean;
             current_subject_revision?: components["schemas"]["Revision"];
+            dependencies?: components["schemas"]["FrozenTestSubject"][];
             effective_limits: components["schemas"]["TestLimits"];
             error?: components["schemas"]["SafeError"];
+            execution_sha256?: components["schemas"]["SHA256"];
             job_id: components["schemas"]["UUID"];
             location: components["schemas"]["ShortText"];
             metrics: components["schemas"]["TestMetrics"];
@@ -2956,7 +3028,7 @@ export interface components {
             permission_basis: "self_owned" | "explicitly_authorized";
             /** @constant */
             redirect_policy: "deny";
-            url: components["schemas"]["HTTPSURL"];
+            url: components["schemas"]["SourceURL"];
             /** @constant */
             verify_certificate: true;
         };
@@ -2980,7 +3052,7 @@ export interface components {
             permission_basis?: "self_owned" | "explicitly_authorized";
             /** @constant */
             redirect_policy?: "deny";
-            url?: components["schemas"]["HTTPSURL"];
+            url?: components["schemas"]["SourceURL"];
             /** @constant */
             verify_certificate?: true;
         };
@@ -3138,7 +3210,7 @@ export interface components {
                 "application/json": components["schemas"]["AcknowledgementResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Implemented M3 operation response. */
         AuditEventListResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
@@ -3228,7 +3300,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Implemented M3 operation response. */
         CoreListResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
@@ -3736,7 +3808,7 @@ export interface components {
                 "application/json": components["schemas"]["SubscriptionResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Implemented M3 operation response. */
         TestBatchResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
@@ -3748,7 +3820,7 @@ export interface components {
                 "application/json": components["schemas"]["TestBatchResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Implemented M3 operation response. */
         TestResultListResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
@@ -3759,7 +3831,7 @@ export interface components {
                 "application/json": components["schemas"]["TestResultListResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Implemented M3 operation response. */
         TestTargetListResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
@@ -3770,7 +3842,7 @@ export interface components {
                 "application/json": components["schemas"]["TestTargetListResponse"];
             };
         };
-        /** @description Typed contract response. This operation is not registered by the foundation contract implementation. */
+        /** @description Implemented M3 operation response. */
         TestTargetResponse: {
             headers: {
                 "Cache-Control": components["headers"]["NoStore"];
@@ -3884,6 +3956,8 @@ export interface components {
         /** @description Case-insensitive node name search; secrets are never searched or echoed. */
         NodeSearch: string;
         Protocol: components["schemas"]["Protocol"];
+        /** @description Required for atomic test admission and target creation; same actor, route and body replay the original operation. */
+        RequiredIdempotencyKey: string;
         Tag: components["schemas"]["Tag"];
         /** @description Exclusive UTC time boundary; must follow from when both are supplied. */
         UntilTime: components["schemas"]["Timestamp"];
@@ -5662,6 +5736,28 @@ export interface operations {
             503: components["responses"]["Unavailable"];
         };
     };
+    getSystemOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded overview without secret or endpoint labels */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemOverviewResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
     getSystemSettings: {
         parameters: {
             query?: never;
@@ -5717,6 +5813,7 @@ export interface operations {
                 location?: components["schemas"]["ShortText"];
                 subject_id?: components["schemas"]["UUID"];
                 subject_revision?: components["schemas"]["Revision"];
+                type?: components["schemas"]["RunnerJobType"];
                 /** @description Exclusive UTC time boundary; must follow from when both are supplied. */
                 until?: components["parameters"]["UntilTime"];
             };
@@ -5756,7 +5853,10 @@ export interface operations {
     createTestTarget: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Supported on asynchronous creation, publication, token issuance and import commit. One key per authenticated actor + fixed route; request HMAC also binds scope and canonical body. Same key/body waits then replays permitted metadata; changed body is 409. Mutations and idempotency registration commit in the same transaction. No arbitrary response bytes or one-time secrets are replayed. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };

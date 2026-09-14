@@ -1,0 +1,41 @@
+name: Self-hosted handoff candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      PROXYLOOM_E2E_BROWSER: chromium
+      QUALITY_BASE_REF: HEAD
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with:
+          go-version: '1.26.8'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.6.0'
+      - run: npm install --global pnpm@10.33.2
+      - name: Install frozen frontend and browser
+        working-directory: proxyloom-web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+      - name: Build, verify and assemble local handoff
+        run: node scripts/prepare-self-hosted.mjs
+      - name: Retain candidate handoff
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: proxyloom-self-hosted-candidate
+          path: .cache/self-hosted/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7

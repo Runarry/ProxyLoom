@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "description": "Official source archives at the exact commits of the unmodified bundled cores. Binary hashes remain in compat/cores.lock.yaml.",
+  "sources": [
+    {"family":"xray","commit":"d2758a023cd7f4174a5a5fa4ff66e487d4342ba0","license":"MPL-2.0","url":"https://codeload.github.com/XTLS/Xray-core/tar.gz/d2758a023cd7f4174a5a5fa4ff66e487d4342ba0","sha256":"14fa566ee0a801d3d51144c67018b449f5dcf462ddfacadd032da069787e61f9","archive":"xray-d2758a023cd7f4174a5a5fa4ff66e487d4342ba0.tar.gz"},
+    {"family":"sing-box","commit":"0b8995879f29a9b98ee027bc17b75e101445b238","license":"GPL-3.0-or-later","url":"https://codeload.github.com/SagerNet/sing-box/tar.gz/0b8995879f29a9b98ee027bc17b75e101445b238","sha256":"faa17ef1634429371401b495f32c498fa35b92e5872dce245ba44a9155f95f14","archive":"sing-box-0b8995879f29a9b98ee027bc17b75e101445b238.tar.gz"},
+    {"family":"mihomo","commit":"ac017cdd246ce8bd547653d927e7bf77d7ee73d5","license":"GPL-3.0","url":"https://codeload.github.com/MetaCubeX/mihomo/tar.gz/ac017cdd246ce8bd547653d927e7bf77d7ee73d5","sha256":"971dd4533e4e2c3dad7473e8115200da8c0d7471b4b61da54da896345c5b3850","archive":"mihomo-ac017cdd246ce8bd547653d927e7bf77d7ee73d5.tar.gz"}
+  ]
+}

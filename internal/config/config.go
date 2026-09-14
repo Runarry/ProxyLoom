@@ -21,6 +21,7 @@ type API struct {
 	DatabaseDSNFile, MasterKeyFile, TokenPepperFile, ContentHMACKeyFile string
 	MasterKeyID, OldMasterKeysFile                                      string
 	SetupTokenFile, TrustedProxyCIDRs                                   string
+	MetricsTokenFile                                                    string
 }
 
 type Migration struct{ DSNFile string }
@@ -56,6 +57,7 @@ func LoadAPI(lookup Lookup) (API, error) {
 	c.TokenPepperFile = lookup("PROXYLOOM_TOKEN_PEPPER_FILE")
 	c.ContentHMACKeyFile = lookup("PROXYLOOM_CONTENT_HMAC_KEY_FILE")
 	c.SetupTokenFile = lookup("PROXYLOOM_SETUP_TOKEN_FILE")
+	c.MetricsTokenFile = lookup("PROXYLOOM_METRICS_TOKEN_FILE")
 	c.TrustedProxyCIDRs = lookup("PROXYLOOM_TRUSTED_PROXIES")
 	for _, cidr := range c.TrustedProxies() {
 		if prefix, err := netip.ParsePrefix(cidr); err != nil || prefix.Addr().Is4In6() {
@@ -70,7 +72,30 @@ func LoadAPI(lookup Lookup) (API, error) {
 	if err = c.ValidateSecrets(); err != nil {
 		return API{}, err
 	}
+	metricsToken, err := c.ReadMetricsToken()
+	clear(metricsToken)
+	if err != nil {
+		return API{}, err
+	}
 	return c, nil
+}
+
+func (c API) ReadMetricsToken() ([]byte, error) {
+	if c.MetricsTokenFile == "" {
+		return nil, nil
+	}
+	data, err := readFile(c.MetricsTokenFile, "PROXYLOOM_METRICS_TOKEN_FILE", 128)
+	if err != nil {
+		return nil, err
+	}
+	defer clear(data)
+	value := strings.TrimSpace(string(data))
+	decoded, err := base64.RawURLEncoding.Strict().DecodeString(value)
+	defer clear(decoded)
+	if err != nil || len(decoded) != 32 || len(value) != 43 {
+		return nil, configError("PROXYLOOM_METRICS_TOKEN_FILE", "invalid_token")
+	}
+	return []byte(value), nil
 }
 
 // Empty setup configuration disables initialization; an initialized deployment
@@ -129,6 +154,8 @@ func validPort(port string) bool {
 	return err == nil && n > 0 && n <= 65535
 }
 
+// ValidPublicURL is shared with the offline deployment initializer.
+func ValidPublicURL(raw string, development bool) bool { return validPublicURL(raw, development) }
 func validPublicURL(raw string, development bool) bool {
 	u, err := url.Parse(raw)
 	if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || strings.Contains(raw, "#") || u.Opaque != "" {

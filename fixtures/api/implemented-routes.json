@@ -179,5 +179,30 @@
   ],
   "/s/{token}/{target_key}": [
     "get"
+  ],
+  "/api/v1/test-targets": [
+    "get",
+    "post"
+  ],
+  "/api/v1/test-targets/{id}": [
+    "get",
+    "patch",
+    "delete"
+  ],
+  "/api/v1/tests": [
+    "post"
+  ],
+  "/api/v1/test-results": [
+    "get"
+  ],
+  "/api/v1/system/settings": [
+    "get",
+    "patch"
+  ],
+  "/api/v1/system/overview": [
+    "get"
+  ],
+  "/api/v1/audit-events": [
+    "get"
   ]
 }

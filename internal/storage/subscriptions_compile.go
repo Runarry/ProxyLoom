@@ -42,6 +42,14 @@ func (s *Subscriptions) HandleCompile(ctx context.Context, lease jobs.Lease) (jo
 			return jobs.Result{}, nil, err
 		}
 		artifact, diags, err := s.compiler.Compile(ctx, b.Frozen.Input, target)
+		if err == nil && b.Frozen.Limits != nil {
+			if artifact.OutboundCount > b.Frozen.Limits.MaxOutbounds {
+				err = limitDiagnostic("/outbounds", b.Batch.SubscriptionID)
+			}
+			if artifact.RuleCount > b.Frozen.Limits.MaxRules {
+				err = limitDiagnostic("/rules", b.Batch.SubscriptionID)
+			}
+		}
 		if err == nil {
 			err = s.compiler.PublicationEvidence(b.Frozen.Input, target)
 		}
@@ -297,26 +305,34 @@ func (s *Subscriptions) GetBatch(ctx context.Context, a subscriptions.Actor, id 
 	}
 	if b.BasePublicationID != "" {
 		var previousBatch ir.ID
-		if err = tx.QueryRow(ctx, `SELECT batch_id::text FROM public.publications WHERE scope_id=$1 AND id=$2`, dbID(a.ScopeID), dbID(b.BasePublicationID)).Scan(&previousBatch); err != nil {
+		err = tx.QueryRow(ctx, `SELECT batch_id::text FROM public.publications WHERE scope_id=$1 AND id=$2`, dbID(a.ScopeID), dbID(b.BasePublicationID)).Scan(&previousBatch)
+		if errors.Is(err, pgx.ErrNoRows) {
+			for i := range b.Batch.Outputs {
+				b.Batch.Outputs[i].PreviousPreviewExpired = true
+			}
+			err = nil
+		} else if err != nil {
 			return subscriptions.Batch{}, subError(err)
 		}
-		previous, previousDigests, err := s.outputRows(ctx, tx, a.ScopeID, previousBatch)
-		if err != nil {
-			return subscriptions.Batch{}, subError(err)
-		}
-		current, currentDigests, err := s.outputRows(ctx, tx, a.ScopeID, b.Batch.BatchID)
-		if err != nil {
-			return subscriptions.Batch{}, subError(err)
-		}
-		for i := range b.Batch.Outputs {
-			b.Batch.Outputs[i].Changed = b.Batch.Outputs[i].ArtifactID != ""
-			for pi, p := range previous {
-				if p.TargetKey == b.Batch.Outputs[i].TargetKey {
-					b.Batch.Outputs[i].PreviousPreview = p.Preview
-					b.Batch.Outputs[i].PreviousPreviewTruncated = p.PreviewTruncated
-					for ci, o := range current {
-						if o.TargetKey == p.TargetKey {
-							b.Batch.Outputs[i].Changed = !hmac.Equal(currentDigests[ci], previousDigests[pi])
+		if previousBatch != "" {
+			previous, previousDigests, err := s.outputRows(ctx, tx, a.ScopeID, previousBatch)
+			if err != nil {
+				return subscriptions.Batch{}, subError(err)
+			}
+			current, currentDigests, err := s.outputRows(ctx, tx, a.ScopeID, b.Batch.BatchID)
+			if err != nil {
+				return subscriptions.Batch{}, subError(err)
+			}
+			for i := range b.Batch.Outputs {
+				b.Batch.Outputs[i].Changed = b.Batch.Outputs[i].ArtifactID != ""
+				for pi, p := range previous {
+					if p.TargetKey == b.Batch.Outputs[i].TargetKey {
+						b.Batch.Outputs[i].PreviousPreview = p.Preview
+						b.Batch.Outputs[i].PreviousPreviewTruncated = p.PreviewTruncated
+						for ci, o := range current {
+							if o.TargetKey == p.TargetKey {
+								b.Batch.Outputs[i].Changed = !hmac.Equal(currentDigests[ci], previousDigests[pi])
+							}
 						}
 					}
 				}

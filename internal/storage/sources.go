@@ -9,6 +9,7 @@ import (
 	"github.com/Runarry/ProxyLoom/internal/catalog"
 	"github.com/Runarry/ProxyLoom/internal/ir"
 	"github.com/Runarry/ProxyLoom/internal/jobs"
+	"github.com/Runarry/ProxyLoom/internal/operations"
 	"github.com/Runarry/ProxyLoom/internal/override"
 	"github.com/Runarry/ProxyLoom/internal/safefetch"
 	"github.com/Runarry/ProxyLoom/internal/source"
@@ -111,10 +112,11 @@ func (s *Sources) Delete(ctx context.Context, input source.Mutation) (source.Doc
 }
 
 type refreshPayload struct {
-	SourceID  ir.ID  `json:"source_id"`
-	Revision  int64  `json:"revision"`
-	ActorID   ir.ID  `json:"actor_id,omitempty"`
-	RequestID string `json:"request_id,omitempty"`
+	SourceID  ir.ID                     `json:"source_id"`
+	Revision  int64                     `json:"revision"`
+	ActorID   ir.ID                     `json:"actor_id,omitempty"`
+	RequestID string                    `json:"request_id,omitempty"`
+	Limits    *operations.CatalogLimits `json:"limits,omitempty"`
 }
 
 func (s *Sources) EnqueueRefresh(ctx context.Context, input source.RefreshRequest) (jobs.Job, bool, error) {
@@ -180,7 +182,11 @@ func (s *Sources) enqueue(ctx context.Context, t *catalogTx, input source.Refres
 	if active {
 		return jobs.Job{}, jobs.ErrConflict
 	}
-	framed, err := json.Marshal(refreshPayload{SourceID: input.SourceID, Revision: input.ExpectedRevision, ActorID: input.PrincipalID, RequestID: input.RequestID})
+	limits, err := t.operationalLimits(ctx)
+	if err != nil {
+		return jobs.Job{}, err
+	}
+	framed, err := json.Marshal(refreshPayload{SourceID: input.SourceID, Revision: input.ExpectedRevision, ActorID: input.PrincipalID, RequestID: input.RequestID, Limits: &limits})
 	if err != nil {
 		return jobs.Job{}, catalog.ErrInvalidInput
 	}

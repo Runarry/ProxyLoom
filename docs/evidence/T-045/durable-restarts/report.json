@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "run_id": "4744a67d-8fd9-48fc-87e6-c75ca13f92d2",
+  "mode": "all",
+  "started_at": "2026-09-13T21:52:08.214Z",
+  "result": "pass",
+  "steps": [
+    {
+      "name": "database-start",
+      "result": "pass"
+    },
+    {
+      "name": "postgres",
+      "result": "pass"
+    },
+    {
+      "name": "build-recovery-suite",
+      "result": "pass"
+    },
+    {
+      "name": "encrypted-backup-restore",
+      "result": "pass"
+    },
+    {
+      "name": "build-native-suite",
+      "result": "pass"
+    },
+    {
+      "name": "restart-database-during-download",
+      "result": "pass"
+    },
+    {
+      "name": "native-network",
+      "result": "pass"
+    },
+    {
+      "name": "browser",
+      "result": "pass"
+    },
+    {
+      "name": "browser-native-server",
+      "result": "pass"
+    },
+    {
+      "name": "source-stability",
+      "result": "pass"
+    },
+    {
+      "name": "database-stop",
+      "result": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "fixture-network",
+      "result": "pass"
+    },
+    {
+      "name": "database",
+      "result": "pass"
+    }
+  ],
+  "source_manifest_sha256": "6a595b1554a59aa45448ae1cd26456a6c84ce724f36b7d13a92256555bb6d5e2",
+  "core_lock_sha256": "8f8633227c0b7f77c091b52f8921b19ca0aed116e63d8d082facb52fea6acb18",
+  "recovery_binary_sha256": "c6db12d36b7671f565c2773ba9de2e4b5c8341afc79f7fabeda3cf7df2e254bd",
+  "test_binary_sha256": "b7be308784f24cf9438657e302ab8c805e567ec6cb65977d7fd8ea8190679370",
+  "ended_at": "2026-09-13T21:54:39.860Z"
+}

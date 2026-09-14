@@ -89,6 +89,11 @@ func realRunnerDatabase(t *testing.T, ctx context.Context) runnerDatabase {
 			t.Error("unsafe acceptance cleanup target")
 			return
 		}
+		// A restart invalidates idle control connections too. Re-establish one
+		// before issuing the single, scoped database cleanup mutation.
+		for control.Ping(cleanup) != nil && cleanup.Err() == nil {
+			time.Sleep(100 * time.Millisecond)
+		}
 		if _, err := control.Exec(cleanup, "DROP DATABASE "+pgx.Identifier{name}.Sanitize()+" WITH (FORCE)"); err != nil {
 			t.Error("isolated runner database cleanup failed")
 		}

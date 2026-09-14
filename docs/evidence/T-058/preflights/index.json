@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "note": "Failed and diagnostic runs are retained; short preflights do not satisfy the required 20-minute baseline.",
+  "runs": [
+    {
+      "run_id": "b2b0ec33-4d5b-41c2-9ed0-c2c6b7557705",
+      "result": "fail",
+      "baseline_run": true,
+      "error_code": "management_baseline_failed",
+      "management_seconds": 148.040046246,
+      "management_p95_ms": 10001.186125,
+      "management_errors": 110
+    },
+    {
+      "run_id": "ed45247d-6a9f-42dc-9a7f-07c3fefba3fa",
+      "result": "fail",
+      "baseline_run": false,
+      "error_code": "management_baseline_failed",
+      "management_seconds": 10.322759769,
+      "management_p95_ms": 1595.183821,
+      "management_errors": 0
+    },
+    {
+      "run_id": "d5292352-2a58-468c-b283-995a630c4baa",
+      "result": "fail",
+      "baseline_run": false,
+      "error_code": "management_baseline_failed",
+      "management_seconds": 10.466483031,
+      "management_p95_ms": 807.795138,
+      "management_errors": 0
+    },
+    {
+      "run_id": "d4a0f8cb-bb63-4558-9618-94d05139db3e",
+      "result": "fail",
+      "baseline_run": false,
+      "error_code": "subscription_baseline_failed",
+      "management_seconds": 10.288595367,
+      "management_p95_ms": 378.602779,
+      "management_errors": 0,
+      "subscription_ttfb_p95_ms": 576.852678
+    },
+    {
+      "run_id": "2b3b2fed-d25a-47b6-ad38-4ee933332c83",
+      "result": "fail",
+      "baseline_run": false,
+      "error_code": "subscription_baseline_failed",
+      "management_seconds": 10.218344707,
+      "management_p95_ms": 292.97364,
+      "management_errors": 0,
+      "subscription_ttfb_p95_ms": 645.669702
+    },
+    {
+      "run_id": "2d5292a9-877d-4a43-801e-056f7e7251b1",
+      "result": "fail",
+      "baseline_run": false,
+      "error_code": "subscription_baseline_failed",
+      "management_seconds": 10.129780138,
+      "management_p95_ms": 306.559067,
+      "management_errors": 0,
+      "subscription_ttfb_p95_ms": 518.941709
+    },
+    {
+      "run_id": "e58959b8-22d3-43cb-a077-6eb44f66cbb1",
+      "result": "pass",
+      "baseline_run": false,
+      "error_code": null,
+      "management_seconds": 10.222404007,
+      "management_p95_ms": 301.517202,
+      "management_errors": 0,
+      "subscription_ttfb_p95_ms": 416.210753
+    }
+  ]
+}

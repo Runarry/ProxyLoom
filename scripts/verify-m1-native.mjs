@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const cache = join(root, '.cache', 'm1-native-compiler');
-const evidence = join(root, 'docs', 'evidence', 'T-029');
+// A new gate retains its own run without overwriting the approved M1 evidence.
+const evidence = process.env.PROXYLOOM_NATIVE_EVIDENCE_DIR ? join(root, process.env.PROXYLOOM_NATIVE_EVIDENCE_DIR) : join(root, 'docs', 'evidence', 'T-029');
 mkdirSync(cache, { recursive: true });
 mkdirSync(evidence, { recursive: true });
 const image = JSON.parse(readFileSync(join(root, 'deploy', 'tools.lock.json'), 'utf8')).images.runtime;

@@ -1,0 +1,13 @@
+
+Running 4 tests using 1 worker
+
+(node:22352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\tests.spec.ts:20:1 › system settings keep conflicting drafts and expose safe audit and overview (2.3s)
+  ok 2 tests\e2e\tests.spec.ts:56:1 › batch real nodes and chains, restore by refresh, and show immutable stale history on mobile (6.4s)
+  ok 3 tests\e2e\tests.spec.ts:85:1 › download SSE reconnect restores snapshots and cancellation settles without repeating the download (7.4s)
+  ok 4 tests\e2e\tests.spec.ts:116:1 › register an HTTP target through the Chinese keyboard-accessible form and reject protected addresses (962ms)
+
+  4 passed (18.8s)

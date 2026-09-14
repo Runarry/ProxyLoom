@@ -18,6 +18,7 @@ type document struct {
 	MixedPort              int                        `yaml:"mixed-port,omitempty"`
 	SOCKSPort              int                        `yaml:"socks-port,omitempty"`
 	HTTPPort               int                        `yaml:"port,omitempty"`
+	TestListeners          []testListener             `yaml:"listeners,omitempty"`
 	BindAddress            string                     `yaml:"bind-address"`
 	AllowLAN               bool                       `yaml:"allow-lan"`
 	Mode                   string                     `yaml:"mode"`
@@ -119,10 +120,11 @@ func Emit(input adapter.EmitInput) (adapter.Artifact, []ir.Diagnostic, error) {
 		return adapter.Artifact{}, []ir.Diagnostic{d}, ir.Diagnostics{d}
 	}
 	return adapter.Artifact{
-		SnapshotID:  input.SnapshotID,
-		TargetKey:   input.TargetKey,
-		ContentType: ContentType,
-		Bytes:       payload,
+		SnapshotID:    input.SnapshotID,
+		TargetKey:     input.TargetKey,
+		ContentType:   ContentType,
+		Bytes:         payload,
+		OutboundCount: len(doc.Proxies) + len(doc.Groups), RuleCount: rules,
 	}, nil, nil
 }
 

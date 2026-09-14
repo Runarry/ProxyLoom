@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "result": "pass",
+  "gate": "G3_open",
+  "directory": "G:\\Projects\\ProxyLoom\\.cache\\self-hosted\\ee2d142a-7d85-49cb-98b7-a3bdceb53b1e",
+  "verified_files": 1430,
+  "delivery_manifest_sha256": "0b99f5f7afdce35dddd8e13c3aa419278c31e37bca81e6ab3bc76f5712941e9d",
+  "checksums_sha256": "f12808ab6fba6394bccabc8bf1aa4732ac997e51a7ad907a040b148e66022e65",
+  "deployment_run": "4b8ef367-283a-4755-ac33-575219840b38",
+  "note": "External receipt written after package assembly; not part of its own checksum list.",
+  "archive": {
+    "file": "G:\\Projects\\ProxyLoom\\.cache\\self-hosted\\proxyloom-m3-candidate-ee2d142a.tar.gz",
+    "sha256": "ed490ca4c7042a52f974285d7c006260372db615a0cdc78699db185402376118",
+    "bytes": 494378305,
+    "inventory_verified": true
+  }
+}

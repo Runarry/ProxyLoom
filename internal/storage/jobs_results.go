@@ -101,7 +101,10 @@ func (s *Jobs) Event(ctx context.Context, id jobs.LeaseIdentity, input jobs.Even
 	return receipt, nil
 }
 func canonicalResult(input jobs.Result) (jobs.Result, string, error) {
-	if !input.State.Terminal() || (input.Verdict != "" && !validVerdict(input.Verdict)) || input.State == jobs.Succeeded && input.Verdict == "" || runnerprotocol.ValidateConfigMetrics(input.Metrics) != nil {
+	if input.Observation.Validate() != nil {
+		return input, "", jobs.ErrInvalidInput
+	}
+	if !input.State.Terminal() || (input.Verdict != "" && !validVerdict(input.Verdict)) || input.State == jobs.Succeeded && input.Verdict == "" || runnerprotocol.ValidateMetrics(input.Metrics) != nil {
 		return input, "", jobs.ErrInvalidInput
 	}
 	if input.Error != nil {
@@ -110,7 +113,7 @@ func canonicalResult(input jobs.Result) (jobs.Result, string, error) {
 		}
 		input.Error = runnerprotocol.Safe(input.Error.Code)
 	}
-	hash, err := runnerprotocol.ResultHash(runnerprotocol.ResultRequest{State: string(input.State), Verdict: string(input.Verdict), Metrics: input.Metrics, Error: input.Error})
+	hash, err := runnerprotocol.ResultHash(runnerprotocol.ResultRequest{State: string(input.State), Verdict: string(input.Verdict), Metrics: input.Metrics, Error: input.Error, Observation: input.Observation})
 	if err != nil {
 		return input, "", jobs.ErrInvalidInput
 	}
@@ -121,7 +124,7 @@ func canonicalResult(input jobs.Result) (jobs.Result, string, error) {
 	return input, hash, nil
 }
 func infrastructureRetry(job jobs.Job, result jobs.Result) bool {
-	if job.Attempt >= 2 || result.State != jobs.Failed || result.Error == nil || job.CancelRequested {
+	if job.Type == jobs.DownloadThroughput || job.Attempt >= 2 || result.State != jobs.Failed || result.Error == nil || job.CancelRequested {
 		return false
 	}
 	switch result.Error.Code {
@@ -150,6 +153,9 @@ func (s *Jobs) CompleteTx(ctx context.Context, id jobs.LeaseIdentity, input jobs
 	job, err := lockLease(ctx, tx, id)
 	if err != nil {
 		return jobs.ResultReceipt{}, err
+	}
+	if !job.Type.Network() && (runnerprotocol.ValidateConfigMetrics(input.Metrics) != nil || input.Observation != nil) {
+		return jobs.ResultReceipt{}, jobs.ErrInvalidInput
 	}
 	var receipt jobs.ResultReceipt
 	receipt.JobID = id.JobID
@@ -186,8 +192,12 @@ func (s *Jobs) CompleteTx(ctx context.Context, id jobs.LeaseIdentity, input jobs
 	}
 	receipt.ResultID = newJobID()
 	receipt.ResultHash = hash
-	encoded, _ := json.Marshal(runnerprotocol.ResultRequest{JobID: id.JobID, Attempt: id.Attempt, LeaseSeq: runnerprotocol.Sequence(id.LeaseSeq), ResultHash: hash, State: string(input.State), Verdict: string(input.Verdict), Metrics: input.Metrics, Error: input.Error})
-	_, err = tx.Exec(ctx, `INSERT INTO public.job_results(result_id,job_id,worker_id,attempt,lease_seq,result_hash,result,settled_bytes) VALUES($1,$2,$3,$4,$5,$6,$7,0)`, dbID(receipt.ResultID), dbID(id.JobID), dbID(id.WorkerID), id.Attempt, id.LeaseSeq, hash, encoded)
+	receipt.SettledBytes, err = settleAttempt(ctx, tx, job, job.Attempt, input.Metrics.BodyBytes)
+	if err != nil {
+		return jobs.ResultReceipt{}, err
+	}
+	encoded, _ := json.Marshal(runnerprotocol.ResultRequest{JobID: id.JobID, Attempt: id.Attempt, LeaseSeq: runnerprotocol.Sequence(id.LeaseSeq), ResultHash: hash, State: string(input.State), Verdict: string(input.Verdict), Metrics: input.Metrics, Error: input.Error, Observation: input.Observation})
+	_, err = tx.Exec(ctx, `INSERT INTO public.job_results(result_id,job_id,worker_id,attempt,lease_seq,result_hash,result,settled_bytes) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, dbID(receipt.ResultID), dbID(id.JobID), dbID(id.WorkerID), id.Attempt, id.LeaseSeq, hash, encoded, receipt.SettledBytes)
 	if err != nil {
 		return jobs.ResultReceipt{}, jobError(err)
 	}
@@ -196,6 +206,15 @@ func (s *Jobs) CompleteTx(ctx context.Context, id jobs.LeaseIdentity, input jobs
 	if infrastructureRetry(job, input) {
 		state = jobs.Queued
 		verdict = ""
+	}
+	if state == jobs.Queued && job.Type.Network() {
+		if err = reserveRetry(ctx, tx, job); errors.Is(err, jobs.ErrBudgetExceeded) {
+			state = jobs.Failed
+			verdict = jobs.Inconclusive
+			input.Error = runnerprotocol.Safe("BUDGET_EXCEEDED")
+		} else if err != nil {
+			return jobs.ResultReceipt{}, err
+		}
 	}
 	var safe []byte
 	if input.Error != nil {
