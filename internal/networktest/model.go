@@ -78,6 +78,9 @@ type Resolver struct {
 	// Only controlled test harnesses populate this field. Production
 	// constructors never copy network exceptions from requests or settings.
 	AllowNets []netip.Prefix
+	// ProxyAllowNets is derived only from the administrator-owned system setting.
+	// It is intentionally not used to resolve HTTP test targets.
+	ProxyAllowNets []netip.Prefix
 }
 
 func (r Resolver) Approved(ip netip.Addr) bool {
@@ -92,6 +95,51 @@ func (r Resolver) Approved(ip netip.Addr) bool {
 	return !safefetch.BlockedAddress(ip)
 }
 func (r Resolver) Resolve(ctx context.Context, host string) ([]string, error) {
+	return r.resolve(ctx, host, r.Approved)
+}
+
+// ResolveEndpoint permits a configured private proxy endpoint while retaining
+// the public-only rule for every other caller of Resolve.
+func (r Resolver) ResolveEndpoint(ctx context.Context, host string) ([]string, error) {
+	return r.resolve(ctx, host, r.ApprovedEndpoint)
+}
+
+func (r Resolver) ApprovedEndpoint(ip netip.Addr) bool {
+	if r.Approved(ip) {
+		return true
+	}
+	for _, prefix := range r.ProxyAllowNets {
+		if prefix.Contains(ip.Unmap()) {
+			return true
+		}
+	}
+	return false
+}
+
+func (r Resolver) PrivateEndpointAuthorized(ip netip.Addr) bool {
+	for _, prefix := range r.ProxyAllowNets {
+		if prefix.Contains(ip.Unmap()) {
+			return true
+		}
+	}
+	return false
+}
+
+func PrivateProxyAddress(ip netip.Addr) bool {
+	ip = ip.Unmap()
+	for _, prefix := range []netip.Prefix{
+		netip.MustParsePrefix("10.0.0.0/8"),
+		netip.MustParsePrefix("172.16.0.0/12"),
+		netip.MustParsePrefix("192.168.0.0/16"),
+	} {
+		if prefix.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func (r Resolver) resolve(ctx context.Context, host string, approved func(netip.Addr) bool) ([]string, error) {
 	var ips []netip.Addr
 	if ip, err := netip.ParseAddr(host); err == nil {
 		ips = []netip.Addr{ip}
@@ -111,7 +159,7 @@ func (r Resolver) Resolve(ctx context.Context, host string) ([]string, error) {
 	}
 	values := []string{}
 	for _, ip := range ips {
-		if !r.Approved(ip) {
+		if !approved(ip) {
 			return nil, ErrAddress
 		}
 		value := ip.Unmap().String()

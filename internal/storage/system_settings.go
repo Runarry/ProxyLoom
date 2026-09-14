@@ -38,6 +38,9 @@ func readSystemSettings(ctx context.Context, q quotaQuery, scope ir.ID) (operati
 		if json.Unmarshal(data, &s) != nil || s.Validate() != nil {
 			return s, catalog.ErrUnavailable
 		}
+		if s.PrivateProxyCIDRs == nil {
+			s.PrivateProxyCIDRs = []string{}
+		}
 		s.Revision = runnerprotocol.Sequence(revision)
 	}
 	quota, _, err := readQuota(ctx, q, scope)
@@ -59,6 +62,9 @@ func (s *Operations) Settings(ctx context.Context, scope ir.ID) (operations.Sett
 	return readSystemSettings(ctx, tx, scope)
 }
 func (s *Operations) Update(ctx context.Context, a operations.Actor, expected int64, value operations.Settings) (operations.Settings, error) {
+	if value.PrivateProxyCIDRs == nil {
+		value.PrivateProxyCIDRs = []string{}
+	}
 	if !validIDs(a.ScopeID, a.ID) || expected < 1 || value.Validate() != nil {
 		return value, operations.ErrInvalid
 	}

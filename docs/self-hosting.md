@@ -26,13 +26,22 @@ API 默认仅监听主机 `127.0.0.1:8080`。HTTPS 入口由管理员已有反�
 
 ## 联网隔离与资源
 
-`start` 先启动数据库、迁移与 API，再启动 Runner 并写入其独立网络命名空间的 OUTPUT 规则。规则允许本容器回环和指定 API 的 TCP 9091，拒绝受保护地址、主机全局地址及非 TCP 外联。DNS 通过 Docker 的本地解析器；实际被测地址仍由冻结流程校验和固定。内核另受 Landlock、seccomp、文件和进程资源约束。
+`start` 先启动数据库、迁移与 API，再启动 Runner 并写入其独立网络命名空间的 OUTPUT 规则。规则允许本容器回环和指定 API 的 TCP 9091；RFC1918 TCP 仅供已冻结并由系统设置白名单授权的代理节点使用，其余受保护地址、主机全局地址及非 TCP 外联仍被拒绝。DNS 通过 Docker 的本地解析器；实际被测地址仍由冻结流程校验和固定。内核另受 Landlock、seccomp、文件和进程资源约束。
 
 Runner 只有收到与自身 ID、主机 boot ID、当前网络命名空间和本次启动随机标识一致的就绪记录后才开始执行。随机标识避免 Linux 复用命名空间编号时接受旧记录。主机重启或容器重建使旧记录失效。30 秒 guard timer 会为新命名空间重新应用规则；新启动没有就绪记录时 Runner 保持未就绪。手工修改 Docker 网络后也应执行 `guard`。网络规则只写入本项目 Runner 的网络命名空间，不改主机防火墙。
 
 API 默认上限 2 CPU/512 MiB，Runner 2 CPU/1 GiB，PostgreSQL 1 CPU/1 GiB；进程数均有上限。这些 CPU 值是各容器上限而非保留配额，4 核主机按实际负载共享；容量基线关闭公网测速，不能推导满载测速时仍具有相同管理接口时延。系统页面只能在部署上限内调整预算。连通性 4、吞吐 1 同时受全局和本机槽位约束。日志按每容器 2 个 5 MiB 文件滚动。关闭页面不取消服务器任务。
 
-若 Runner 持续未就绪，先执行 `status`，检查 `network_guard_waiting`、Linux Landlock 支持、guard service 日志和 mTLS 证书有效期。新建身份后要同步 API 与 Runner 的证书、登记和 Runner ID。不要通过关闭证书验证或放开全部网络来解决故障。
+若 Runner 持续未就绪，先执行 `status`，检查 `network_guard_waiting`、Linux Landlock 支持、guard service 日志和 mTLS 证书有效期。新建身份后要同步 API 与 Runner 的证书、登记和 Runner ID。私网代理节点须在系统页面单独加入“私网代理节点白名单”（仅 RFC1918 CIDR，最多 16 项）；测试目标不能加入该列表，仍须为公网受控目标。不要通过关闭证书验证或放开全部网络来解决故障。
+
+Docker Desktop 的本地手工验收可额外叠加 `deploy/compose.runner.network.dev.yaml` 启用联网 Runner。先运行 `pwsh -NoProfile -File scripts/dev-runner-network-registry.ps1` 生成仅含登记容量的派生文件；该命令不修改身份或密钥。随后在开发 Compose 命令中追加该覆盖文件，例如：
+
+```powershell
+pwsh -NoProfile -File scripts/dev-runner-network-registry.ps1
+docker compose -p proxyloom-manual --env-file deploy/secrets/local/runner.env -f deploy/compose.dev.yaml -f deploy/compose.runner.yaml -f deploy/compose.runner.network.dev.yaml up -d --wait
+```
+
+该覆盖层不具备 Linux 主机网络 Guard，只能用于可信管理员的本地临时环境；生产部署继续使用 `compose.yaml` 与 `proxyloom.sh guard`。本地连通性目标同样应使用自有或明确授权、无重定向且完整正文不超过 64 KiB 的 HTTPS 端点；Google 根域会跳转，Google 首页的正文超过连通性单样本上限。
 
 ## 每日备份与恢复
 

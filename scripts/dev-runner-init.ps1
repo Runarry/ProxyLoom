@@ -67,7 +67,10 @@ try {
     $clientRequest.CertificateExtensions.Add([Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension]::new($clientOids,$true))
     $clientCert = $clientRequest.Create($ca,$start,$end,[Security.Cryptography.RandomNumberGenerator]::GetBytes(16))
     $certificateHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($clientCert.RawData)).ToLowerInvariant()
-    $registry = @(@{ runner_id=$runnerID; certificate_sha256=$certificateHash; arch=$Architecture; core_build_ids=$buildIDs; validation_slots=1 })
+    # The normal development overlay remains configuration-only because its
+    # Runner advertises no online slots. Register bounded online capacities so
+    # the explicit network overlay can opt in without rotating the identity.
+    $registry = @(@{ runner_id=$runnerID; certificate_sha256=$certificateHash; arch=$Architecture; core_build_ids=$buildIDs; validation_slots=1; connectivity_slots=4; throughput_slots=1 })
     Write-ProtectedFile 'runner_ca' $ca.ExportCertificatePem()
     Write-ProtectedFile 'runner_server_cert' $serverCert.ExportCertificatePem()
     Write-ProtectedFile 'runner_server_key' $serverKey.ExportPkcs8PrivateKeyPem()

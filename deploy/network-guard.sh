@@ -42,6 +42,13 @@ for family in iptables ip6tables; do
   nsenter -t "$pid" -n "$family" -w -A PROXYLOOM_OUT -o lo -j ACCEPT
 done
 nsenter -t "$pid" -n iptables -w -A PROXYLOOM_OUT -d "$api_ip" -p tcp --dport 9091 -j ACCEPT
+# System settings authorize individual private endpoints in every frozen job
+# and Runner rechecks that authorization. The network namespace keeps its port
+# and all other protected-address boundaries; it must admit RFC1918 here so an
+# administrator can update the self-hosted allowlist without a host restart.
+for prefix in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16; do
+  nsenter -t "$pid" -n iptables -w -A PROXYLOOM_OUT -d "$prefix" -p tcp -j ACCEPT
+done
 for prefix in 0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16 192.0.0.0/24 224.0.0.0/4 240.0.0.0/4; do
   nsenter -t "$pid" -n iptables -w -A PROXYLOOM_OUT -d "$prefix" -j REJECT
 done

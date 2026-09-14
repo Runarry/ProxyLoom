@@ -2653,6 +2653,7 @@ export interface components {
         SettingsPatchRequest: {
             catalog_limits?: components["schemas"]["CatalogLimitsPatch"];
             cleanup_paused?: boolean;
+            private_proxy_cidrs?: string[];
             quota?: components["schemas"]["QuotaSettingsPatch"];
             retention?: components["schemas"]["RetentionSettingsPatch"];
         };
@@ -2906,6 +2907,7 @@ export interface components {
         SystemSettings: {
             catalog_limits: components["schemas"]["CatalogLimits"];
             cleanup_paused: boolean;
+            private_proxy_cidrs: string[];
             quota: components["schemas"]["QuotaSettings"];
             retention: components["schemas"]["RetentionSettings"];
             revision: components["schemas"]["Revision"];

@@ -152,7 +152,7 @@ func (c *Client) runNetwork(ctx context.Context, lease *runnerprotocol.Lease) (r
 	policy := c.networkPolicy
 	for _, endpoint := range lease.ApprovedEndpoints {
 		ip, err := netip.ParseAddr(endpoint.IP)
-		if err != nil || !policy.Approved(ip) {
+		if err != nil || endpoint.PrivateAuthorized && !networktest.PrivateProxyAddress(ip) || !endpoint.PrivateAuthorized && !policy.Approved(ip) {
 			result.Error = runnerprotocol.Safe("INVALID_CONFIG")
 			return result, nil
 		}

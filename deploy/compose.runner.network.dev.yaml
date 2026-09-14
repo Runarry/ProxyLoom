@@ -1,0 +1,16 @@
+# Explicit local Docker Desktop overlay for manual online testing. Desktop does
+# not expose the Linux host namespace needed by the production network guard.
+# The Runner still consumes only frozen artifacts, exact allowlisted private
+# proxy endpoints and public test targets; never use this overlay in production.
+services:
+  runner:
+    environment:
+      PROXYLOOM_RUNNER_NETWORK_ENABLED: 'true'
+      PROXYLOOM_RUNNER_DEVELOPMENT_NETWORK: 'true'
+    networks: [control, egress]
+
+networks:
+  egress: {}
+
+secrets:
+  runner_registry: {file: ../.cache/proxyloom-manual/runner_registry_network}

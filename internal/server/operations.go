@@ -69,7 +69,7 @@ func (h *operationsHandler) update(c *gin.Context) {
 	var fields map[string]json.RawMessage
 	json.Unmarshal(data, &fields)
 	for group, value := range patch {
-		if group == "cleanup_paused" {
+		if group == "cleanup_paused" || group == "private_proxy_cidrs" {
 			fields[group] = value
 			continue
 		}

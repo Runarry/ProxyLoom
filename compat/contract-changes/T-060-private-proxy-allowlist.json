@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "task": "T-060",
+  "summary": "Add a separately managed RFC1918 proxy-node allowlist while retaining public-only test targets.",
+  "documents": [
+    "docs/m3-testing-contract.md",
+    "docs/m3-operations-contract.md",
+    "docs/self-hosting.md",
+    "docs/project_design_v1.0.md",
+    "docs/requirements_v1.0.md"
+  ],
+  "fixtures": [
+    "fixtures/api/m3-settings.json"
+  ],
+  "generated": [
+    "proxyloom-web/src/api/schema.d.ts"
+  ],
+  "contracts": [
+    {
+      "path": "api/openapi.yaml",
+      "before_sha256": "5dc4e9987b23d518f7ddca53546fab14dff5df9b48112af55cf1c7fcd7346a56",
+      "after_sha256": "f979a4d24b4a48ba43e167e289b3b4bcf2fe57fd40cec0eacba3456c4f259a9a",
+      "changes": [
+        {
+          "pointer": "/components/schemas/SettingsPatchRequest/properties/private_proxy_cidrs",
+          "before_sha256": null,
+          "after_sha256": "caf85f1680faaea0ddbe407d7b23374cf17b1060a70a9990dc7de0965976124a"
+        },
+        {
+          "pointer": "/components/schemas/SystemSettings/properties/private_proxy_cidrs",
+          "before_sha256": null,
+          "after_sha256": "caf85f1680faaea0ddbe407d7b23374cf17b1060a70a9990dc7de0965976124a"
+        },
+        {
+          "pointer": "/components/schemas/SystemSettings/required",
+          "before_sha256": "a490e9dac4d67d11a362bc49a545aa1a7028ceee1695edd34932272f16f5fb1f",
+          "after_sha256": "57c81bbb8072b509c6cfe0580cafb94f50595767a26594a064b597aa74787237"
+        }
+      ]
+    }
+  ]
+}

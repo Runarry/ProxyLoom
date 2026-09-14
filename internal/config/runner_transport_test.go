@@ -35,6 +35,15 @@ func TestRunnerTransportRequiresIsolatedHTTPSIdentity(t *testing.T) {
 	if _, err := LoadRunnerTransport(env[:1]); err == nil {
 		t.Fatal("partial configuration silently fell back")
 	}
+	development := append(append([]string(nil), env...), "PROXYLOOM_RUNNER_NETWORK_ENABLED=true", "PROXYLOOM_RUNNER_DEVELOPMENT_NETWORK=true")
+	if cfg, err := LoadRunnerTransport(development); err != nil || !cfg.DevelopmentNetwork {
+		t.Fatalf("explicit development network mode rejected: %v", err)
+	}
+	for _, extra := range []string{"PROXYLOOM_RUNNER_DEVELOPMENT_NETWORK=true", "PROXYLOOM_RUNNER_DEVELOPMENT_NETWORK=maybe"} {
+		if _, err := LoadRunnerTransport(append(append([]string(nil), env...), extra)); err == nil {
+			t.Fatal("unguarded mode accepted without explicit online mode or with invalid value")
+		}
+	}
 }
 
 func TestRunnerListenerRequiresCompleteDedicatedConfiguration(t *testing.T) {
